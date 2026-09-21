@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amit Uniform — Sales Order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1C2333; --navy-light:#2D3548;
+    --canvas:#F7F5F0; --canvas-2:#EFEBE2;
+    --brass:#B8863F; --brass-light:#E8DCC4;
+    --thread:#4A7C59; --thread-light:#E4EEE7;
+    --rust:#C4472F; --rust-light:#F5E3DE;
+    --ink:#20242E; --ink-soft:#5B6270;
+    --line:#DCD7C9; --white:#FFFDFB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans',sans-serif; background:var(--canvas); color:var(--ink); font-size:14px; -webkit-font-smoothing:antialiased; }
+  .app{ display:flex; height:100vh; overflow:hidden; }
+
+  .rail{ width:64px; background:var(--navy); flex-shrink:0; display:flex; flex-direction:column; align-items:center; padding:20px 0; gap:4px; }
+  .rail .mark{ width:32px;height:32px;border-radius:7px; background:var(--brass); color:var(--navy); font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px; display:flex;align-items:center;justify-content:center; margin-bottom:24px; }
+  .rail-icon{ width:38px;height:38px; display:flex;align-items:center;justify-content:center; border-radius:8px; color:rgba(255,255,255,.55); font-size:16px; cursor:pointer; }
+  .rail-icon.active{ background:rgba(255,255,255,.1); color:var(--white); }
+
+  .main{ flex:1; overflow-y:auto; }
+
+  .topbar{ display:flex; justify-content:space-between; align-items:center; padding:18px 32px; border-bottom:1px solid var(--line); background:var(--white); }
+  .crumbs{ font-size:12px; color:var(--ink-soft); margin-bottom:4px; }
+  .crumbs b{ color:var(--navy); font-weight:600; }
+  .topbar h1{ font-size:19px; font-weight:600; color:var(--navy); }
+  .status-pill{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:100px; background:var(--thread-light); color:var(--thread); margin-left:10px; vertical-align:middle; }
+  .topbar-actions{ display:flex; gap:10px; }
+  .btn{ font-family:inherit; font-size:13px; font-weight:500; padding:9px 16px; border-radius:6px; border:1px solid var(--line); background:var(--white); color:var(--ink); cursor:pointer; }
+  .btn-primary{ background:var(--navy); color:var(--white); border-color:var(--navy); }
+  .btn-convert{ background:var(--brass); color:var(--white); border-color:var(--brass); }
+
+  /* stage stepper */
+  .stepper{ display:flex; padding:16px 32px; background:var(--white); border-bottom:1px solid var(--line); }
+  .step{ display:flex; align-items:center; gap:10px; padding-right:24px; margin-right:24px; border-right:1px solid var(--line); font-size:12.5px; color:var(--ink-soft); }
+  .step:last-child{ border-right:none; }
+  .step-num{ width:22px; height:22px; border-radius:50%; background:var(--canvas-2); color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; font-size:11px; display:flex; align-items:center; justify-content:center; }
+  .step.done .step-num{ background:var(--thread); color:var(--white); }
+  .step.current .step-num{ background:var(--brass); color:var(--white); }
+  .step.done, .step.current{ color:var(--navy); font-weight:500; }
+
+  .content{ display:flex; padding:28px 32px; gap:28px; }
+  .doc-col{ flex:1; min-width:0; }
+  .side-col{ width:320px; flex-shrink:0; display:flex; flex-direction:column; gap:16px; }
+
+  .card{ background:var(--white); border:1px solid var(--line); border-radius:8px; padding:22px 24px; margin-bottom:20px; }
+  .card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .card-head h3{ font-size:13.5px; font-weight:600; color:var(--navy); }
+
+  .info-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+  .info-item .k{ font-size:11px; color:var(--ink-soft); margin-bottom:4px; }
+  .info-item .v{ font-size:14px; font-weight:600; color:var(--navy); }
+
+  table.items{ width:100%; border-collapse:collapse; }
+  table.items th{ text-align:left; font-size:11px; font-weight:600; color:var(--ink-soft); padding:8px 10px; border-bottom:1px solid var(--line); background:var(--canvas); }
+  table.items th.num, table.items td.num{ text-align:right; }
+  table.items td{ padding:11px 10px; border-bottom:1px solid var(--line); font-size:13px; vertical-align:top; }
+  table.items td.num{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; }
+  .item-name{ font-weight:500; color:var(--navy); }
+  .item-sub{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+  .fulfil-pill{ font-size:10px; font-weight:600; padding:2px 8px; border-radius:100px; }
+  .fulfil-pill.full{ background:var(--thread-light); color:var(--thread); }
+  .fulfil-pill.partial{ background:var(--brass-light); color:var(--brass); }
+
+  /* production mini-tracker inside card */
+  .mini-track{ display:flex; gap:4px; margin-top:16px; }
+  .mt-seg{ flex:1; height:6px; border-radius:3px; background:var(--canvas-2); }
+  .mt-seg.filled{ background:var(--brass); }
+  .mt-labels{ display:flex; justify-content:space-between; margin-top:6px; font-size:10px; color:var(--ink-soft); }
+
+  /* side col */
+  .side-card h3{ font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:12px; letter-spacing:.02em; }
+  .side-row{ display:flex; justify-content:space-between; padding:7px 0; font-size:13px; border-bottom:1px solid var(--canvas-2); }
+  .side-row:last-child{ border-bottom:none; }
+  .side-row .k{ color:var(--ink-soft); }
+  .side-row .v{ font-weight:500; }
+
+  .payment-bar{ height:8px; border-radius:4px; background:var(--canvas-2); overflow:hidden; margin:10px 0 8px; }
+  .payment-bar .fill{ height:100%; background:var(--thread); width:50%; }
+  .payment-note{ font-size:11.5px; color:var(--ink-soft); }
+
+  .action-list{ display:flex; flex-direction:column; gap:8px; }
+  .action-btn{ display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--line); border-radius:6px; font-size:12.5px; font-weight:500; color:var(--navy); cursor:pointer; background:var(--white); }
+  .action-btn.wa{ background:var(--thread-light); border-color:var(--thread); color:var(--thread); }
+
+  .timeline{ display:flex; flex-direction:column; gap:12px; }
+  .tl-item{ display:flex; gap:10px; font-size:12.5px; }
+  .tl-dot{ width:6px; height:6px; border-radius:50%; background:var(--line); margin-top:5px; flex-shrink:0; }
+  .tl-item.now .tl-dot{ background:var(--brass); }
+  .tl-body .tl-title{ font-weight:500; color:var(--ink); }
+  .tl-body .tl-time{ color:var(--ink-soft); font-size:11.5px; margin-top:1px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="rail">
+    <div class="mark">AU</div>
+    <div class="rail-icon">☰</div>
+    <div class="rail-icon">💬</div>
+    <div class="rail-icon">◫</div>
+    <div class="rail-icon">👤</div>
+    <div class="rail-icon active">▤</div>
+    <div class="rail-icon">⚙</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="crumbs">Grand Horizon Hotels / <b>Sales Order SO-2026-0142</b></div>
+        <h1>Sales Order <span class="status-pill">In production</span></h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn">Download PDF</button>
+        <button class="btn">Edit order</button>
+        <button class="btn btn-convert">Generate Tax Invoice</button>
+      </div>
+    </div>
+
+    <div class="stepper">
+      <div class="step done"><div class="step-num">✓</div> Quotation</div>
+      <div class="step done"><div class="step-num">✓</div> Proforma Invoice</div>
+      <div class="step done"><div class="step-num">✓</div> Order confirmed</div>
+      <div class="step current"><div class="step-num">4</div> Production</div>
+      <div class="step"><div class="step-num">5</div> Billing &amp; Dispatch</div>
+    </div>
+
+    <div class="content">
+      <div class="doc-col">
+
+        <div class="card">
+          <div class="card-head"><h3>Order summary</h3></div>
+          <div class="info-grid">
+            <div class="info-item"><div class="k">Order date</div><div class="v">10 Sep 2026</div></div>
+            <div class="info-item"><div class="k">Delivery due</div><div class="v">28 Sep 2026</div></div>
+            <div class="info-item"><div class="k">Order value</div><div class="v">₹1,01,000</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>Items ordered</h3></div>
+          <table class="items">
+            <thead>
+              <tr><th>Item</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th><th>Fulfilment</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="item-name">Housekeeping Shirt</div><div class="item-sub">Maroon · Sizes S–XXL</div></td>
+                <td class="num">120</td>
+                <td class="num">₹620</td>
+                <td class="num">₹74,400</td>
+                <td><span class="fulfil-pill partial">60 of 120 dispatched</span></td>
+              </tr>
+              <tr>
+                <td><div class="item-name">Housekeeping Apron</div><div class="item-sub">Maroon · One size</div></td>
+                <td class="num">40</td>
+                <td class="num">₹410</td>
+                <td class="num">₹16,400</td>
+                <td><span class="fulfil-pill partial">Pending</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="mini-track">
+            <div class="mt-seg filled"></div><div class="mt-seg filled"></div><div class="mt-seg filled"></div>
+            <div class="mt-seg filled"></div><div class="mt-seg"></div><div class="mt-seg"></div><div class="mt-seg"></div>
+          </div>
+          <div class="mt-labels">
+            <span>Material</span><span>Cutting</span><span>Stitching</span><span>Finishing</span><span>QC</span><span>Packing</span><span>Dispatch</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>Order activity</h3></div>
+          <div class="timeline">
+            <div class="tl-item now">
+              <div class="tl-dot"></div>
+              <div class="tl-body"><div class="tl-title">Batch 1 (60 pcs) dispatched, batch 2 in finishing</div><div class="tl-time">Today, 9:20 AM</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-body"><div class="tl-title">Production job PJ-0201 started — Stitching</div><div class="tl-time">14 Sep 2026</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-body"><div class="tl-title">Advance payment received — ₹50,500</div><div class="tl-time">11 Sep 2026</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-body"><div class="tl-title">Order confirmed from Proforma PI-0142</div><div class="tl-time">10 Sep 2026</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="side-col">
+        <div class="card side-card">
+          <h3>Customer</h3>
+          <div class="side-row"><span class="k">Company</span><span class="v">Grand Horizon Hotels</span></div>
+          <div class="side-row"><span class="k">Contact</span><span class="v">Priya Mehta</span></div>
+          <div class="side-row"><span class="k">Salesperson</span><span class="v">Ravi Shah</span></div>
+          <div class="side-row"><span class="k">Tier</span><span class="v">Gold</span></div>
+        </div>
+
+        <div class="card side-card">
+          <h3>Payment status</h3>
+          <div class="payment-bar"><div class="fill"></div></div>
+          <div class="payment-note">₹50,500 received of ₹1,01,000</div>
+          <div class="side-row" style="margin-top:8px;"><span class="k">Balance due</span><span class="v">On dispatch</span></div>
+        </div>
+
+        <div class="card side-card">
+          <h3>Production job</h3>
+          <div class="side-row"><span class="k">Job ID</span><span class="v">PJ-0201</span></div>
+          <div class="side-row"><span class="k">Current stage</span><span class="v">Finishing</span></div>
+          <div class="side-row"><span class="k">Est. completion</span><span class="v">24 Sep 2026</span></div>
+        </div>
+
+        <div class="card side-card">
+          <h3>Actions</h3>
+          <div class="action-list">
+            <div class="action-btn wa">💬 Send dispatch update</div>
+            <div class="action-btn">📦 Log partial dispatch</div>
+            <div class="action-btn">🧾 View linked invoice</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

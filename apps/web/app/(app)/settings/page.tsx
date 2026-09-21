@@ -1,0 +1,20 @@
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
+import { Card, ErrorState, LoadingState, PageHeader, StatusBadge } from '../../../components/ui';
+import { get } from '../../../lib/api';
+import { AuditEvent, User, formatDate } from '../../../lib/types';
+import { useAuth } from '../../../lib/auth-context';
+
+export default function SettingsPage() {
+  const { user } = useAuth();
+  const [users, setUsers] = useState<User[] | null>(null);
+  const [events, setEvents] = useState<AuditEvent[] | null>(null);
+  const [error, setError] = useState('');
+  const load = useCallback(async () => { setError(''); try { const [team, audit] = await Promise.all([get<User[]>('/users'), get<AuditEvent[]>('/audit-events?limit=50')]); setUsers(team); setEvents(audit); } catch (reason) { setError(reason instanceof Error ? reason.message : 'Unable to load settings'); } }, []);
+  useEffect(() => { if (user?.role === 'Admin') void load(); }, [user, load]);
+  if (user?.role !== 'Admin') return <ErrorState message="Admin access is required for settings and audit events." />;
+  if (error) return <><PageHeader title="Settings & roles" subtitle="Foundation access and audit controls" /><ErrorState message={error} onRetry={() => void load()} /></>;
+  if (!users || !events) return <><PageHeader title="Settings & roles" subtitle="Foundation access and audit controls" /><LoadingState label="Loading team and audit events…" /></>;
+  return <><PageHeader title="Settings & roles" subtitle={`${users.length} users · organization-scoped access`} /><div className="settings-layout"><nav className="settings-nav"><h2>Settings</h2><div className="settings-category">Team</div><span className="settings-link active">Users & roles</span><span className="settings-link">Permissions</span><div className="settings-category">Security</div><span className="settings-link">Audit log</span><span className="settings-link">Session foundation</span><div className="settings-category">Business</div><span className="settings-link">Company details</span></nav><div className="settings-content"><div className="content-area"><Card><div className="card-head"><div><h2>Team members</h2><p>Seeded local accounts and their basic role access</p></div></div><div className="table-scroll"><table className="data-table"><thead><tr><th>User</th><th>Role</th><th>Status</th><th>Created</th></tr></thead><tbody>{users.map((member) => <tr key={member.id}><td><div className="primary-cell">{member.name}</div><div className="secondary-cell">{member.email}</div></td><td><span className={`role-pill ${member.role.toLowerCase()}`}>{member.role}</span></td><td><StatusBadge value="ACTIVE" /></td><td className="muted">{formatDate(member.createdAt)}</td></tr>)}</tbody></table></div></Card><Card><div className="card-head"><div><h2>Basic role control</h2><p>Admin can access everything; Sales is limited to the live commercial slice.</p></div></div><div className="table-scroll"><table className="data-table"><thead><tr><th>Module</th><th>Admin</th><th>Sales</th></tr></thead><tbody>{[['Dashboard', '✓', '✓'], ['Leads / Customers', '✓', '✓'], ['Catalogue', '✓', '✓'], ['Quotations / Sales Orders', '✓', '✓'], ['Settings / Audit', '✓', '—'], ['Payments / Production / Integrations', 'Prototype', '—']].map(([name, admin, sales]) => <tr key={name}><td className="primary-cell">{name}</td><td>{admin}</td><td>{sales}</td></tr>)}</tbody></table></div></Card><Card><div className="card-head"><div><h2>Audit log</h2><p>Foundation events recorded by the API</p></div></div>{events.length ? <div className="table-scroll"><table className="data-table"><thead><tr><th>Action</th><th>Entity</th><th>User</th><th>When</th></tr></thead><tbody>{events.map((event) => <tr key={event.id}><td><span className="audit-action">{event.action}</span></td><td>{event.entityType}{event.entityId ? <span className="secondary-cell mono">{event.entityId.slice(0, 10)}…</span> : ''}</td><td>{event.user.name}</td><td className="muted">{formatDate(event.createdAt)}</td></tr>)}</tbody></table></div> : <div className="muted">No audit events yet.</div>}</Card></div></div></div></>;
+}
