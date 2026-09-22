@@ -12,7 +12,24 @@ async function main(): Promise<void> {
       return;
     }
 
-    await prisma.organization.delete({ where: { id: previous.id } });
+    await prisma.$transaction(async (tx) => {
+      const [quotations, salesOrders] = await Promise.all([
+        tx.quotation.findMany({ where: { organizationId: previous.id }, select: { id: true } }),
+        tx.salesOrder.findMany({ where: { organizationId: previous.id }, select: { id: true } }),
+      ]);
+
+      await tx.auditEvent.deleteMany({ where: { organizationId: previous.id } });
+      await tx.quotationItem.deleteMany({ where: { quotationId: { in: quotations.map((quotation) => quotation.id) } } });
+      await tx.salesOrderItem.deleteMany({ where: { salesOrderId: { in: salesOrders.map((order) => order.id) } } });
+      await tx.salesOrder.deleteMany({ where: { organizationId: previous.id } });
+      await tx.quotation.deleteMany({ where: { organizationId: previous.id } });
+      await tx.lead.deleteMany({ where: { organizationId: previous.id } });
+      await tx.customer.deleteMany({ where: { organizationId: previous.id } });
+      await tx.product.deleteMany({ where: { organizationId: previous.id } });
+      await tx.user.deleteMany({ where: { organizationId: previous.id } });
+      await tx.role.deleteMany({ where: { organizationId: previous.id } });
+      await tx.organization.delete({ where: { id: previous.id } });
+    });
   }
 
   const organization = await prisma.organization.create({ data: { name: 'Amit Uniforms Demo', quotationSequence: 4, salesOrderSequence: 2 } });

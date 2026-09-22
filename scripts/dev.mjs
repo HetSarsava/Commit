@@ -28,15 +28,24 @@ function commandAvailable(command, args) {
   return !result.error && result.status === 0;
 }
 
+function spawnCommand(command, args, options = {}) {
+  const spawnOptions = {
+    cwd: root,
+    stdio: options.stdio ?? 'inherit',
+    windowsHide: options.windowsHide ?? true,
+    env: childEnvironment,
+  };
+
+  if (process.platform === 'win32' && /\.(cmd|bat)$/i.test(command)) {
+    return spawn(process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', [command, ...args].join(' ')], spawnOptions);
+  }
+
+  return spawn(command, args, { ...spawnOptions, shell: false });
+}
+
 function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
-      cwd: root,
-      stdio: options.stdio ?? 'inherit',
-      shell: false,
-      windowsHide: true,
-      env: childEnvironment,
-    });
+    const child = spawnCommand(command, args, options);
 
     child.once('error', reject);
     child.once('close', (code, signal) => {
@@ -416,12 +425,7 @@ async function waitForServices(child, runtime) {
 
 async function startServices(runtime) {
   log('Starting backend and frontend.');
-  const services = spawn(npmCommand, ['run', 'dev:services'], {
-    cwd: root,
-    stdio: 'inherit',
-    windowsHide: false,
-    env: childEnvironment,
-  });
+  const services = spawnCommand(npmCommand, ['run', 'dev:services'], { stdio: 'inherit', windowsHide: false });
 
   let interrupted = false;
   const stopServices = () => {
