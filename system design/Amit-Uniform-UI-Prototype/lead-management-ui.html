@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amit Uniform — Lead Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1C2333;
+    --navy-light:#2D3548;
+    --canvas:#F7F5F0;
+    --canvas-2:#EFEBE2;
+    --brass:#B8863F;
+    --brass-light:#E8DCC4;
+    --thread:#4A7C59;
+    --rust:#C4472F;
+    --ink:#20242E;
+    --ink-soft:#5B6270;
+    --line:#DCD7C9;
+    --white:#FFFDFB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'IBM Plex Sans',sans-serif;
+    background:var(--canvas);
+    color:var(--ink);
+    font-size:14px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{ display:flex; min-height:100vh; }
+
+  /* ---------- Left rail: pipeline nav ---------- */
+  .rail{
+    width:232px;
+    background:var(--navy);
+    color:var(--canvas);
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    padding:24px 0;
+  }
+  .rail-brand{
+    padding:0 20px 20px;
+    border-bottom:1px solid rgba(255,255,255,.1);
+    margin-bottom:20px;
+  }
+  .rail-brand .mark{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.06em;
+    color:var(--brass);
+    margin-bottom:4px;
+  }
+  .rail-brand .name{
+    font-size:17px;
+    font-weight:600;
+    line-height:1.3;
+  }
+  .rail-section-label{
+    font-size:11px;
+    color:rgba(255,255,255,.4);
+    padding:0 20px;
+    margin-bottom:8px;
+    letter-spacing:.02em;
+  }
+  .stage-list{ list-style:none; margin-bottom:24px; }
+  .stage-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:9px 20px;
+    cursor:pointer;
+    border-left:3px solid transparent;
+    color:rgba(255,255,255,.72);
+    font-size:13.5px;
+    transition:background .12s;
+  }
+  .stage-item:hover{ background:rgba(255,255,255,.05); }
+  .stage-item.active{
+    background:rgba(255,255,255,.08);
+    border-left-color:var(--brass);
+    color:var(--white);
+    font-weight:500;
+  }
+  .stage-count{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:rgba(255,255,255,.45);
+  }
+  .stage-item.active .stage-count{ color:var(--brass); }
+  .rail-foot{
+    margin-top:auto;
+    padding:14px 20px;
+    border-top:1px solid rgba(255,255,255,.1);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .avatar{
+    width:30px;height:30px;border-radius:50%;
+    background:var(--brass);
+    color:var(--navy);
+    font-weight:600;
+    font-size:12.5px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .rail-foot .who{ font-size:12.5px; }
+  .rail-foot .who .r{ color:rgba(255,255,255,.45); font-size:11px; }
+
+  /* ---------- Main ---------- */
+  .main{ flex:1; display:flex; flex-direction:column; min-width:0; }
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 28px;
+    border-bottom:1px solid var(--line);
+    background:var(--white);
+  }
+  .topbar h1{
+    font-size:19px;
+    font-weight:600;
+    color:var(--navy);
+  }
+  .topbar .sub{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+  .topbar-actions{ display:flex; gap:10px; }
+  .btn{
+    font-family:inherit;
+    font-size:13px;
+    font-weight:500;
+    padding:8px 16px;
+    border-radius:6px;
+    border:1px solid var(--line);
+    background:var(--white);
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .btn-primary{
+    background:var(--navy);
+    color:var(--white);
+    border-color:var(--navy);
+  }
+
+  .toolbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 28px;
+    background:var(--canvas);
+    border-bottom:1px solid var(--line);
+  }
+  .search{
+    flex:1;
+    max-width:320px;
+    position:relative;
+  }
+  .search input{
+    width:100%;
+    padding:8px 12px 8px 32px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-size:13px;
+    background:var(--white);
+    font-family:inherit;
+  }
+  .search::before{
+    content:"⌕";
+    position:absolute;
+    left:11px; top:50%; transform:translateY(-50%);
+    color:var(--ink-soft);
+    font-size:15px;
+  }
+  .chip{
+    padding:7px 12px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:var(--white);
+    font-size:12.5px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    display:flex; align-items:center; gap:5px;
+  }
+  .chip.on{ background:var(--brass-light); border-color:var(--brass); color:var(--navy); font-weight:500;}
+
+  /* ---------- Table ---------- */
+  .table-wrap{ flex:1; overflow:auto; padding:0 28px 28px; }
+  table{ width:100%; border-collapse:collapse; margin-top:16px; }
+  thead th{
+    text-align:left;
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    padding:9px 14px;
+    border-bottom:1px solid var(--line);
+    background:var(--canvas);
+    position:sticky; top:0;
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:12px 14px;
+    border-bottom:1px solid var(--line);
+    font-size:13px;
+    vertical-align:middle;
+  }
+  tbody tr{ background:var(--white); cursor:pointer; transition:background .1s; }
+  tbody tr:hover{ background:#FCFAF6; }
+  tbody tr.selected{ background:var(--brass-light); }
+
+  .company-cell .co{ font-weight:600; color:var(--navy); }
+  .company-cell .loc{ font-size:11.5px; color:var(--ink-soft); margin-top:1px; }
+
+  .stage-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:11.5px;
+    font-weight:500;
+    padding:4px 9px;
+    border-radius:100px;
+    background:var(--canvas-2);
+    color:var(--navy);
+    white-space:nowrap;
+  }
+  .dot{ width:6px; height:6px; border-radius:50%; background:var(--navy-light); flex-shrink:0; }
+
+  .priority-hot{ color:var(--rust); font-weight:600; }
+  .priority-hot::before{ content:"● "; font-size:9px; }
+  .priority-warm{ color:var(--brass); font-weight:500; }
+  .priority-normal{ color:var(--ink-soft); }
+
+  .source-tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    color:var(--ink-soft);
+  }
+
+  .qty-cell{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; }
+
+  .followup-overdue{ color:var(--rust); font-weight:500; }
+  .followup-today{ color:var(--thread); font-weight:500; }
+
+  /* ---------- Detail drawer ---------- */
+  .drawer{
+    width:380px;
+    background:var(--white);
+    border-left:1px solid var(--line);
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    overflow-y:auto;
+  }
+  .drawer-head{
+    padding:22px 24px 18px;
+    border-bottom:1px solid var(--line);
+  }
+  .drawer-head .co-name{ font-size:18px; font-weight:600; color:var(--navy); margin-bottom:3px; }
+  .drawer-head .co-meta{ font-size:12.5px; color:var(--ink-soft); }
+  .drawer-stage{
+    margin-top:14px;
+    display:flex;
+    gap:4px;
+  }
+  .stage-track{
+    flex:1;
+    height:5px;
+    background:var(--canvas-2);
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .stage-track.filled{ background:var(--brass); }
+
+  .drawer-section{
+    padding:18px 24px;
+    border-bottom:1px solid var(--line);
+  }
+  .drawer-section h3{
+    font-size:11px;
+    font-weight:600;
+    color:var(--ink-soft);
+    letter-spacing:.02em;
+    margin-bottom:12px;
+  }
+  .field-row{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 0;
+    font-size:13px;
+  }
+  .field-row .k{ color:var(--ink-soft); }
+  .field-row .v{ font-weight:500; text-align:right; }
+
+  .note-box{
+    background:var(--canvas);
+    border-radius:6px;
+    padding:10px 12px;
+    font-size:12.5px;
+    color:var(--ink);
+    line-height:1.5;
+    border:1px solid var(--line);
+  }
+
+  .drawer-actions{
+    padding:18px 24px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .action-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:10px;
+    border-radius:6px;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    border:1px solid var(--line);
+    background:var(--white);
+    color:var(--navy);
+  }
+  .action-btn.primary{ background:var(--thread); border-color:var(--thread); color:var(--white); }
+
+  .timeline{ display:flex; flex-direction:column; gap:12px; }
+  .tl-item{ display:flex; gap:10px; font-size:12.5px; }
+  .tl-dot{ width:6px; height:6px; border-radius:50%; background:var(--line); margin-top:5px; flex-shrink:0; }
+  .tl-item.now .tl-dot{ background:var(--thread); }
+  .tl-body .tl-title{ font-weight:500; color:var(--ink); }
+  .tl-body .tl-time{ color:var(--ink-soft); font-size:11.5px; margin-top:1px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- LEFT RAIL: pipeline as navigation -->
+  <div class="rail">
+    <div class="rail-brand">
+      <div class="mark">AMIT UNIFORM</div>
+      <div class="name">Lead Pipeline</div>
+    </div>
+
+    <div class="rail-section-label">Pipeline stage</div>
+    <ul class="stage-list">
+      <li class="stage-item"><span>New</span><span class="stage-count">14</span></li>
+      <li class="stage-item"><span>Contacted</span><span class="stage-count">9</span></li>
+      <li class="stage-item"><span>Requirement</span><span class="stage-count">7</span></li>
+      <li class="stage-item active"><span>Catalogue</span><span class="stage-count">12</span></li>
+      <li class="stage-item"><span>Quotation</span><span class="stage-count">6</span></li>
+      <li class="stage-item"><span>Negotiation</span><span class="stage-count">4</span></li>
+      <li class="stage-item"><span>Sample</span><span class="stage-count">2</span></li>
+      <li class="stage-item"><span>Order</span><span class="stage-count">5</span></li>
+      <li class="stage-item"><span>Production</span><span class="stage-count">3</span></li>
+      <li class="stage-item"><span>Dispatch</span><span class="stage-count">1</span></li>
+      <li class="stage-item"><span>Completed</span><span class="stage-count">31</span></li>
+    </ul>
+
+    <div class="rail-section-label">Views</div>
+    <ul class="stage-list">
+      <li class="stage-item"><span>All leads</span><span class="stage-count">94</span></li>
+      <li class="stage-item"><span>My follow-ups today</span><span class="stage-count">8</span></li>
+      <li class="stage-item"><span>Overdue</span><span class="stage-count">3</span></li>
+    </ul>
+
+    <div class="rail-foot">
+      <div class="avatar">RS</div>
+      <div class="who">
+        <div>Ravi Shah</div>
+        <div class="r">Sales</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1>Catalogue stage</h1>
+        <div class="sub">12 leads — catalogue sent, awaiting requirement confirmation</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn">Import leads</button>
+        <button class="btn btn-primary">+ New lead</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search"><input placeholder="Search company, contact, mobile…"></div>
+      <div class="chip on">Source: All</div>
+      <div class="chip">Salesperson: All</div>
+      <div class="chip">Priority: All</div>
+      <div class="chip">Sort: Follow-up date</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Company / contact</th>
+            <th>Source</th>
+            <th>Requirement</th>
+            <th>Qty</th>
+            <th>Priority</th>
+            <th>Salesperson</th>
+            <th>Next follow-up</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="selected">
+            <td class="company-cell">
+              <div class="co">Grand Horizon Hotels</div>
+              <div class="loc">Ahmedabad, GJ · Priya Mehta</div>
+            </td>
+            <td><span class="source-tag">IndiaMART</span></td>
+            <td>Housekeeping uniforms</td>
+            <td class="qty-cell">120 pcs</td>
+            <td><span class="priority-hot">Hot</span></td>
+            <td>Ravi Shah</td>
+            <td><span class="followup-today">Today, 4:00 PM</span></td>
+          </tr>
+          <tr>
+            <td class="company-cell">
+              <div class="co">Sunrise Hospital Group</div>
+              <div class="loc">Surat, GJ · Dr. Kavita Rao</div>
+            </td>
+            <td><span class="source-tag">WhatsApp</span></td>
+            <td>Nursing scrubs, lab coats</td>
+            <td class="qty-cell">85 pcs</td>
+            <td><span class="priority-warm">Warm</span></td>
+            <td>Ravi Shah</td>
+            <td><span class="followup-overdue">Overdue — 2 days</span></td>
+          </tr>
+          <tr>
+            <td class="company-cell">
+              <div class="co">Metro Facility Services</div>
+              <div class="loc">Vadodara, GJ · Nilesh Patel</div>
+            </td>
+            <td><span class="source-tag">Google Ads</span></td>
+            <td>Security guard uniforms</td>
+            <td class="qty-cell">200 pcs</td>
+            <td><span class="priority-normal">Normal</span></td>
+            <td>Anjali Desai</td>
+            <td>Tomorrow, 11:00 AM</td>
+          </tr>
+          <tr>
+            <td class="company-cell">
+              <div class="co">Precision Auto Works</div>
+              <div class="loc">Rajkot, GJ · Suresh Bhatt</div>
+            </td>
+            <td><span class="source-tag">Referral</span></td>
+            <td>Factory workwear</td>
+            <td class="qty-cell">60 pcs</td>
+            <td><span class="priority-normal">Normal</span></td>
+            <td>Ravi Shah</td>
+            <td>25 Sep</td>
+          </tr>
+          <tr>
+            <td class="company-cell">
+              <div class="co">Coastal Logistics Pvt Ltd</div>
+              <div class="loc">Bhavnagar, GJ · Meera Joshi</div>
+            </td>
+            <td><span class="source-tag">Justdial</span></td>
+            <td>Driver &amp; warehouse uniforms</td>
+            <td class="qty-cell">150 pcs</td>
+            <td><span class="priority-warm">Warm</span></td>
+            <td>Anjali Desai</td>
+            <td>26 Sep</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RIGHT DRAWER: selected lead detail -->
+  <div class="drawer">
+    <div class="drawer-head">
+      <div class="co-name">Grand Horizon Hotels</div>
+      <div class="co-meta">Priya Mehta · +91 98250 xxxxx · Ahmedabad, GJ</div>
+      <div class="drawer-stage">
+        <div class="stage-track filled"></div>
+        <div class="stage-track filled"></div>
+        <div class="stage-track filled"></div>
+        <div class="stage-track filled"></div>
+        <div class="stage-track"></div>
+        <div class="stage-track"></div>
+        <div class="stage-track"></div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Requirement</h3>
+      <div class="field-row"><span class="k">Product</span><span class="v">Housekeeping uniforms</span></div>
+      <div class="field-row"><span class="k">Quantity</span><span class="v">120 pcs</span></div>
+      <div class="field-row"><span class="k">Budget</span><span class="v">₹85,000 – ₹1,10,000</span></div>
+      <div class="field-row"><span class="k">Delivery by</span><span class="v">15 Oct 2026</span></div>
+      <div class="field-row"><span class="k">Industry</span><span class="v">Hospitality</span></div>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Notes</h3>
+      <div class="note-box">Wants sample swatches in navy and maroon before confirming. Sent catalogue link on WhatsApp — opened twice, viewed housekeeping range.</div>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Activity</h3>
+      <div class="timeline">
+        <div class="tl-item now">
+          <div class="tl-dot"></div>
+          <div class="tl-body">
+            <div class="tl-title">Catalogue link opened — 6 products viewed</div>
+            <div class="tl-time">Today, 10:42 AM</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-body">
+            <div class="tl-title">Catalogue sent via WhatsApp</div>
+            <div class="tl-time">Yesterday, 3:10 PM</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-body">
+            <div class="tl-title">Lead created from IndiaMART enquiry</div>
+            <div class="tl-time">3 days ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-actions">
+      <div class="action-btn primary">Move to Quotation →</div>
+      <div class="action-btn">Send follow-up on WhatsApp</div>
+      <div class="action-btn">Reassign salesperson</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

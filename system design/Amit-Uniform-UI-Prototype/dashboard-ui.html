@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amit Uniform — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1C2333; --navy-light:#2D3548;
+    --canvas:#F7F5F0; --canvas-2:#EFEBE2;
+    --brass:#B8863F; --brass-light:#E8DCC4;
+    --thread:#4A7C59; --thread-light:#E4EEE7;
+    --rust:#C4472F; --rust-light:#F5E3DE;
+    --ink:#20242E; --ink-soft:#5B6270;
+    --line:#DCD7C9; --white:#FFFDFB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans',sans-serif; background:var(--canvas); color:var(--ink); font-size:14px; -webkit-font-smoothing:antialiased; }
+  .app{ display:flex; min-height:100vh; }
+
+  .rail{ width:64px; background:var(--navy); flex-shrink:0; display:flex; flex-direction:column; align-items:center; padding:20px 0; gap:4px; }
+  .rail .mark{ width:32px;height:32px;border-radius:7px; background:var(--brass); color:var(--navy); font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px; display:flex;align-items:center;justify-content:center; margin-bottom:24px; }
+  .rail-icon{ width:38px;height:38px; display:flex;align-items:center;justify-content:center; border-radius:8px; color:rgba(255,255,255,.55); font-size:16px; cursor:pointer; }
+  .rail-icon.active{ background:rgba(255,255,255,.1); color:var(--white); }
+
+  .main{ flex:1; overflow-y:auto; }
+  .topbar{ display:flex; justify-content:space-between; align-items:center; padding:22px 32px 0; }
+  .topbar h1{ font-size:20px; font-weight:600; color:var(--navy); }
+  .topbar .sub{ font-size:12.5px; color:var(--ink-soft); margin-top:3px; }
+  .date-range{ font-size:12.5px; color:var(--ink-soft); background:var(--white); border:1px solid var(--line); padding:7px 12px; border-radius:6px; }
+
+  .content{ padding:20px 32px 40px; }
+
+  /* KPI row */
+  .kpi-row{ display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px; }
+  .kpi{ background:var(--white); border:1px solid var(--line); border-radius:8px; padding:16px 18px; }
+  .kpi .label{ font-size:11.5px; color:var(--ink-soft); margin-bottom:8px; }
+  .kpi .value{ font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:600; color:var(--navy); }
+  .kpi .delta{ font-size:11px; margin-top:6px; }
+  .delta.up{ color:var(--thread); }
+  .delta.down{ color:var(--rust); }
+  .kpi.accent{ background:var(--navy); border-color:var(--navy); }
+  .kpi.accent .label{ color:rgba(255,255,255,.6); }
+  .kpi.accent .value{ color:var(--white); }
+  .kpi.accent .delta{ color:var(--brass); }
+
+  .grid-2{ display:grid; grid-template-columns:1.4fr 1fr; gap:16px; margin-bottom:16px; }
+
+  .card{ background:var(--white); border:1px solid var(--line); border-radius:8px; padding:20px 22px; }
+  .card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .card-head h3{ font-size:13.5px; font-weight:600; color:var(--navy); }
+  .card-head .link{ font-size:12px; color:var(--brass); cursor:pointer; }
+
+  /* pipeline funnel */
+  .funnel{ display:flex; flex-direction:column; gap:8px; }
+  .fun-row{ display:flex; align-items:center; gap:12px; }
+  .fun-label{ width:100px; font-size:12px; color:var(--ink-soft); flex-shrink:0; }
+  .fun-bar-wrap{ flex:1; background:var(--canvas-2); border-radius:4px; height:22px; overflow:hidden; }
+  .fun-bar{ height:100%; background:var(--brass); border-radius:4px; display:flex; align-items:center; padding-left:8px; }
+  .fun-bar.hi{ background:var(--navy); }
+  .fun-count{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--white); }
+  .fun-total{ width:34px; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); }
+
+  /* AI insight card */
+  .ai-card{ background:linear-gradient(135deg,var(--navy),var(--navy-light)); color:var(--white); border:none; }
+  .ai-card .card-head h3{ color:var(--white); display:flex; align-items:center; gap:8px; }
+  .ai-tag{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; background:var(--brass); color:var(--navy); padding:2px 7px; border-radius:100px; }
+  .ai-insight{ font-size:13px; line-height:1.6; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.9); }
+  .ai-insight:last-child{ border-bottom:none; }
+  .ai-insight b{ color:var(--brass); font-weight:600; }
+
+  /* tables */
+  .mini-table{ width:100%; }
+  .mini-table td{ padding:9px 0; border-bottom:1px solid var(--canvas); font-size:12.5px; }
+  .mini-table tr:last-child td{ border-bottom:none; }
+  .mt-name{ font-weight:500; color:var(--navy); }
+  .mt-sub{ font-size:11px; color:var(--ink-soft); }
+  .mt-val{ text-align:right; font-family:'IBM Plex Mono',monospace; }
+
+  .follow-item{ display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--canvas); }
+  .follow-item:last-child{ border-bottom:none; }
+  .follow-left .co{ font-size:13px; font-weight:500; color:var(--navy); }
+  .follow-left .action{ font-size:11.5px; color:var(--ink-soft); }
+  .follow-time{ font-size:11.5px; padding:4px 9px; border-radius:100px; background:var(--rust-light); color:var(--rust); font-weight:500; }
+  .follow-time.ok{ background:var(--thread-light); color:var(--thread); }
+
+  .production-strip{ display:flex; gap:8px; overflow-x:auto; }
+  .ps-col{ min-width:130px; background:var(--canvas); border-radius:6px; padding:10px; flex-shrink:0; }
+  .ps-col h4{ font-size:10.5px; color:var(--ink-soft); margin-bottom:8px; font-weight:600; }
+  .ps-count{ font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:600; color:var(--navy); }
+  .ps-col.bottleneck{ background:var(--rust-light); }
+  .ps-col.bottleneck h4{ color:var(--rust); }
+  .ps-col.bottleneck .ps-count{ color:var(--rust); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="rail">
+    <div class="mark">AU</div>
+    <div class="rail-icon active">◈</div>
+    <div class="rail-icon">☰</div>
+    <div class="rail-icon">💬</div>
+    <div class="rail-icon">▤</div>
+    <div class="rail-icon">◫</div>
+    <div class="rail-icon">⚙</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1>Good morning, Ravi</h1>
+        <div class="sub">Friday, 18 September 2026 · Ahmedabad office</div>
+      </div>
+      <div class="date-range">This week ▾</div>
+    </div>
+
+    <div class="content">
+
+      <div class="kpi-row">
+        <div class="kpi accent">
+          <div class="label">Today's leads</div>
+          <div class="value">14</div>
+          <div class="delta up">↑ 22% vs yesterday</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Follow-ups due today</div>
+          <div class="value">8</div>
+          <div class="delta down">3 overdue</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Quotations sent</div>
+          <div class="value">6</div>
+          <div class="delta up">₹4.8L value</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Orders this week</div>
+          <div class="value">5</div>
+          <div class="delta up">↑ 12%</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Outstanding receivable</div>
+          <div class="value">₹6.2L</div>
+          <div class="delta down">₹1.1L overdue</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h3>Pipeline funnel — this month</h3><span class="link">View all leads →</span></div>
+          <div class="funnel">
+            <div class="fun-row"><div class="fun-label">New</div><div class="fun-bar-wrap"><div class="fun-bar hi" style="width:100%"><span class="fun-count">94</span></div></div><div class="fun-total">94</div></div>
+            <div class="fun-row"><div class="fun-label">Contacted</div><div class="fun-bar-wrap"><div class="fun-bar" style="width:78%"><span class="fun-count">73</span></div></div><div class="fun-total">73</div></div>
+            <div class="fun-row"><div class="fun-label">Catalogue</div><div class="fun-bar-wrap"><div class="fun-bar" style="width:55%"><span class="fun-count">52</span></div></div><div class="fun-total">52</div></div>
+            <div class="fun-row"><div class="fun-label">Quotation</div><div class="fun-bar-wrap"><div class="fun-bar" style="width:32%"><span class="fun-count">30</span></div></div><div class="fun-total">30</div></div>
+            <div class="fun-row"><div class="fun-label">Negotiation</div><div class="fun-bar-wrap"><div class="fun-bar" style="width:18%"><span class="fun-count">17</span></div></div><div class="fun-total">17</div></div>
+            <div class="fun-row"><div class="fun-label">Order</div><div class="fun-bar-wrap"><div class="fun-bar" style="width:12%"><span class="fun-count">11</span></div></div><div class="fun-total">11</div></div>
+          </div>
+        </div>
+
+        <div class="card ai-card">
+          <div class="card-head"><h3>AI insights <span class="ai-tag">BETA</span></h3></div>
+          <div class="ai-insight">Hospital &amp; hospitality leads are converting <b>2.3× faster</b> than factory workwear leads this month — consider prioritising follow-ups on that segment.</div>
+          <div class="ai-insight">IndiaMART leads have the highest close rate (<b>34%</b>) but Google Ads leads have the highest average order value (<b>₹68,400</b>).</div>
+          <div class="ai-insight">3 quotations sent 5+ days ago have had no reply — <b>Sunrise Hospital</b>, <b>Metro Facility</b>, and <b>Coastal Logistics</b> may need a follow-up call, not another WhatsApp message.</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h3>Follow-ups &amp; reminders</h3><span class="link">See all</span></div>
+          <div class="follow-item">
+            <div class="follow-left"><div class="co">Sunrise Hospital Group</div><div class="action">Quotation follow-up call</div></div>
+            <div class="follow-time">Overdue · 2d</div>
+          </div>
+          <div class="follow-item">
+            <div class="follow-left"><div class="co">Grand Horizon Hotels</div><div class="action">Confirm sample colours</div></div>
+            <div class="follow-time">Today, 4:00 PM</div>
+          </div>
+          <div class="follow-item">
+            <div class="follow-left"><div class="co">Precision Auto Works</div><div class="action">Send revised quotation</div></div>
+            <div class="follow-time ok">Tomorrow</div>
+          </div>
+          <div class="follow-item">
+            <div class="follow-left"><div class="co">Coastal Logistics</div><div class="action">Payment reminder — ₹22,000 due</div></div>
+            <div class="follow-time">Overdue · 4d</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>Salesperson performance</h3><span class="link">Full report</span></div>
+          <table class="mini-table">
+            <tr><td><div class="mt-name">Ravi Shah</div><div class="mt-sub">32 leads · 9 orders</div></td><td class="mt-val">₹8.4L</td></tr>
+            <tr><td><div class="mt-name">Anjali Desai</div><div class="mt-sub">28 leads · 6 orders</div></td><td class="mt-val">₹5.9L</td></tr>
+            <tr><td><div class="mt-name">Kiran Patel</div><div class="mt-sub">19 leads · 4 orders</div></td><td class="mt-val">₹3.1L</td></tr>
+            <tr><td><div class="mt-name">Meera Shah</div><div class="mt-sub">15 leads · 2 orders</div></td><td class="mt-val">₹1.8L</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Production status</h3><span class="link">Open production board →</span></div>
+        <div class="production-strip">
+          <div class="ps-col"><h4>MATERIAL</h4><div class="ps-count">4</div></div>
+          <div class="ps-col"><h4>CUTTING</h4><div class="ps-count">6</div></div>
+          <div class="ps-col bottleneck"><h4>STITCHING</h4><div class="ps-count">18</div></div>
+          <div class="ps-col"><h4>FINISHING</h4><div class="ps-count">5</div></div>
+          <div class="ps-col"><h4>QC</h4><div class="ps-count">3</div></div>
+          <div class="ps-col"><h4>PACKING</h4><div class="ps-count">2</div></div>
+          <div class="ps-col"><h4>DISPATCH</h4><div class="ps-count">1</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

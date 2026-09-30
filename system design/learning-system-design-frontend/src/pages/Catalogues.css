@@ -1,0 +1,367 @@
+.catalogues-page {
+  min-height: 100vh;
+  background: var(--canvas);
+}
+
+/* Summary Cards */
+.summary-card.success {
+  background: #D1FAE5;
+  border-color: #6EE7B7;
+}
+
+/* Catalogue List */
+.catalogue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.catalogue-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.catalogue-card:hover {
+  box-shadow: 0 4px 12px rgba(28, 35, 51, 0.08);
+  transform: translateY(-2px);
+}
+
+.catalogue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--canvas-2);
+  background: var(--canvas);
+}
+
+.catalogue-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0 0 4px 0;
+}
+
+.catalogue-customer {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.catalogue-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-draft {
+  background: #F3F4F6;
+  color: #6B7280;
+  border-color: #D1D5DB;
+}
+
+.status-shared {
+  background: #DBEAFE;
+  color: #1E40AF;
+  border-color: #93C5FD;
+}
+
+.status-viewed {
+  background: #FEF3C7;
+  color: #92400E;
+  border-color: #FCD34D;
+}
+
+.status-expired {
+  background: #FEE2E2;
+  color: #991B1B;
+  border-color: #FCA5A5;
+}
+
+.status-converted {
+  background: #D1FAE5;
+  color: #065F46;
+  border-color: #6EE7B7;
+}
+
+.catalogue-body {
+  padding: 20px 24px;
+}
+
+.catalogue-description {
+  font-size: 13px;
+  color: var(--ink);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.catalogue-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.catalogue-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.catalogue-info-item .label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.catalogue-info-item span:last-child {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--navy);
+}
+
+.catalogue-products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.product-chip {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--canvas);
+  color: var(--navy);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.product-chip.more {
+  background: var(--brass);
+  color: var(--white);
+  border-color: var(--brass);
+}
+
+.catalogue-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--canvas-2);
+  background: var(--canvas);
+}
+
+.btn-copy {
+  background: var(--brass);
+  color: var(--white);
+  border-color: var(--brass);
+}
+
+.btn-copy:hover {
+  background: #9a6e30;
+}
+
+.btn-success {
+  background: #10B981;
+  color: var(--white);
+  border-color: #10B981;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.btn-danger {
+  background: #DC2626;
+  color: var(--white);
+  border-color: #DC2626;
+}
+
+.btn-danger:hover {
+  background: #B91C1C;
+}
+
+/* Form Section */
+.form-section {
+  margin: 28px 0;
+  padding: 24px;
+  background: var(--canvas);
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.form-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.form-section-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0;
+}
+
+.product-form {
+  padding: 20px;
+  background: var(--white);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  position: relative;
+}
+
+/* Analytics Modal */
+.analytics-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0 0 20px 0;
+}
+
+.analytics-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.analytics-card {
+  padding: 16px;
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.analytics-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--navy);
+  font-family: 'IBM Plex Mono', monospace;
+  margin-bottom: 6px;
+}
+
+.analytics-label {
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.product-clicks {
+  margin: 24px 0;
+  padding: 20px;
+  background: var(--canvas);
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+.product-clicks h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0 0 16px 0;
+}
+
+.product-click-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.product-click-row:last-child {
+  border-bottom: none;
+}
+
+.click-count {
+  font-weight: 600;
+  color: var(--brass);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.share-link-section {
+  margin-top: 24px;
+}
+
+.share-link-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0 0 12px 0;
+}
+
+.link-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.link-box input {
+  flex: 1;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.link-box input:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(28, 35, 51, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .catalogue-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .catalogue-header-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .catalogue-info {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .catalogue-footer {
+    flex-direction: column;
+  }
+
+  .btn-small {
+    width: 100%;
+  }
+
+  .analytics-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .link-box {
+    flex-direction: column;
+  }
+
+  .link-box input {
+    width: 100%;
+  }
+
+  .link-box button {
+    width: 100%;
+  }
+}

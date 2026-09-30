@@ -1,0 +1,162 @@
+.quotations-page {
+  min-height: 100vh;
+  background: var(--canvas);
+  padding: 24px 32px;
+}
+
+.quotations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.quotations-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0 0 4px 0;
+}
+
+.header-sub {
+  font-size: 14px;
+  color: var(--thread);
+}
+
+.btn-primary {
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #1a2844;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.spinner {
+  color: var(--navy);
+  font-size: 16px;
+}
+
+/* Empty State */
+.empty-state {
+  background: var(--white);
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  padding: 60px 40px;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  color: var(--navy);
+  margin: 0 0 8px 0;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: var(--thread);
+  margin: 0 0 24px 0;
+}
+
+/* Quotations List */
+.quotations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quotation-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 180px 1fr 150px 100px 120px;
+  gap: 16px;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.quotation-card:hover {
+  border-color: var(--brass);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.quotation-number {
+  font-weight: 600;
+  color: var(--navy);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.quotation-customer {
+  color: var(--ink);
+}
+
+.quotation-total {
+  font-weight: 600;
+  color: var(--navy);
+  text-align: right;
+}
+
+.quotation-status {
+  display: flex;
+  justify-content: center;
+}
+
+.quotation-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btn-action {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  opacity: 0.7;
+}
+
+.btn-action:hover {
+  background: var(--canvas);
+  opacity: 1;
+}
+
+.btn-action.btn-danger:hover {
+  background: #fee;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+  background: var(--canvas);
+  color: var(--thread);
+}

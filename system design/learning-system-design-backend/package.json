@@ -1,0 +1,50 @@
+{
+  "name": "learning-system-design-backend",
+  "version": "1.0.0",
+  "description": "Backend for Learning System Design - CRM with WhatsApp, Catalogue, Billing",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "node prisma/seed.js"
+  },
+  "NOTE": "Prisma scripts are only needed if USE_MOCK_DB=false. By default, mock data is used.",
+  "keywords": [
+    "crm",
+    "whatsapp",
+    "billing",
+    "catalogue"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^5.18.0",
+    "bcryptjs": "^2.4.3",
+    "bullmq": "^5.12.0",
+    "cors": "^2.8.5",
+    "csv-writer": "^1.6.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "express-validator": "^7.1.0",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.14",
+    "pdfkit": "^0.20.2",
+    "puppeteer": "^22.15.0",
+    "socket.io": "^4.7.5",
+    "xlsx": "^0.18.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4",
+    "prisma": "^5.18.0"
+  }
+}

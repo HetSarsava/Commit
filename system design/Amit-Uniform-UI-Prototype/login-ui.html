@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amit Uniform — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1C2333; --navy-light:#2D3548;
+    --canvas:#F7F5F0; --canvas-2:#EFEBE2;
+    --brass:#B8863F; --brass-light:#E8DCC4;
+    --thread:#4A7C59;
+    --rust:#C4472F;
+    --ink:#20242E; --ink-soft:#5B6270;
+    --line:#DCD7C9; --white:#FFFDFB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans',sans-serif; background:var(--canvas); color:var(--ink); font-size:14px; -webkit-font-smoothing:antialiased; }
+  .app{ display:flex; min-height:100vh; }
+
+  /* left: brand panel */
+  .brand-panel{
+    flex:1.1; background:var(--navy); color:var(--white);
+    display:flex; flex-direction:column; justify-content:space-between;
+    padding:48px 56px; position:relative; overflow:hidden;
+  }
+  .brand-panel::before{
+    content:""; position:absolute; top:-100px; right:-100px; width:340px; height:340px;
+    border-radius:50%; background:radial-gradient(circle, rgba(184,134,63,.18), transparent 70%);
+  }
+  .brand-mark{ display:flex; align-items:center; gap:10px; }
+  .brand-mark .sq{ width:34px; height:34px; border-radius:8px; background:var(--brass); color:var(--navy); font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; }
+  .brand-mark .txt{ font-size:14px; font-weight:600; letter-spacing:.03em; }
+
+  .brand-mid{ max-width:420px; }
+  .brand-mid h1{ font-size:30px; font-weight:600; line-height:1.3; margin-bottom:14px; }
+  .brand-mid p{ font-size:14px; color:rgba(255,255,255,.65); line-height:1.6; }
+
+  .feature-list{ display:flex; flex-direction:column; gap:14px; margin-top:28px; }
+  .feature-item{ display:flex; align-items:center; gap:10px; font-size:13px; color:rgba(255,255,255,.85); }
+  .feature-dot{ width:26px; height:26px; border-radius:7px; background:rgba(184,134,63,.2); color:var(--brass); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+
+  .brand-foot{ font-size:11.5px; color:rgba(255,255,255,.4); }
+
+  /* right: form panel */
+  .form-panel{ flex:1; background:var(--white); display:flex; align-items:center; justify-content:center; padding:48px; }
+  .form-box{ width:100%; max-width:360px; }
+  .form-box h2{ font-size:22px; font-weight:600; color:var(--navy); margin-bottom:6px; }
+  .form-box .sub{ font-size:13px; color:var(--ink-soft); margin-bottom:28px; }
+
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:12.5px; font-weight:500; color:var(--ink); margin-bottom:6px; }
+  .field input{ width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:7px; font-size:13.5px; font-family:inherit; }
+  .field input:focus{ outline:none; border-color:var(--brass); }
+
+  .row-between{ display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }
+  .remember{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-soft); }
+  .remember input{ width:14px; height:14px; }
+  .forgot{ font-size:12.5px; color:var(--brass); font-weight:500; cursor:pointer; }
+
+  .btn-login{ width:100%; padding:12px; background:var(--navy); color:var(--white); border:none; border-radius:7px; font-size:14px; font-weight:600; cursor:pointer; }
+
+  .divider{ display:flex; align-items:center; gap:12px; margin:22px 0; }
+  .divider::before, .divider::after{ content:""; flex:1; height:1px; background:var(--line); }
+  .divider span{ font-size:11.5px; color:var(--ink-soft); }
+
+  .otp-btn{ width:100%; padding:11px; border:1px solid var(--line); border-radius:7px; background:var(--white); color:var(--navy); font-size:13px; font-weight:500; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+
+  .role-note{ margin-top:26px; padding:12px 14px; background:var(--canvas); border-radius:7px; font-size:11.5px; color:var(--ink-soft); line-height:1.6; border:1px solid var(--line); }
+  .role-note b{ color:var(--navy); }
+
+  .foot-links{ text-align:center; margin-top:24px; font-size:12px; color:var(--ink-soft); }
+  .foot-links a{ color:var(--brass); text-decoration:none; font-weight:500; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="brand-panel">
+    <div class="brand-mark">
+      <div class="sq">AU</div>
+      <div class="txt">AMIT UNIFORM</div>
+    </div>
+
+    <div class="brand-mid">
+      <h1>One platform for leads, catalogue, billing and dispatch.</h1>
+      <p>Sign in to manage your pipeline, WhatsApp conversations, quotations, production and payments — all in one place.</p>
+
+      <div class="feature-list">
+        <div class="feature-item"><span class="feature-dot">✓</span> Lead to dispatch, tracked end to end</div>
+        <div class="feature-item"><span class="feature-dot">💬</span> WhatsApp automation with AI assistance</div>
+        <div class="feature-item"><span class="feature-dot">🔒</span> Role-based access with 2FA and audit logs</div>
+      </div>
+    </div>
+
+    <div class="brand-foot">© 2026 Amit Uniform · Ahmedabad, Gujarat</div>
+  </div>
+
+  <div class="form-panel">
+    <div class="form-box">
+      <h2>Welcome back</h2>
+      <div class="sub">Sign in to your Amit Uniform account</div>
+
+      <div class="field">
+        <label>Email or mobile number</label>
+        <input type="text" placeholder="ravi@amituniform.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" placeholder="••••••••••">
+      </div>
+
+      <div class="row-between">
+        <label class="remember"><input type="checkbox"> Remember me</label>
+        <span class="forgot">Forgot password?</span>
+      </div>
+
+      <button class="btn-login">Sign in</button>
+
+      <div class="divider"><span>OR</span></div>
+
+      <button class="otp-btn">📱 Sign in with OTP</button>
+
+      <div class="role-note">
+        Signing in as <b>Sales</b>, <b>Accounts</b>, or <b>Production</b>? Your access is limited to the modules assigned by your Admin.
+      </div>
+
+      <div class="foot-links">
+        Need an account? Ask your <a href="#">Admin to invite you</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

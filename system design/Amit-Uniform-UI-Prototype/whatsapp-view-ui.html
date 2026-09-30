@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amit Uniform — WhatsApp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1C2333;
+    --navy-light:#2D3548;
+    --canvas:#F7F5F0;
+    --canvas-2:#EFEBE2;
+    --brass:#B8863F;
+    --brass-light:#E8DCC4;
+    --thread:#4A7C59;
+    --thread-light:#E4EEE7;
+    --rust:#C4472F;
+    --rust-light:#F5E3DE;
+    --ink:#20242E;
+    --ink-soft:#5B6270;
+    --line:#DCD7C9;
+    --white:#FFFDFB;
+    --bubble-in:#FFFFFF;
+    --bubble-out:#233B2E;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'IBM Plex Sans',sans-serif;
+    background:var(--canvas);
+    color:var(--ink);
+    font-size:14px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{ display:flex; height:100vh; overflow:hidden; }
+
+  /* rail */
+  .rail{
+    width:64px; background:var(--navy); flex-shrink:0;
+    display:flex; flex-direction:column; align-items:center; padding:20px 0; gap:4px;
+  }
+  .rail .mark{
+    width:32px;height:32px;border-radius:7px; background:var(--brass); color:var(--navy);
+    font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px;
+    display:flex;align-items:center;justify-content:center; margin-bottom:24px;
+  }
+  .rail-icon{ width:38px;height:38px; display:flex;align-items:center;justify-content:center;
+    border-radius:8px; color:rgba(255,255,255,.55); font-size:16px; cursor:pointer; }
+  .rail-icon.active{ background:rgba(255,255,255,.1); color:var(--white); }
+
+  /* chat list */
+  .chat-list{ width:300px; flex-shrink:0; background:var(--white); border-right:1px solid var(--line); display:flex; flex-direction:column; }
+  .chat-list-head{ padding:18px 18px 12px; border-bottom:1px solid var(--line); }
+  .chat-list-head h2{ font-size:16px; font-weight:600; color:var(--navy); margin-bottom:10px; }
+  .cl-search{ width:100%; padding:7px 10px; border:1px solid var(--line); border-radius:6px; font-size:12.5px; font-family:inherit; }
+  .cl-tabs{ display:flex; gap:6px; padding:10px 18px; border-bottom:1px solid var(--line); }
+  .cl-tab{ font-size:11.5px; padding:5px 10px; border-radius:100px; color:var(--ink-soft); cursor:pointer; }
+  .cl-tab.on{ background:var(--brass-light); color:var(--navy); font-weight:500; }
+
+  .chat-items{ flex:1; overflow-y:auto; }
+  .chat-item{ display:flex; gap:10px; padding:12px 18px; cursor:pointer; border-bottom:1px solid var(--canvas); position:relative; }
+  .chat-item:hover{ background:#FCFAF6; }
+  .chat-item.active{ background:var(--brass-light); }
+  .ci-avatar{ width:38px;height:38px;border-radius:50%; background:var(--navy-light); color:var(--white);
+    font-size:12px; font-weight:600; display:flex;align-items:center;justify-content:center; flex-shrink:0; }
+  .ci-body{ flex:1; min-width:0; }
+  .ci-top{ display:flex; justify-content:space-between; }
+  .ci-name{ font-size:13px; font-weight:600; color:var(--navy); }
+  .ci-time{ font-size:10.5px; color:var(--ink-soft); }
+  .ci-preview{ font-size:12px; color:var(--ink-soft); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ci-badges{ display:flex; gap:5px; margin-top:5px; }
+  .badge{ font-size:9.5px; font-weight:600; padding:2px 6px; border-radius:100px; }
+  .badge.bot{ background:var(--thread-light); color:var(--thread); }
+  .badge.human{ background:var(--brass-light); color:var(--brass); }
+  .badge.unread{ background:var(--rust); color:var(--white); border-radius:50%; width:16px; height:16px; padding:0; display:flex;align-items:center;justify-content:center; }
+
+  /* conversation */
+  .convo{ flex:1; display:flex; flex-direction:column; min-width:0; }
+  .convo-head{ display:flex; justify-content:space-between; align-items:center; padding:14px 24px; background:var(--white); border-bottom:1px solid var(--line); }
+  .ch-left{ display:flex; align-items:center; gap:12px; }
+  .ch-avatar{ width:40px;height:40px;border-radius:50%; background:var(--navy-light); color:var(--white);
+    font-weight:600; font-size:13px; display:flex;align-items:center;justify-content:center; }
+  .ch-name{ font-size:14.5px; font-weight:600; color:var(--navy); }
+  .ch-sub{ font-size:11.5px; color:var(--ink-soft); margin-top:1px; }
+  .automation-toggle{
+    display:flex; align-items:center; gap:8px; font-size:12px; color:var(--ink-soft);
+    background:var(--canvas); padding:7px 12px; border-radius:100px; border:1px solid var(--line);
+  }
+  .automation-toggle.paused{ background:var(--rust-light); color:var(--rust); border-color:var(--rust); font-weight:500; }
+  .toggle-dot{ width:7px;height:7px;border-radius:50%; background:var(--ink-soft); }
+  .automation-toggle.paused .toggle-dot{ background:var(--rust); }
+
+  .msg-area{ flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:4px; background:var(--canvas); }
+  .day-divider{ text-align:center; font-size:11px; color:var(--ink-soft); margin:14px 0; }
+
+  .msg-row{ display:flex; margin-bottom:2px; }
+  .msg-row.out{ justify-content:flex-end; }
+  .bubble{ max-width:420px; padding:10px 13px; border-radius:10px; font-size:13px; line-height:1.5; box-shadow:0 1px 1px rgba(0,0,0,.04); }
+  .msg-row.in .bubble{ background:var(--bubble-in); color:var(--ink); border-top-left-radius:3px; }
+  .msg-row.out .bubble{ background:var(--bubble-out); color:#EAF3ED; border-top-right-radius:3px; }
+  .bubble .time{ font-size:10px; opacity:.55; margin-top:5px; text-align:right; }
+  .bubble.system{ background:transparent; border:1px dashed var(--line); color:var(--ink-soft); font-size:11.5px; text-align:center; margin:6px auto; }
+
+  .bubble.catalogue-card{ background:var(--bubble-in); padding:0; overflow:hidden; border-top-left-radius:3px; }
+  .cc-img{ height:110px; background:linear-gradient(135deg,var(--brass-light),var(--canvas-2)); display:flex;align-items:center;justify-content:center; color:var(--brass); font-size:22px; }
+  .cc-body{ padding:10px 13px; }
+  .cc-title{ font-weight:600; color:var(--navy); font-size:13px; }
+  .cc-sub{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+
+  .sender-tag{ font-size:10px; color:var(--ink-soft); margin-bottom:3px; display:flex; align-items:center; gap:4px; }
+  .sender-tag.bot::before{ content:"⚙"; }
+
+  .compose{ padding:16px 24px; background:var(--white); border-top:1px solid var(--line); }
+  .compose-row{ display:flex; align-items:center; gap:10px; }
+  .compose-input{ flex:1; padding:11px 14px; border:1px solid var(--line); border-radius:100px; font-family:inherit; font-size:13px; }
+  .compose-send{ width:38px;height:38px; border-radius:50%; background:var(--thread); color:var(--white); border:none; cursor:pointer; font-size:15px; }
+  .compose-hint{ font-size:11px; color:var(--ink-soft); margin-top:8px; text-align:center; }
+
+  /* right info panel */
+  .info-panel{ width:280px; flex-shrink:0; background:var(--white); border-left:1px solid var(--line); padding:22px 20px; overflow-y:auto; }
+  .ip-section{ margin-bottom:22px; }
+  .ip-section h3{ font-size:11px; font-weight:600; color:var(--ink-soft); margin-bottom:10px; letter-spacing:.02em; }
+  .ip-row{ display:flex; justify-content:space-between; font-size:12.5px; padding:5px 0; }
+  .ip-row .k{ color:var(--ink-soft); }
+  .ip-row .v{ font-weight:500; text-align:right; }
+  .ip-stage-pill{ display:inline-block; font-size:11px; font-weight:600; padding:4px 10px; border-radius:100px; background:var(--brass-light); color:var(--navy); }
+  .ip-btn{ display:block; width:100%; padding:9px; text-align:center; border:1px solid var(--line); border-radius:6px; font-size:12.5px; font-weight:500; color:var(--navy); margin-bottom:8px; cursor:pointer; }
+  .ip-btn.primary{ background:var(--navy); color:var(--white); border-color:var(--navy); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="rail">
+    <div class="mark">AU</div>
+    <div class="rail-icon">☰</div>
+    <div class="rail-icon active">💬</div>
+    <div class="rail-icon">▤</div>
+    <div class="rail-icon">◫</div>
+    <div class="rail-icon">⚙</div>
+  </div>
+
+  <div class="chat-list">
+    <div class="chat-list-head">
+      <h2>WhatsApp</h2>
+      <input class="cl-search" placeholder="Search conversations…">
+    </div>
+    <div class="cl-tabs">
+      <div class="cl-tab on">All</div>
+      <div class="cl-tab">Needs human</div>
+      <div class="cl-tab">Bot handling</div>
+    </div>
+    <div class="chat-items">
+      <div class="chat-item active">
+        <div class="ci-avatar">KR</div>
+        <div class="ci-body">
+          <div class="ci-top"><span class="ci-name">Dr. Kavita Rao</span><span class="ci-time">10:47</span></div>
+          <div class="ci-preview">Can you send the lab coat sizes again?</div>
+          <div class="ci-badges"><span class="badge human">Needs you</span></div>
+        </div>
+      </div>
+      <div class="chat-item">
+        <div class="ci-avatar">PM</div>
+        <div class="ci-body">
+          <div class="ci-top"><span class="ci-name">Priya Mehta</span><span class="ci-time">09:15</span></div>
+          <div class="ci-preview">Bot: Here's our housekeeping catalogue…</div>
+          <div class="ci-badges"><span class="badge bot">Bot handling</span></div>
+        </div>
+      </div>
+      <div class="chat-item">
+        <div class="ci-avatar">SB</div>
+        <div class="ci-body">
+          <div class="ci-top"><span class="ci-name">Suresh Bhatt</span><span class="ci-time">Yesterday</span></div>
+          <div class="ci-preview">Order confirmed, thank you!</div>
+          <div class="ci-badges"></div>
+        </div>
+        <span class="badge unread">2</span>
+      </div>
+      <div class="chat-item">
+        <div class="ci-avatar">MJ</div>
+        <div class="ci-body">
+          <div class="ci-top"><span class="ci-name">Meera Joshi</span><span class="ci-time">Yesterday</span></div>
+          <div class="ci-preview">Bot: MOQ for driver uniforms is 50 pcs</div>
+          <div class="ci-badges"><span class="badge bot">Bot handling</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="convo">
+    <div class="convo-head">
+      <div class="ch-left">
+        <div class="ch-avatar">KR</div>
+        <div>
+          <div class="ch-name">Dr. Kavita Rao — Sunrise Hospital Group</div>
+          <div class="ch-sub">Lead: Quotation stage · Assigned to Ravi Shah</div>
+        </div>
+      </div>
+      <div class="automation-toggle paused"><span class="toggle-dot"></span> Automation paused — human reply needed</div>
+    </div>
+
+    <div class="msg-area">
+      <div class="day-divider">Today</div>
+
+      <div class="msg-row in">
+        <div>
+          <div class="sender-tag bot">Automated</div>
+          <div class="bubble">Hi Dr. Rao! Thanks for your enquiry. Here's our catalogue for nursing &amp; hospital wear 👇</div>
+        </div>
+      </div>
+
+      <div class="msg-row in">
+        <div class="bubble catalogue-card">
+          <div class="cc-img">👔</div>
+          <div class="cc-body">
+            <div class="cc-title">Hospital &amp; Nursing Wear — Catalogue</div>
+            <div class="cc-sub">18 products · Sizes S–XXL</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="msg-row out">
+        <div class="bubble">Can you send the lab coat sizes again? <div class="time">10:47</div></div>
+      </div>
+
+      <div class="bubble system">Automation paused — customer asked a follow-up question outside approved answers. Assigned to Ravi Shah.</div>
+
+    </div>
+
+    <div class="compose">
+      <div class="compose-row">
+        <input class="compose-input" placeholder="Type a reply as Ravi Shah…">
+        <button class="compose-send">➤</button>
+      </div>
+      <div class="compose-hint">You're replying as a human — automation stays paused until this lead moves stages or you resume it.</div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="ip-section">
+      <h3>Lead</h3>
+      <div class="ip-row"><span class="k">Company</span><span class="v">Sunrise Hospital Group</span></div>
+      <div class="ip-row"><span class="k">Stage</span><span class="v"><span class="ip-stage-pill">Quotation</span></span></div>
+      <div class="ip-row"><span class="k">Source</span><span class="v">WhatsApp</span></div>
+      <div class="ip-row"><span class="k">Salesperson</span><span class="v">Ravi Shah</span></div>
+    </div>
+
+    <div class="ip-section">
+      <h3>Requirement</h3>
+      <div class="ip-row"><span class="k">Product</span><span class="v">Nursing scrubs, lab coats</span></div>
+      <div class="ip-row"><span class="k">Quantity</span><span class="v">85 pcs</span></div>
+      <div class="ip-row"><span class="k">Budget</span><span class="v">~₹80,000</span></div>
+    </div>
+
+    <div class="ip-section">
+      <h3>Quick actions</h3>
+      <div class="ip-btn primary">Open quotation QT-0184</div>
+      <div class="ip-btn">Resume automation</div>
+      <div class="ip-btn">Send catalogue link</div>
+      <div class="ip-btn">View full lead profile</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amit Uniform — Workflow Automation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1C2333; --navy-light:#2D3548;
+    --canvas:#F7F5F0; --canvas-2:#EFEBE2;
+    --brass:#B8863F; --brass-light:#E8DCC4;
+    --thread:#4A7C59; --thread-light:#E4EEE7;
+    --rust:#C4472F; --rust-light:#F5E3DE;
+    --ink:#20242E; --ink-soft:#5B6270;
+    --line:#DCD7C9; --white:#FFFDFB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:'IBM Plex Sans',sans-serif; background:var(--canvas); color:var(--ink); font-size:14px; -webkit-font-smoothing:antialiased; }
+  .app{ display:flex; height:100vh; overflow:hidden; }
+
+  .rail{ width:64px; background:var(--navy); flex-shrink:0; display:flex; flex-direction:column; align-items:center; padding:20px 0; gap:4px; }
+  .rail .mark{ width:32px;height:32px;border-radius:7px; background:var(--brass); color:var(--navy); font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px; display:flex;align-items:center;justify-content:center; margin-bottom:24px; }
+  .rail-icon{ width:38px;height:38px; display:flex;align-items:center;justify-content:center; border-radius:8px; color:rgba(255,255,255,.55); font-size:16px; cursor:pointer; }
+  .rail-icon.active{ background:rgba(255,255,255,.1); color:var(--white); }
+
+  .main{ flex:1; display:flex; flex-direction:column; min-width:0; }
+
+  .topbar{ display:flex; justify-content:space-between; align-items:center; padding:18px 28px; background:var(--white); border-bottom:1px solid var(--line); }
+  .topbar h1{ font-size:19px; font-weight:600; color:var(--navy); }
+  .topbar .sub{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+  .btn{ font-family:inherit; font-size:13px; font-weight:500; padding:8px 16px; border-radius:6px; border:1px solid var(--line); background:var(--white); color:var(--ink); cursor:pointer; }
+  .btn-primary{ background:var(--navy); color:var(--white); border-color:var(--navy); }
+  .status-toggle{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--thread); font-weight:600; }
+  .status-dot{ width:8px; height:8px; border-radius:50%; background:var(--thread); }
+
+  .body-wrap{ flex:1; display:flex; overflow:hidden; }
+
+  /* left: workflow list */
+  .wf-list{ width:260px; flex-shrink:0; background:var(--white); border-right:1px solid var(--line); overflow-y:auto; }
+  .wf-list-head{ padding:16px 18px; border-bottom:1px solid var(--line); font-size:11.5px; color:var(--ink-soft); font-weight:600; letter-spacing:.02em; }
+  .wf-item{ padding:12px 18px; border-bottom:1px solid var(--canvas); cursor:pointer; }
+  .wf-item.active{ background:var(--brass-light); border-left:3px solid var(--brass); }
+  .wf-item .name{ font-size:13px; font-weight:600; color:var(--navy); }
+  .wf-item .desc{ font-size:11px; color:var(--ink-soft); margin-top:3px; line-height:1.4; }
+  .wf-item .runs{ font-size:10.5px; color:var(--thread); margin-top:6px; font-family:'IBM Plex Mono',monospace; }
+
+  /* canvas */
+  .canvas-wrap{ flex:1; overflow:auto; padding:32px; background: radial-gradient(circle, #E5E0D2 1px, transparent 1px) 0 0/16px 16px, var(--canvas); }
+  .flow{ display:flex; flex-direction:column; align-items:center; gap:0; max-width:480px; margin:0 auto; }
+
+  .node{ width:100%; background:var(--white); border:1px solid var(--line); border-radius:10px; padding:14px 16px; box-shadow:0 1px 3px rgba(28,35,51,.05); position:relative; }
+  .node-type{ font-size:9.5px; font-weight:700; letter-spacing:.05em; padding:3px 8px; border-radius:100px; display:inline-block; margin-bottom:8px; }
+  .node-type.trigger{ background:var(--brass-light); color:var(--brass); }
+  .node-type.condition{ background:#E9E3F5; color:#6B4FA0; }
+  .node-type.action{ background:var(--thread-light); color:var(--thread); }
+  .node-type.wait{ background:var(--canvas-2); color:var(--ink-soft); }
+  .node-title{ font-size:13.5px; font-weight:600; color:var(--navy); }
+  .node-detail{ font-size:12px; color:var(--ink-soft); margin-top:4px; line-height:1.5; }
+
+  .connector{ width:2px; height:28px; background:var(--line); position:relative; }
+  .connector::after{ content:"▾"; position:absolute; bottom:-2px; left:-6px; color:var(--ink-soft); font-size:12px; }
+  .connector.branch::after{ content:""; }
+
+  .branch-wrap{ display:flex; gap:24px; width:100%; }
+  .branch-col{ flex:1; display:flex; flex-direction:column; align-items:center; }
+  .branch-tag{ font-size:10.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; padding:2px 8px; border:1px dashed var(--line); border-radius:100px; }
+
+  .add-node{ width:100%; border:1.5px dashed var(--line); border-radius:10px; padding:10px; text-align:center; font-size:12px; color:var(--brass); cursor:pointer; margin-top:4px; }
+
+  /* right: node config */
+  .config-panel{ width:320px; flex-shrink:0; background:var(--white); border-left:1px solid var(--line); overflow-y:auto; }
+  .cfg-head{ padding:18px 22px 14px; border-bottom:1px solid var(--line); }
+  .cfg-head .type-tag{ font-size:9.5px; font-weight:700; letter-spacing:.05em; color:var(--brass); }
+  .cfg-head h3{ font-size:15px; font-weight:600; color:var(--navy); margin-top:5px; }
+
+  .cfg-section{ padding:16px 22px; border-bottom:1px solid var(--line); }
+  .cfg-section label{ display:block; font-size:11.5px; color:var(--ink-soft); margin-bottom:6px; }
+  .cfg-section select, .cfg-section input{ width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px; font-size:12.5px; font-family:inherit; margin-bottom:12px; }
+  .cfg-row{ display:flex; gap:8px; }
+  .cfg-row > *{ flex:1; }
+
+  .cfg-actions{ padding:18px 22px; }
+  .save-btn{ width:100%; padding:10px; background:var(--navy); color:var(--white); border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="rail">
+    <div class="mark">AU</div>
+    <div class="rail-icon">☰</div>
+    <div class="rail-icon">💬</div>
+    <div class="rail-icon">◫</div>
+    <div class="rail-icon">👤</div>
+    <div class="rail-icon">▤</div>
+    <div class="rail-icon active">⚡</div>
+    <div class="rail-icon">⚙</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1>Hotel Lead → Hot Priority</h1>
+        <div class="sub">Workflow automation · 34 runs this month</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div class="status-toggle"><span class="status-dot"></span> Active</div>
+        <button class="btn">Duplicate</button>
+        <button class="btn btn-primary">Save workflow</button>
+      </div>
+    </div>
+
+    <div class="body-wrap">
+      <div class="wf-list">
+        <div class="wf-list-head">ALL WORKFLOWS (7)</div>
+        <div class="wf-item active">
+          <div class="name">Hotel Lead → Hot Priority</div>
+          <div class="desc">Hospitality lead, qty &gt;50 → assign + catalogue + follow-up</div>
+          <div class="runs">● 34 runs this month</div>
+        </div>
+        <div class="wf-item">
+          <div class="name">Quotation follow-up</div>
+          <div class="desc">No reply in 24 hrs → notify salesperson</div>
+          <div class="runs">● 61 runs this month</div>
+        </div>
+        <div class="wf-item">
+          <div class="name">Payment reminder — 3 day</div>
+          <div class="desc">Invoice due in 3 days → WhatsApp reminder</div>
+          <div class="runs">● 18 runs this month</div>
+        </div>
+        <div class="wf-item">
+          <div class="name">Low stock alert</div>
+          <div class="desc">Raw material below threshold → notify purchase</div>
+          <div class="runs">● 6 runs this month</div>
+        </div>
+        <div class="wf-item">
+          <div class="name">New IndiaMART lead</div>
+          <div class="desc">Auto-create lead + welcome WhatsApp message</div>
+          <div class="runs">● 22 runs this month</div>
+        </div>
+      </div>
+
+      <div class="canvas-wrap">
+        <div class="flow">
+
+          <div class="node">
+            <span class="node-type trigger">TRIGGER</span>
+            <div class="node-title">New lead created</div>
+            <div class="node-detail">Source: any · Industry: Hospitality</div>
+          </div>
+          <div class="connector"></div>
+
+          <div class="node">
+            <span class="node-type condition">CONDITION</span>
+            <div class="node-title">If quantity &gt; 50</div>
+            <div class="node-detail">Checks the "quantity" field on the lead</div>
+          </div>
+          <div class="connector branch"></div>
+
+          <div class="branch-wrap">
+            <div class="branch-col">
+              <div class="branch-tag">YES</div>
+              <div class="node">
+                <span class="node-type action">ACTION</span>
+                <div class="node-title">Set priority: Hot</div>
+                <div class="node-detail">Assign to available salesperson</div>
+              </div>
+              <div class="connector"></div>
+              <div class="node">
+                <span class="node-type action">ACTION</span>
+                <div class="node-title">Send catalogue</div>
+                <div class="node-detail">Housekeeping range, via WhatsApp</div>
+              </div>
+              <div class="connector"></div>
+              <div class="node">
+                <span class="node-type wait">WAIT</span>
+                <div class="node-title">Wait 24 hours</div>
+                <div class="node-detail">Stops if customer replies</div>
+              </div>
+              <div class="connector"></div>
+              <div class="node">
+                <span class="node-type action">ACTION</span>
+                <div class="node-title">Notify salesperson</div>
+                <div class="node-detail">"Follow up — no reply in 24h"</div>
+              </div>
+            </div>
+            <div class="branch-col">
+              <div class="branch-tag">NO</div>
+              <div class="node">
+                <span class="node-type action">ACTION</span>
+                <div class="node-title">Set priority: Normal</div>
+                <div class="node-detail">Standard queue, no escalation</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="add-node">+ Add step</div>
+
+        </div>
+      </div>
+
+      <div class="config-panel">
+        <div class="cfg-head">
+          <span class="type-tag">CONDITION</span>
+          <h3>If quantity &gt; 50</h3>
+        </div>
+
+        <div class="cfg-section">
+          <label>Field</label>
+          <select><option>Lead: Quantity</option></select>
+          <label>Operator</label>
+          <select><option>Greater than</option></select>
+          <label>Value</label>
+          <input value="50">
+        </div>
+
+        <div class="cfg-section">
+          <label>If false, go to</label>
+          <select><option>"NO" branch (Normal priority)</option></select>
+        </div>
+
+        <div class="cfg-actions">
+          <button class="save-btn">Update condition</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,231 @@
+.proformas-page {
+  min-height: 100vh;
+  background: var(--canvas);
+}
+
+/* Proforma List */
+.proforma-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.proforma-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.proforma-card:hover {
+  box-shadow: 0 4px 12px rgba(28, 35, 51, 0.08);
+  transform: translateY(-2px);
+}
+
+.proforma-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--canvas-2);
+  background: var(--canvas);
+}
+
+.proforma-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0 0 4px 0;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.proforma-customer {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.proforma-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.proforma-amount {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--navy);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.status-pending {
+  background: #FEF3C7;
+  color: #92400E;
+  border-color: #FCD34D;
+}
+
+.status-accepted {
+  background: #D1FAE5;
+  color: #065F46;
+  border-color: #6EE7B7;
+}
+
+.status-rejected {
+  background: #FEE2E2;
+  color: #991B1B;
+  border-color: #FCA5A5;
+}
+
+.status-converted {
+  background: #DBEAFE;
+  color: #1E40AF;
+  border-color: #93C5FD;
+}
+
+.proforma-body {
+  padding: 20px 24px;
+}
+
+.proforma-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.proforma-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.proforma-info-item .label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.proforma-info-item span:last-child {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--navy);
+}
+
+.proforma-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.proforma-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--canvas);
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+
+.proforma-item.more {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  justify-content: center;
+  background: var(--white);
+  border-style: dashed;
+}
+
+.proforma-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.proforma-item-qty {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.proforma-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--canvas-2);
+  background: var(--canvas);
+  align-items: center;
+}
+
+.btn-primary {
+  background: var(--brass);
+  color: var(--white);
+  border-color: var(--brass);
+}
+
+.btn-primary:hover {
+  background: #9a6e30;
+}
+
+.converted-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #D1FAE5;
+  color: #065F46;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #6EE7B7;
+}
+
+.info-box {
+  padding: 16px;
+  background: #FEF3C7;
+  border: 1px solid #FCD34D;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.info-box p {
+  margin: 0;
+  font-size: 13px;
+  color: #92400E;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .proforma-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .proforma-header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .proforma-info {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .proforma-footer {
+    flex-direction: column;
+  }
+
+  .btn-small {
+    width: 100%;
+  }
+
+  .converted-badge {
+    width: 100%;
+    justify-content: center;
+  }
+}
