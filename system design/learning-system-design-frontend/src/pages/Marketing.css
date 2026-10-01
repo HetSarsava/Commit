@@ -552,11 +552,32 @@
 
 @media (max-width: 768px) {
   .marketing-container {
-    padding: 20px;
+    padding: 16px;
+    min-width: 0;
+  }
+
+  .marketing-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .marketing-header .btn-primary {
+    width: 100%;
   }
 
   .metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+
+  .section-card {
+    padding: 16px;
+  }
+
+  .top-campaigns,
+  .campaigns-grid {
+    grid-template-columns: 1fr;
+    min-width: 0;
   }
 
   .table-header, .table-row {

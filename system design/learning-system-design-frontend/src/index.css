@@ -1,5 +1,4 @@
-/* Import IBM Plex fonts */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+/* Use local system fallbacks so the client demo remains fully usable offline. */
 
 :root {
   --navy: #1C2333;

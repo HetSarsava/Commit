@@ -84,7 +84,7 @@ const DashboardPrototype = () => {
     <div className="dashboard-wrap">
       <div className="topbar">
         <div>
-          <h1>Good morning, {user?.firstName || 'User'}</h1>
+          <h1>Good morning, {user?.firstName || user?.name?.split(' ')[0] || 'User'}</h1>
           <div className="sub">{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · Ahmedabad office</div>
         </div>
         <div className="date-range">This week ▾</div>
@@ -105,12 +105,12 @@ const DashboardPrototype = () => {
           </div>
           <div className="kpi">
             <div className="label">Quotations sent</div>
-            <div className="value">{data.summary.totalOrders}</div>
+            <div className="value">{data.summary.sentQuotations ?? data.summary.totalQuotations ?? data.summary.totalOrders}</div>
             <div className="delta up">{formatCurrency(data.summary.thisMonthRevenue)} value</div>
           </div>
           <div className="kpi">
             <div className="label">Orders this week</div>
-            <div className="value">{data.today.orders}</div>
+            <div className="value">{data.summary.thisWeekOrders ?? data.today.orders}</div>
             <div className="delta up">↑ 12%</div>
           </div>
           <div className="kpi">

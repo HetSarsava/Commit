@@ -3579,4 +3579,243 @@ const mockData = {
   ],
 };
 
+/*
+ * Presentation seed data
+ * ----------------------
+ * The original fixture was written in 2024.  Keeping those dates made the
+ * dashboard show two-year-old follow-ups and caused date-filtered reports to
+ * look empty in a client demo.  Shift legacy dates to the current demo day,
+ * then add a few records for every major branch of the CRM workflow.
+ */
+const DAY_MS = 24 * 60 * 60 * 1000;
+const demoNow = new Date();
+demoNow.setHours(12, 0, 0, 0);
+const legacyAnchor = new Date('2024-09-30T12:00:00');
+const legacyShift = demoNow.getTime() - legacyAnchor.getTime();
+
+const shiftLegacyDates = (value) => {
+  if (value instanceof Date) {
+    if (value.getFullYear() <= 2025) value.setTime(value.getTime() + legacyShift);
+    return value;
+  }
+  if (Array.isArray(value)) {
+    value.forEach(shiftLegacyDates);
+    return value;
+  }
+  if (value && typeof value === 'object') {
+    Object.values(value).forEach(shiftLegacyDates);
+  }
+  return value;
+};
+
+shiftLegacyDates(mockData);
+
+// Reference numbers and message templates also carried the old fixture year.
+// Keep identifiers and human-readable demo messages consistent with the dates.
+const shiftLegacyStringReferences = (value) => {
+  if (Array.isArray(value)) {
+    value.forEach(shiftLegacyStringReferences);
+    return value;
+  }
+  if (value && typeof value === 'object') {
+    Object.keys(value).forEach((key) => {
+      if (typeof value[key] === 'string') {
+        value[key] = value[key].replace(/202409/g, '202609').replace(/2024/g, '2026');
+      } else {
+        shiftLegacyStringReferences(value[key]);
+      }
+    });
+  }
+  return value;
+};
+
+shiftLegacyStringReferences(mockData);
+
+const daysAgo = (days) => new Date(demoNow.getTime() - days * DAY_MS);
+const daysFromNow = (days) => new Date(demoNow.getTime() + days * DAY_MS);
+
+// Additional customers make reports, quotations and customer lookups useful
+// without requiring the presenter to create records first.
+mockData.customers.push(
+  {
+    id: 'cust-2', companyName: 'Sunrise Hospital Group', contactPerson: 'Dr. Kavita Rao',
+    mobile: '+919876540004', whatsapp: '+919876540004', email: 'kavita@sunrisehospital.com',
+    address: 'Ring Road, Surat', city: 'Surat', state: 'Gujarat', pincode: '395001',
+    gstin: '24AABCS2345K1ZP', createdAt: daysAgo(90), updatedAt: daysAgo(3),
+  },
+  {
+    id: 'cust-3', companyName: 'Smart School Network', contactPerson: 'Principal Sharma',
+    mobile: '+919876540009', whatsapp: '+919876540009', email: 'sharma@smartschool.com',
+    address: 'SG Highway, Ahmedabad', city: 'Ahmedabad', state: 'Gujarat', pincode: '380054',
+    gstin: '24AABCS6789M1ZQ', createdAt: daysAgo(75), updatedAt: daysAgo(2),
+  },
+  {
+    id: 'cust-4', companyName: 'Coastal Logistics', contactPerson: 'Arjun Nair',
+    mobile: '+919876540007', whatsapp: '+919876540007', email: 'arjun@coastallogistics.com',
+    address: 'Andheri East, Mumbai', city: 'Mumbai', state: 'Maharashtra', pincode: '400069',
+    gstin: '27AABCC3456P1ZR', createdAt: daysAgo(70), updatedAt: daysAgo(6),
+  },
+  {
+    id: 'cust-5', companyName: 'City Hospital', contactPerson: 'Dr. Anjali Mehta',
+    mobile: '+919823456789', whatsapp: '+919823456789', email: 'anjali@cityhospital.com',
+    address: 'Camp Road, Pune', city: 'Pune', state: 'Maharashtra', pincode: '411001',
+    gstin: '27AABCC7890Q1ZS', createdAt: daysAgo(60), updatedAt: daysAgo(4),
+  },
+  {
+    id: 'cust-6', companyName: 'Hotel Pride', contactPerson: 'Mr. Suresh Rao',
+    mobile: '+919845612301', whatsapp: '+919845612301', email: 'suresh@hotelpride.com',
+    address: 'MG Road, Bengaluru', city: 'Bengaluru', state: 'Karnataka', pincode: '560001',
+    gstin: '29AABCH4567R1ZT', createdAt: daysAgo(52), updatedAt: daysAgo(1),
+  },
+  {
+    id: 'cust-7', companyName: 'Precision Auto Works', contactPerson: 'Vikram Singh',
+    mobile: '+919876540006', whatsapp: '+919876540006', email: 'vikram@precisionauto.com',
+    address: 'Vatva GIDC, Ahmedabad', city: 'Ahmedabad', state: 'Gujarat', pincode: '382445',
+    gstin: '24AABCP8901S1ZU', createdAt: daysAgo(48), updatedAt: daysAgo(8),
+  },
+  {
+    id: 'cust-8', companyName: 'Green Valley Hospital', contactPerson: 'Dr. Ramesh Gupta',
+    mobile: '+919876540010', whatsapp: '+919876540010', email: 'ramesh@greenvalley.com',
+    address: 'Sector 18, Delhi', city: 'Delhi', state: 'Delhi', pincode: '110001',
+    gstin: '07AABCG1234X1ZX', createdAt: daysAgo(45), updatedAt: daysAgo(5),
+  },
+);
+
+const demoLeadSeeds = [
+  ['lead-demo-1', 'Orchid International School', 'Mrs. Ritu Shah', 'SCHOOL', 'NEW', 'HOT', 'WEBSITE', 420, 365000, 'user-2', 0, 0],
+  ['lead-demo-2', 'BlueStone Hotels', 'Mr. Harish Menon', 'HOSPITALITY', 'CONTACTED', 'WARM', 'GOOGLE_ADS', 180, 210000, 'user-3', 1, 1],
+  ['lead-demo-3', 'Apex Security Pvt Ltd', 'Ms. Farah Khan', 'SECURITY', 'REQUIREMENT', 'HIGH', 'REFERRAL', 260, 390000, 'user-2', 2, 3],
+  ['lead-demo-4', 'Narmada Textiles', 'Mr. Dev Patel', 'MANUFACTURING', 'CATALOGUE', 'NORMAL', 'INDIAMART', 110, 126000, 'user-3', 3, 5],
+  ['lead-demo-5', 'Crescent Healthcare', 'Dr. Nikhil Shah', 'HEALTHCARE', 'QUOTATION', 'HOT', 'WHATSAPP', 240, 288000, 'user-2', 4, 7],
+  ['lead-demo-6', 'Westside Retail Mall', 'Ms. Ayesha Thomas', 'RETAIL', 'NEGOTIATION', 'HIGH', 'FACEBOOK', 95, 104500, 'user-3', 5, 9],
+  ['lead-demo-7', 'Little Stars Academy', 'Ms. Kavya Iyer', 'EDUCATION', 'SAMPLE', 'WARM', 'INSTAGRAM', 320, 272000, 'user-2', 1, 12],
+  ['lead-demo-8', 'MetroRail Services', 'Mr. Pranav Joshi', 'TRANSPORT', 'ORDER', 'HOT', 'TRADEINDIA', 500, 625000, 'user-3', 2, 15],
+  ['lead-demo-9', 'Harbour View Resort', 'Mr. Joseph Dsouza', 'HOSPITALITY', 'PRODUCTION', 'HIGH', 'EMAIL', 140, 196000, 'user-2', 3, 18],
+  ['lead-demo-10', 'CivicCare Clinics', 'Ms. Pooja Rao', 'HEALTHCARE', 'DISPATCH', 'NORMAL', 'PHONE', 75, 97500, 'user-3', 4, 20],
+  ['lead-demo-11', 'Summit Corporate Park', 'Mr. Karan Malhotra', 'CORPORATE', 'COMPLETED', 'WARM', 'GOOGLE_BUSINESS', 160, 224000, 'user-2', 1, 25],
+  ['lead-demo-12', 'Evergreen Fitness', 'Ms. Sonal Joshi', 'FITNESS', 'COMPLETED', 'NORMAL', 'MANUAL', 90, 108000, 'user-3', 2, 30],
+];
+
+demoLeadSeeds.forEach(([id, companyName, contactPerson, industry, status, priority, source, quantity, budget, salesPersonId, campaignNumber, age]) => {
+  mockData.leads.push({
+    id, companyName, contactPerson,
+    mobile: `+9198765${String(41000 + age).padStart(5, '0')}`,
+    whatsapp: `+9198765${String(41000 + age).padStart(5, '0')}`,
+    email: `${contactPerson.toLowerCase().replace(/[^a-z]+/g, '.')}@example.com`,
+    city: ['Ahmedabad', 'Mumbai', 'Surat', 'Pune'][age % 4], state: age % 2 ? 'Maharashtra' : 'Gujarat',
+    industry, requirement: `${quantity} customised ${industry.toLowerCase()} uniforms`,
+    productInterest: industry === 'HEALTHCARE' ? 'Nursing scrubs and lab coats' : 'Custom uniform sets',
+    quantity, budget, deliveryDate: daysFromNow(14 + (age % 18)), source, status, priority,
+    notes: `Demo record for ${status.toLowerCase()} stage and ${source.toLowerCase().replace(/_/g, ' ')} attribution.`,
+    followUpDate: status === 'COMPLETED' ? null : (age % 4 === 0 ? daysFromNow(0) : daysFromNow((age % 8) - 2)),
+    salesPersonId, campaignId: campaignNumber ? `campaign-${campaignNumber}` : null,
+    createdAt: daysAgo(age), updatedAt: daysAgo(Math.max(0, age - 1)), convertedAt: status === 'COMPLETED' ? daysAgo(3) : null,
+  });
+});
+
+const demoProducts = [
+  ['prod-demo-1', 'AU-HO-101', 'Reception Blazer — Navy', 'JACKETS', 'Poly-viscose', 2450, 45, true],
+  ['prod-demo-2', 'AU-HO-102', 'Housekeeping Trousers', 'PANTS', 'Poly-cotton', 680, 220, true],
+  ['prod-demo-3', 'AU-SC-103', 'School Tie & Belt Set', 'ACCESSORIES', 'Polyester', 220, 600, false],
+  ['prod-demo-4', 'AU-ME-104', 'Patient Gown — Sky Blue', 'MEDICAL', 'Cotton', 540, 18, true],
+  ['prod-demo-5', 'AU-SE-105', 'Security Cap with Badge', 'ACCESSORIES', 'Twill', 190, 320, true],
+  ['prod-demo-6', 'AU-CO-106', 'Corporate Polo — White', 'SHIRTS', 'Cotton pique', 760, 75, true],
+  ['prod-demo-7', 'AU-RE-107', 'Restaurant Waistcoat', 'JACKETS', 'Poly-viscose', 1150, 0, true],
+  ['prod-demo-8', 'AU-PA-108', 'Rain Jacket — Reflective', 'JACKETS', 'Waterproof', 1850, 32, true],
+];
+
+demoProducts.forEach(([id, sku, name, category, fabric, basePrice, stockQuantity, customizable]) => {
+  mockData.products.push({
+    id, sku, name, description: `${name} for the Amit Uniform presentation catalogue`, category, fabric,
+    colors: ['Navy', 'White', 'Grey'], sizes: ['S', 'M', 'L', 'XL', 'XXL'], moq: 20,
+    basePrice, stockQuantity, customizable, isActive: true, createdAt: daysAgo(120), updatedAt: daysAgo(2),
+  });
+});
+
+const quoteSeeds = [
+  ['quot-demo-1', 'QT-202609-0201', 'lead-demo-5', 'user-2', 'DRAFT', 198000, 0, 198000, 10],
+  ['quot-demo-2', 'QT-202609-0202', 'lead-demo-6', 'user-3', 'ACCEPTED', 104500, 5, 109226, 9],
+  ['quot-demo-3', 'QT-202609-0203', 'lead-demo-7', 'user-2', 'REJECTED', 272000, 0, 320960, 12],
+  ['quot-demo-4', 'QT-202609-0204', 'lead-demo-8', 'user-3', 'VIEWED', 625000, 8, 662500, 14],
+  ['quot-demo-5', 'QT-202609-0205', 'lead-demo-9', 'user-2', 'EXPIRED', 196000, 0, 231280, 35],
+  ['quot-demo-6', 'QT-202609-0206', 'lead-demo-11', 'user-2', 'SENT', 224000, 3, 259840, 5],
+];
+
+quoteSeeds.forEach(([id, quotationNumber, customerId, salesPersonId, status, subtotal, discountPercent, total, age], index) => {
+  const taxAmount = Math.round(total - subtotal * (1 - discountPercent / 100));
+  mockData.quotations.push({
+    id, quotationNumber, customerId, salesPersonId, status, subtotal, discountPercent,
+    discountAmount: Math.round(subtotal * discountPercent / 100), taxAmount, total,
+    validUntil: daysFromNow(status === 'EXPIRED' ? -3 : 30),
+    termsConditions: '50% advance on order confirmation. Balance before dispatch. Prices include GST.',
+    notes: `Presentation quotation in ${status.toLowerCase()} state.`, sentAt: status === 'DRAFT' ? null : daysAgo(age),
+    createdAt: daysAgo(age), updatedAt: daysAgo(Math.max(0, age - 1)),
+  });
+  mockData.quotationItems.push({
+    id: `qitem-demo-${index + 1}`, quotationId: id, productId: demoProducts[index % demoProducts.length][0],
+    quantity: 80 + index * 20, unitPrice: Math.round(subtotal / (80 + index * 20)), discount: 0,
+    total: subtotal, customization: index % 2 ? 'Logo embroidery and custom colour matching' : 'Standard catalogue finish',
+  });
+});
+
+const orderSeeds = [
+  ['order-demo-1', 'ORD-202609-1101', 'quot-demo-2', 'lead-demo-6', 'CONFIRMED', 104500, 52250, 52250, 2],
+  ['order-demo-2', 'ORD-202609-1102', 'quot-demo-4', 'lead-demo-8', 'READY', 625000, 312500, 312500, 12],
+  ['order-demo-3', 'ORD-202609-1103', null, 'lead-demo-9', 'DISPATCHED', 196000, 196000, 0, 8],
+  ['order-demo-4', 'ORD-202609-1104', null, 'lead-demo-11', 'DELIVERED', 224000, 224000, 0, 28],
+  ['order-demo-5', 'ORD-202609-1105', null, 'lead-demo-12', 'CANCELLED', 108000, 0, 0, 20],
+];
+
+orderSeeds.forEach(([id, orderNumber, quotationId, customerId, status, total, advanceAmount, balanceAmount, age], index) => {
+  mockData.orders.push({
+    id, orderNumber, quotationId, customerId, salesPersonId: index % 2 ? 'user-3' : 'user-2', status,
+    poNumber: status === 'CANCELLED' ? null : `PO/AU/2026/${1101 + index}`,
+    advanceAmount, balanceAmount, deliveryDate: daysFromNow(status === 'DELIVERED' ? -2 : 10 + index),
+    subtotal: Math.round(total / 1.18), discountPercent: index === 1 ? 5 : 0,
+    discountAmount: 0, taxAmount: total - Math.round(total / 1.18),
+    total, termsConditions: 'Net 30 days. Delivery as per production schedule.',
+    notes: `Presentation order in ${status.toLowerCase().replace(/_/g, ' ')} state.`,
+    confirmedAt: status === 'PENDING' ? null : daysAgo(Math.max(0, age - 1)),
+    createdAt: daysAgo(age), updatedAt: daysAgo(Math.max(0, age - 1)),
+  });
+  const orderItemId = `oitem-demo-${index + 1}`;
+  const quantity = 80 + index * 25;
+  const productId = demoProducts[(index + 2) % demoProducts.length][0];
+  mockData.orderItems.push({ id: orderItemId, orderId: id, productId, quantity, unitPrice: Math.round(total / quantity), discount: 0, total, customization: 'Amit Uniform logo embroidery' });
+  mockData.productionTracking.push({
+    id: `prodtrack-demo-${index + 1}`, orderItemId, stage: ['QC', 'PACKING', 'DISPATCH', 'DISPATCH', 'MATERIAL'][index],
+    assignedWorkerId: 'user-4', startedAt: daysAgo(Math.max(0, age - 4)), estimatedCompletion: daysFromNow(index === 4 ? 18 : 4),
+    notes: `Production tracking sample for ${status.toLowerCase().replace(/_/g, ' ')} order.`, createdAt: daysAgo(age), updatedAt: daysAgo(1),
+  });
+});
+
+const invoiceSeeds = [
+  ['inv-demo-1', 'INV-202609-1201', 'order-demo-1', 'lead-demo-6', 'PARTIALLY_PAID', 109226, 60000, 49226, 1],
+  ['inv-demo-2', 'INV-202609-1202', 'order-demo-2', 'lead-demo-8', 'SENT', 662500, 0, 662500, 10],
+  ['inv-demo-3', 'INV-202609-1203', 'order-demo-3', 'lead-demo-9', 'OVERDUE', 231280, 120000, 111280, 45],
+  ['inv-demo-4', 'INV-202609-1204', 'order-demo-4', 'lead-demo-11', 'PAID', 264320, 264320, 0, 25],
+];
+
+invoiceSeeds.forEach(([id, invoiceNumber, orderId, customerId, status, total, amountPaid, balanceDue, age], index) => {
+  const subtotal = Math.round(total / 1.18);
+  mockData.invoices.push({
+    id, invoiceNumber, orderId, customerId, salesPersonId: index % 2 ? 'user-3' : 'user-2',
+    invoiceDate: daysAgo(age), dueDate: daysFromNow(status === 'OVERDUE' ? -4 : 20), status,
+    subtotal, discountPercent: 0, discountAmount: 0, cgst: Math.round((total - subtotal) / 2),
+    sgst: Math.round((total - subtotal) / 2), igst: 0, taxAmount: total - subtotal, total, amountPaid, balanceDue,
+    notes: `Presentation invoice in ${status.toLowerCase().replace(/_/g, ' ')} state.`, termsConditions: 'Payment by bank transfer or UPI.',
+    createdAt: daysAgo(age), updatedAt: daysAgo(Math.max(0, age - 1)),
+  });
+  mockData.invoiceItems.push({ id: `invitem-demo-${index + 1}`, invoiceId: id, productId: demoProducts[(index + 2) % demoProducts.length][0], quantity: 80 + index * 25, unitPrice: Math.round(subtotal / (80 + index * 25)), total: subtotal, customization: 'Logo embroidery' });
+  if (amountPaid > 0) {
+    mockData.payments.push({ id: `pay-demo-${index + 1}`, referenceNumber: `PAY-202609-${6200 + index}`, invoiceId: id, customerId, amount: amountPaid, method: ['UPI', 'BANK_TRANSFER', 'CHEQUE', 'CARD'][index], transactionId: `TXN202609${index + 1}`, notes: 'Demo payment entry', paymentDate: daysAgo(Math.max(1, age - 2)), receivedBy: 'user-5', createdAt: daysAgo(Math.max(1, age - 2)), updatedAt: daysAgo(Math.max(1, age - 2)) });
+  }
+});
+
+// Give the marketing dashboard completed, attributed conversions so platform
+// revenue and ROI are meaningful in the presentation.
+mockData.leads.filter((lead) => lead.id === 'lead-demo-11' || lead.id === 'lead-demo-12').forEach((lead, index) => {
+  lead.campaignId = `campaign-${index + 1}`;
+});
+
 module.exports = mockData;

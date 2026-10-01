@@ -21,6 +21,11 @@ const Layout = ({ children }) => {
     setIsExpanded(!isExpanded);
   };
 
+  const displayName = user?.name || [user?.firstName, user?.lastName].filter(Boolean).join(' ') || 'User';
+  const nameParts = displayName.trim().split(/\s+/);
+  const initials = (user?.firstName?.[0] || nameParts[0]?.[0] || '') +
+    (user?.lastName?.[0] || nameParts[1]?.[0] || '');
+
   const navItems = [
     { path: '/dashboard', icon: '◈', label: 'Dashboard' },
     { path: '/leads', icon: '☰', label: 'Leads' },
@@ -55,6 +60,7 @@ const Layout = ({ children }) => {
           className="rail-toggle"
           onClick={toggleSidebar}
           title={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+          aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
         >
           {isExpanded ? '◀' : '▶'}
         </button>
@@ -66,38 +72,44 @@ const Layout = ({ children }) => {
             return true;
           })
           .map((item) => (
-            <div
+            <button
               key={item.path}
               className={`rail-icon ${isActive(item.path) ? 'active' : ''}`}
               onClick={() => navigate(item.path)}
               title={!isExpanded ? item.label : ''}
+              aria-label={item.label}
+              type="button"
             >
               <span className="icon">{item.icon}</span>
               {isExpanded && <span className="label">{item.label}</span>}
-            </div>
+            </button>
           ))}
 
         <div style={{ flex: 1 }}></div>
 
         {user?.role === 'ADMIN' && (
-          <div
+          <button
             className={`rail-icon ${isActive('/settings') ? 'active' : ''}`}
             onClick={() => navigate('/settings')}
             title={!isExpanded ? 'Settings' : ''}
+            aria-label="Settings"
+            type="button"
           >
             <span className="icon">⚙</span>
             {isExpanded && <span className="label">Settings</span>}
-          </div>
+          </button>
         )}
 
-        <div
+        <button
           className="rail-icon"
           onClick={handleLogout}
           title={!isExpanded ? 'Logout' : ''}
+          aria-label="Logout"
+          type="button"
         >
           <span className="icon">⇥</span>
           {isExpanded && <span className="label">Logout</span>}
-        </div>
+        </button>
       </div>
 
       {/* Main Content */}
@@ -109,10 +121,10 @@ const Layout = ({ children }) => {
             <NotificationBell />
             <div className="user-info">
               <div className="user-avatar">
-                {user?.firstName?.[0]}{user?.lastName?.[0]}
+                {initials.toUpperCase() || 'AU'}
               </div>
               <div className="user-details">
-                <div className="user-name">{user?.firstName} {user?.lastName}</div>
+                <div className="user-name">{displayName}</div>
                 <div className="user-role">{user?.role}</div>
               </div>
             </div>

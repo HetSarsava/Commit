@@ -2,7 +2,8 @@
 
 .whatsapp-page-enhanced {
   padding: 0;
-  height: 100vh;
+  height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background: #f8f9fa;
@@ -14,6 +15,8 @@
   background: white;
   border-bottom: 2px solid #e9ecef;
   padding: 0 2rem;
+  overflow-x: auto;
+  min-width: 0;
 }
 
 .whatsapp-tabs .tab {
@@ -26,6 +29,7 @@
   color: #6c757d;
   cursor: pointer;
   transition: all 0.2s;
+  flex: 0 0 auto;
 }
 
 .whatsapp-tabs .tab:hover {
@@ -50,9 +54,16 @@
 .inbox-layout-enhanced {
   display: grid;
   grid-template-columns: 300px 1fr 280px;
-  height: calc(100vh - 140px);
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
   background: white;
   position: relative;
+}
+
+.inbox-layout-enhanced > *,
+.chat-panel-enhanced {
+  min-width: 0;
 }
 
 /* When info panel is hidden */
@@ -1069,7 +1080,7 @@ input:checked + .toggle-slider:before {
 
 @media (max-width: 768px) {
   .inbox-layout-enhanced {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .conversations-panel-enhanced {

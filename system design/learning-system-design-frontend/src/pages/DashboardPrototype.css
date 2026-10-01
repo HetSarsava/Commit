@@ -20,6 +20,26 @@
   background: var(--canvas);
 }
 
+/* Keep dashboard styles isolated from similarly named page styles loaded by the router. */
+.dashboard-wrap .topbar {
+  padding: 22px 32px 0;
+}
+
+.dashboard-wrap .content {
+  padding: 20px 32px 40px;
+}
+
+.dashboard-wrap .card {
+  margin-bottom: 0;
+  padding: 20px 22px;
+}
+
+.dashboard-wrap .ai-card {
+  background: linear-gradient(135deg, var(--navy), var(--navy-light)) !important;
+  border: none;
+  color: var(--white);
+}
+
 .topbar {
   display: flex;
   justify-content: space-between;

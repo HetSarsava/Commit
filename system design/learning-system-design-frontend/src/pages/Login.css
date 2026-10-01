@@ -200,11 +200,11 @@
   font-size: 12.5px;
   color: var(--brass);
   font-weight: 500;
-  cursor: pointer;
+  cursor: default;
 }
 
 .forgot:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .btn-login {
@@ -270,6 +270,11 @@
   background: var(--canvas);
 }
 
+.otp-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .role-note {
   margin-top: 26px;
   padding: 12px 14px;
@@ -311,14 +316,9 @@
   color: var(--ink-soft);
 }
 
-.foot-links a {
+.foot-links .invite-note {
   color: var(--brass);
-  text-decoration: none;
   font-weight: 500;
-}
-
-.foot-links a:hover {
-  text-decoration: underline;
 }
 
 /* Responsive */

@@ -151,8 +151,12 @@
 /* Leads Layout */
 .leads-layout {
   display: grid;
-  grid-template-columns: 1fr 500px;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
+}
+
+.leads-layout.has-selection {
+  grid-template-columns: minmax(0, 1fr) 500px;
 }
 
 .leads-list {
@@ -634,6 +638,10 @@
 /* Responsive Design */
 @media (max-width: 1200px) {
   .leads-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .leads-layout.has-selection {
     grid-template-columns: 1fr;
   }
 

@@ -7,14 +7,23 @@ const bcrypt = require('bcryptjs');
 // Helper to generate unique IDs
 const generateId = (prefix = 'id') => `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-// Hash passwords for demo users
-const initializePasswords = async () => {
-  mockData.users[0].password = await bcrypt.hash('admin123', 10);
-  mockData.users[1].password = await bcrypt.hash('sales123', 10);
-  mockData.users[2].password = await bcrypt.hash('sales123', 10);
-  mockData.users[3].password = await bcrypt.hash('production123', 10);
-  mockData.users[4].password = await bcrypt.hash('accountant123', 10);
-  mockData.users[5].password = await bcrypt.hash('purchase123', 10);
+// Hash passwords synchronously so the first login request cannot race startup.
+// These credentials are intentionally kept in one place for the demo seed data.
+const initializePasswords = () => {
+  const passwordsByEmail = {
+    'admin@amituniform.com': 'admin123',
+    'ravi@amituniform.com': 'sales123',
+    'anjali@amituniform.com': 'sales123',
+    'kiran@amituniform.com': 'production123',
+    'meera@amituniform.com': 'accountant123',
+    'prakash@amituniform.com': 'purchase123',
+    'neha@amituniform.com': 'marketing123',
+  };
+
+  mockData.users.forEach((user) => {
+    const password = passwordsByEmail[user.email];
+    if (password) user.password = bcrypt.hashSync(password, 10);
+  });
 };
 
 // Initialize on first load
@@ -143,6 +152,13 @@ const mockPrisma = {
       if (where.priority) leads = leads.filter(l => l.priority === where.priority);
       if (where.source) leads = leads.filter(l => l.source === where.source);
       if (where.salesPersonId) leads = leads.filter(l => l.salesPersonId === where.salesPersonId);
+      if (where.campaignId) {
+        if (typeof where.campaignId === 'object' && where.campaignId.not !== undefined) {
+          leads = leads.filter(l => l.campaignId !== where.campaignId.not);
+        } else {
+          leads = leads.filter(l => l.campaignId === where.campaignId);
+        }
+      }
 
       // Apply OR search
       if (where.OR) {
@@ -267,6 +283,13 @@ const mockPrisma = {
       if (where.status) leads = leads.filter(l => l.status === where.status);
       if (where.priority) leads = leads.filter(l => l.priority === where.priority);
       if (where.salesPersonId) leads = leads.filter(l => l.salesPersonId === where.salesPersonId);
+      if (where.campaignId) {
+        if (typeof where.campaignId === 'object' && where.campaignId.not !== undefined) {
+          leads = leads.filter(l => l.campaignId !== where.campaignId.not);
+        } else {
+          leads = leads.filter(l => l.campaignId === where.campaignId);
+        }
+      }
 
       return leads.length;
     },

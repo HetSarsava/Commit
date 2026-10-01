@@ -90,13 +90,13 @@ const Login = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="field">
-              <label>Email or mobile number</label>
+              <label>Work email</label>
               <input
-                type="text"
+                type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="admin@example.com"
+                placeholder="admin@amituniform.com"
                 required
                 disabled={loading}
               />
@@ -126,7 +126,7 @@ const Login = () => {
                 />
                 Remember me
               </label>
-              <span className="forgot">Forgot password?</span>
+              <span className="forgot" title="Password reset is handled by your administrator">Ask your admin to reset your password</span>
             </div>
 
             <button type="submit" className="btn-login" disabled={loading}>
@@ -138,7 +138,7 @@ const Login = () => {
             <span>OR</span>
           </div>
 
-          <button className="otp-btn">📱 Sign in with OTP</button>
+          <button type="button" className="otp-btn" disabled title="OTP sign-in is not enabled in this demo">📱 Sign in with OTP (unavailable)</button>
 
           <div className="role-note">
             Signing in as <b>Sales</b>, <b>Accounts</b>, or <b>Production</b>? Your access
@@ -147,12 +147,13 @@ const Login = () => {
 
           <div className="demo-credentials">
             <p><strong>Demo Credentials:</strong></p>
-            <p>Admin: admin@example.com / admin123</p>
-            <p>Sales: sales1@example.com / sales123</p>
+            <p>Admin: admin@amituniform.com / admin123</p>
+            <p>Sales: ravi@amituniform.com / sales123</p>
+            <p>Production: kiran@amituniform.com / production123</p>
           </div>
 
           <div className="foot-links">
-            Need an account? Ask your <a href="#">Admin to invite you</a>
+            Need an account? Ask your <span className="invite-note">Admin to invite you</span>
           </div>
         </div>
       </div>

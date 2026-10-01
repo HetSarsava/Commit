@@ -33,6 +33,11 @@ const WhatsAppEnhanced = () => {
       setLoading(true);
       const data = await whatsappAPI.getConversations();
       setConversations(data);
+      // Open the most recent conversation by default so the inbox is useful on first load.
+      if (!selectedConversation && data.length > 0) {
+        setSelectedConversation(data[0]);
+        loadMessages(data[0].id);
+      }
     } catch (error) {
       console.error('Failed to load conversations:', error);
     } finally {

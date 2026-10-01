@@ -251,7 +251,7 @@ const LeadsEnhanced = () => {
           </div>
 
           {/* Leads List */}
-          <div className="leads-layout">
+          <div className={`leads-layout ${selectedLead ? 'has-selection' : ''}`}>
             {/* List */}
             <div className="leads-list">
               {leads.length === 0 ? (

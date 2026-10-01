@@ -8,6 +8,9 @@ exports.getDashboardStats = async (req, res, next) => {
     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+    const thisWeekStart = new Date(today);
+    const daysSinceMonday = (thisWeekStart.getDay() + 6) % 7;
+    thisWeekStart.setDate(thisWeekStart.getDate() - daysSinceMonday);
     const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
@@ -256,6 +259,7 @@ exports.getDashboardStats = async (req, res, next) => {
 
     // ===== SUMMARY METRICS =====
     const thisMonthOrders = orders.filter(o => new Date(o.createdAt) >= thisMonthStart);
+    const thisWeekOrders = orders.filter(o => new Date(o.createdAt) >= thisWeekStart);
     const lastMonthOrders = orders.filter(
       o => new Date(o.createdAt) >= lastMonthStart && new Date(o.createdAt) <= lastMonthEnd
     );
@@ -320,6 +324,9 @@ exports.getDashboardStats = async (req, res, next) => {
         totalLeads: leads.length,
         newLeads: leads.filter(l => l.status === 'NEW').length,
         totalOrders: orders.length,
+        totalQuotations: quotations.length,
+        sentQuotations: quotations.filter(q => q.status !== 'DRAFT').length,
+        thisWeekOrders: thisWeekOrders.length,
         pendingOrders: orders.filter(o => o.status === 'PENDING').length,
         totalOutstanding: Math.round(totalOutstanding),
         overallConversionRate,
