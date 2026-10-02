@@ -129,7 +129,7 @@ const ProductModal = ({ mode, product, onClose, onSuccess }) => {
   const isViewMode = mode === 'view';
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="form-modal product-modal" onClick={onClose}>
       <div className="modal-container modal-large" onClick={(e) => e.stopPropagation()}>
         {/* Modal Header */}
         <div className="modal-header">

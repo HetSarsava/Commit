@@ -4,27 +4,43 @@
 
 button,
 a[href],
-input,
-select,
-textarea,
 summary,
 [role='button'],
 [role='tab'] {
   min-height: 24px;
 }
 
-/* Compact-but-clickable controls (page-level buttons, chips, icon buttons) */
+/* Standard form-control height. Page-level rules may increase this for a
+   particular workflow, but ordinary filters and fields should never fall back
+   to browser-default geometry. */
+input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),
+select,
+textarea {
+  min-height: 36px;
+}
+
+/* Standard action height, including pages that use a variant without `.btn`. */
 .btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-success,
+.btn-warning,
+.btn-link {
+  min-height: 36px;
+}
+
+/* Compact-but-clickable controls (row actions, chips, and small buttons). */
 .btn-sm,
+.btn-small,
 .chip,
 .action-btn,
 .icon-btn,
 .btn-icon,
 .tab,
 .p-action-btn,
-.btn-small,
-.btn-link {
-  min-height: 28px;
+.btn-remove {
+  min-height: 32px;
   min-width: 28px;
 }
 

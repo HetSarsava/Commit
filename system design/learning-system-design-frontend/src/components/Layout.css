@@ -412,3 +412,26 @@
     transition: none;
   }
 }
+
+/* ---------- Print ---------- */
+
+@media print {
+  .app-layout,
+  .main-content,
+  .page-content {
+    display: block;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    background: var(--white);
+  }
+
+  .rail,
+  .rail-backdrop,
+  .app-topbar,
+  .topbar-actions,
+  .action-list,
+  .no-print {
+    display: none !important;
+  }
+}

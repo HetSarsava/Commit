@@ -206,7 +206,7 @@ const QuotationBuilder = ({ quotation = null, mode = 'create', onClose, onSucces
   const totals = calculateTotals();
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="quotation-builder-modal" onClick={onClose}>
       <div className="quotation-builder" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="builder-header">

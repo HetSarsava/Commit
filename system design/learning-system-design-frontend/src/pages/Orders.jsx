@@ -34,6 +34,13 @@ const Orders = () => {
     navigate(`/orders/${order.id}`);
   };
 
+  const handleCardKeyDown = (event, order) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleView(order);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'PENDING':
@@ -66,7 +73,7 @@ const Orders = () => {
           <div className="sub">{orders.length} orders</div>
         </div>
         <div className="topbar-actions">
-          <button className="btn">Export</button>
+          <button className="btn" disabled title="Order export is not configured">Export</button>
           <button className="btn btn-primary" onClick={() => navigate('/quotations')}>
             + New Order (from Quotation)
           </button>
@@ -83,9 +90,14 @@ const Orders = () => {
             aria-label="Search orders by order number or PO number"
           />
         </div>
-        <div className={`chip ${filterStatus !== 'ALL' ? 'on' : ''}`} onClick={() => setFilterStatus(filterStatus === 'ALL' ? 'CONFIRMED' : 'ALL')}>
+        <button
+          type="button"
+          className={`chip ${filterStatus !== 'ALL' ? 'on' : ''}`}
+          aria-pressed={filterStatus !== 'ALL'}
+          onClick={() => setFilterStatus(filterStatus === 'ALL' ? 'CONFIRMED' : 'ALL')}
+        >
           Status: {filterStatus === 'ALL' ? 'All' : filterStatus}
-        </div>
+        </button>
       </div>
 
       {/* Orders List */}
@@ -107,11 +119,15 @@ const Orders = () => {
               <div
                 key={order.id}
                 className="order-card"
+                role="button"
+                tabIndex={0}
+                aria-label={`View order ${order.orderNumber}`}
                 onClick={() => handleView(order)}
+                onKeyDown={(event) => handleCardKeyDown(event, order)}
               >
                 <div className="order-header">
                   <div className="order-number">{order.orderNumber}</div>
-                  <div className={`order-status ${getStatusColor(order.status)}`}>
+                  <div className={`status-badge ${getStatusColor(order.status)}`}>
                     {order.status.replace('_', ' ')}
                   </div>
                 </div>

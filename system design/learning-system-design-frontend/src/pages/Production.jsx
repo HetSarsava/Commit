@@ -78,8 +78,10 @@ const Production = () => {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner">Loading production board...</div>
+      <div className="production-page">
+        <div className="loading-container">
+          <div className="loading-spinner">Loading production board...</div>
+        </div>
       </div>
     );
   }

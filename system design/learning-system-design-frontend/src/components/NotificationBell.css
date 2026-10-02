@@ -271,6 +271,11 @@
 
 @media (max-width: 480px) {
   .notification-bell-container .notification-dropdown {
-    width: calc(100vw - 32px);
-    right: -140px;
-  }}
+    position: fixed;
+    top: 66px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-height: calc(100dvh - 82px);
+  }
+}

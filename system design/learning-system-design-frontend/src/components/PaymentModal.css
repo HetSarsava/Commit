@@ -1,4 +1,4 @@
-.modal-overlay {
+.payment-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -12,7 +12,7 @@
   padding: 20px;
 }
 
-.modal-overlay .modal-content {
+.payment-modal .modal-content {
   background: var(--white);
   border-radius: 8px;
   width: 100%;
@@ -22,7 +22,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.modal-overlay .modal-header {
+.payment-modal .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -30,14 +30,14 @@
   border-bottom: 1px solid var(--line);
 }
 
-.modal-overlay .modal-header h2 {
+.payment-modal .modal-header h2 {
   font-size: 18px;
   font-weight: 600;
   color: var(--navy);
   margin: 0;
 }
 
-.modal-overlay .modal-close {
+.payment-modal .modal-close {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -53,16 +53,16 @@
   transition: all 0.15s;
 }
 
-.modal-overlay .modal-close:hover {
+.payment-modal .modal-close:hover {
   background: var(--line);
 }
 
-.modal-overlay .modal-body {
+.payment-modal .modal-body {
   padding: 24px 28px;
 }/* Invoice Summary */
 
 
-.modal-overlay .invoice-summary {
+.payment-modal .invoice-summary {
   background: var(--canvas);
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -70,7 +70,7 @@
   margin-bottom: 24px;
 }
 
-.modal-overlay .summary-row {
+.payment-modal .summary-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -78,33 +78,33 @@
   font-size: 13px;
 }
 
-.modal-overlay .summary-row span {
+.payment-modal .summary-row span {
   color: var(--ink-soft);
 }
 
-.modal-overlay .summary-row strong {
+.payment-modal .summary-row strong {
   font-family: 'IBM Plex Mono', monospace;
   color: var(--navy);
   font-weight: 600;
 }
 
-.modal-overlay .summary-row.balance {
+.payment-modal .summary-row.balance {
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid var(--line);
   font-size: 15px;
 }
 
-.modal-overlay .summary-row.balance strong {
+.payment-modal .summary-row.balance strong {
   color: var(--rust);
 }/* Form */
 
 
-.modal-overlay .form-group {
+.payment-modal .form-group {
   margin-bottom: 20px;
 }
 
-.modal-overlay .form-group label {
+.payment-modal .form-group label {
   display: block;
   font-size: 12.5px;
   font-weight: 600;
@@ -112,9 +112,9 @@
   margin-bottom: 6px;
 }
 
-.modal-overlay .form-group input,
-.modal-overlay .form-group select,
-.modal-overlay .form-group textarea {
+.payment-modal .form-group input,
+.payment-modal .form-group select,
+.payment-modal .form-group textarea {
   width: 100%;
   font-family: inherit;
   font-size: 14px;
@@ -126,26 +126,26 @@
   transition: all 0.15s;
 }
 
-.modal-overlay .form-group input:focus,
-.modal-overlay .form-group select:focus,
-.modal-overlay .form-group textarea:focus {
+.payment-modal .form-group input:focus,
+.payment-modal .form-group select:focus,
+.payment-modal .form-group textarea:focus {
   outline: none;
   border-color: var(--brass);
 }
 
-.modal-overlay .form-group textarea {
+.payment-modal .form-group textarea {
   resize: vertical;
   min-height: 60px;
 }/* Quick Amount Buttons */
 
 
-.modal-overlay .quick-amounts {
+.payment-modal .quick-amounts {
   display: flex;
   gap: 8px;
   margin-top: 8px;
 }
 
-.modal-overlay .quick-btn {
+.payment-modal .quick-btn {
   flex: 1;
   font-family: inherit;
   font-size: 12px;
@@ -159,13 +159,13 @@
   transition: all 0.15s;
 }
 
-.modal-overlay .quick-btn:hover {
+.payment-modal .quick-btn:hover {
   background: var(--canvas);
   border-color: var(--brass);
 }/* Error Message */
 
 
-.modal-overlay .error-message {
+.payment-modal .error-message {
   background: #FEF2F2;
   border: 1px solid #FCA5A5;
   color: #DC2626;
@@ -176,7 +176,7 @@
 }/* Modal Actions */
 
 
-.modal-overlay .modal-actions {
+.payment-modal .modal-actions {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
@@ -185,7 +185,7 @@
   border-top: 1px solid var(--line);
 }
 
-.modal-overlay .btn {
+.payment-modal .btn {
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -198,26 +198,26 @@
   transition: all 0.15s;
 }
 
-.modal-overlay .btn:hover {
+.payment-modal .btn:hover {
   background: var(--canvas);
 }
 
-.modal-overlay .btn:disabled {
+.payment-modal .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.modal-overlay .btn-primary {
+.payment-modal .btn-primary {
   background: var(--thread);
   color: var(--white);
   border-color: var(--thread);
 }
 
-.modal-overlay .btn-primary:hover {
+.payment-modal .btn-primary:hover {
   background: #3E6B4A;
 }
 
-.modal-overlay .btn-secondary {
+.payment-modal .btn-secondary {
   background: var(--white);
   color: var(--ink);
   border-color: var(--line);
@@ -225,29 +225,29 @@
 
 
 @media (max-width: 768px) {
-  .modal-overlay {
+  .payment-modal {
     padding: 0;
   }
 
-  .modal-overlay .modal-content {
+  .payment-modal .modal-content {
     max-width: 100%;
     max-height: 100vh;
     border-radius: 0;
   }
 
-  .modal-overlay .modal-header,
-  .modal-overlay .modal-body {
+  .payment-modal .modal-header,
+  .payment-modal .modal-body {
     padding: 20px;
   }
 
-  .modal-overlay .quick-amounts {
+  .payment-modal .quick-amounts {
     flex-direction: column;
   }
 
-  .modal-overlay .modal-actions {
+  .payment-modal .modal-actions {
     flex-direction: column-reverse;
   }
 
-  .modal-overlay .btn {
+  .payment-modal .btn {
     width: 100%;
   }}

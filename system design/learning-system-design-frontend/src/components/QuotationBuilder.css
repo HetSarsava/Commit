@@ -1,4 +1,4 @@
-.modal-overlay {
+.quotation-builder-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,7 +11,7 @@
   z-index: 1000;
 }
 
-.modal-overlay .quotation-builder {
+.quotation-builder-modal .quotation-builder {
   background: var(--white);
   border-radius: 8px;
   width: 90%;
@@ -23,7 +23,7 @@
 }/* Header */
 
 
-.modal-overlay .builder-header {
+.quotation-builder-modal .builder-header {
   padding: 24px;
   border-bottom: 1px solid var(--line);
   display: flex;
@@ -31,13 +31,13 @@
   align-items: center;
 }
 
-.modal-overlay .builder-header h2 {
+.quotation-builder-modal .builder-header h2 {
   margin: 0;
   color: var(--navy);
   font-size: 24px;
 }
 
-.modal-overlay .modal-close {
+.quotation-builder-modal .modal-close {
   background: none;
   border: none;
   font-size: 24px;
@@ -53,12 +53,12 @@
   transition: background 0.2s;
 }
 
-.modal-overlay .modal-close:hover {
+.quotation-builder-modal .modal-close:hover {
   background: var(--canvas);
 }/* Steps */
 
 
-.modal-overlay .builder-steps {
+.quotation-builder-modal .builder-steps {
   display: flex;
   align-items: center;
   padding: 24px;
@@ -66,13 +66,13 @@
   border-bottom: 1px solid var(--line);
 }
 
-.modal-overlay .step {
+.quotation-builder-modal .step {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.modal-overlay .step-number {
+.quotation-builder-modal .step-number {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -86,23 +86,23 @@
   transition: all 0.3s;
 }
 
-.modal-overlay .step.active .step-number {
+.quotation-builder-modal .step.active .step-number {
   background: var(--navy);
   border-color: var(--navy);
   color: var(--white);
 }
 
-.modal-overlay .step-label {
+.quotation-builder-modal .step-label {
   font-weight: 500;
   color: var(--ink);
 }
 
-.modal-overlay .step.active .step-label {
+.quotation-builder-modal .step.active .step-label {
   color: var(--navy);
   font-weight: 600;
 }
 
-.modal-overlay .step-line {
+.quotation-builder-modal .step-line {
   flex: 1;
   height: 2px;
   background: var(--line);
@@ -110,7 +110,7 @@
 }/* Error */
 
 
-.modal-overlay .builder-error {
+.quotation-builder-modal .builder-error {
   margin: 16px 24px;
   padding: 12px;
   background: #fee;
@@ -120,26 +120,26 @@
 }/* Content */
 
 
-.modal-overlay .builder-content {
+.quotation-builder-modal .builder-content {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
 }
 
-.modal-overlay .step-content h3 {
+.quotation-builder-modal .step-content h3 {
   margin: 0 0 20px 0;
   color: var(--navy);
   font-size: 20px;
 }
 
-.modal-overlay .step-content h4 {
+.quotation-builder-modal .step-content h4 {
   margin: 20px 0 12px 0;
   color: var(--navy);
   font-size: 16px;
 }/* Customer List */
 
 
-.modal-overlay .customer-list {
+.quotation-builder-modal .customer-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -147,7 +147,7 @@
   overflow-y: auto;
 }
 
-.modal-overlay .customer-item {
+.quotation-builder-modal .customer-item {
   padding: 16px;
   border: 2px solid var(--line);
   border-radius: 8px;
@@ -155,41 +155,41 @@
   transition: all 0.2s;
 }
 
-.modal-overlay .customer-item:hover {
+.quotation-builder-modal .customer-item:hover {
   border-color: var(--brass);
   background: var(--canvas);
 }
 
-.modal-overlay .customer-item.selected {
+.quotation-builder-modal .customer-item.selected {
   border-color: var(--navy);
   background: #e8f0fe;
 }
 
-.modal-overlay .customer-name {
+.quotation-builder-modal .customer-name {
   font-weight: 600;
   color: var(--navy);
   margin-bottom: 4px;
 }
 
-.modal-overlay .customer-contact {
+.quotation-builder-modal .customer-contact {
   color: var(--ink);
   font-size: 14px;
 }
 
-.modal-overlay .customer-mobile {
+.quotation-builder-modal .customer-mobile {
   color: var(--thread);
   font-size: 14px;
 }/* Selected Products */
 
 
-.modal-overlay .selected-products {
+.quotation-builder-modal .selected-products {
   background: var(--canvas);
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 24px;
 }
 
-.modal-overlay .selected-product-item {
+.quotation-builder-modal .selected-product-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -200,23 +200,23 @@
   margin-bottom: 8px;
 }
 
-.modal-overlay .product-info {
+.quotation-builder-modal .product-info {
   display: flex;
   flex-direction: column;
   min-width: 200px;
 }
 
-.modal-overlay .product-info strong {
+.quotation-builder-modal .product-info strong {
   color: var(--navy);
   margin-bottom: 4px;
 }
 
-.modal-overlay .product-info small {
+.quotation-builder-modal .product-info small {
   color: var(--thread);
   font-size: 12px;
 }
 
-.modal-overlay .product-inputs {
+.quotation-builder-modal .product-inputs {
   display: flex;
   gap: 8px;
   /* line total and remove button line up with the inputs, under the captions */
@@ -226,14 +226,14 @@
 }
 
 /* Captions for the three editable fields: qty, unit price, discount */
-.modal-overlay .product-field {
+.quotation-builder-modal .product-field {
   display: flex;
   flex-direction: column;
   gap: 4px;
   min-width: 80px;
 }
 
-.modal-overlay .product-field .field-annotation {
+.quotation-builder-modal .product-field .field-annotation {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -242,7 +242,7 @@
   white-space: nowrap;
 }
 
-.modal-overlay .product-inputs input {
+.quotation-builder-modal .product-inputs input {
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 4px;
@@ -250,14 +250,14 @@
   width: 80px;
 }
 
-.modal-overlay .item-total {
+.quotation-builder-modal .item-total {
   font-weight: 600;
   color: var(--navy);
   min-width: 100px;
   text-align: right;
 }
 
-.modal-overlay .btn-remove {
+.quotation-builder-modal .btn-remove {
   background: none;
   border: none;
   cursor: pointer;
@@ -267,12 +267,12 @@
   transition: opacity 0.2s;
 }
 
-.modal-overlay .btn-remove:hover {
+.quotation-builder-modal .btn-remove:hover {
   opacity: 1;
 }/* Products Grid Mini */
 
 
-.modal-overlay .products-grid-mini {
+.quotation-builder-modal .products-grid-mini {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
@@ -280,7 +280,7 @@
   overflow-y: auto;
 }
 
-.modal-overlay .product-mini {
+.quotation-builder-modal .product-mini {
   padding: 12px;
   border: 2px solid var(--line);
   border-radius: 6px;
@@ -288,63 +288,63 @@
   transition: all 0.2s;
 }
 
-.modal-overlay .product-mini:hover {
+.quotation-builder-modal .product-mini:hover {
   border-color: var(--brass);
   background: var(--canvas);
 }
 
-.modal-overlay .product-mini.disabled {
+.quotation-builder-modal .product-mini.disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.modal-overlay .product-mini.disabled:hover {
+.quotation-builder-modal .product-mini.disabled:hover {
   border-color: var(--line);
   background: transparent;
 }
 
-.modal-overlay .product-name {
+.quotation-builder-modal .product-name {
   font-weight: 600;
   color: var(--navy);
   margin-bottom: 4px;
 }
 
-.modal-overlay .product-sku {
+.quotation-builder-modal .product-sku {
   font-size: 12px;
   color: var(--thread);
   margin-bottom: 8px;
 }
 
-.modal-overlay .product-price {
+.quotation-builder-modal .product-price {
   font-weight: 600;
   color: var(--brass);
 }
 
-.modal-overlay .product-moq {
+.quotation-builder-modal .product-moq {
   font-size: 12px;
   color: var(--thread);
   margin-top: 4px;
 }/* Review Section */
 
 
-.modal-overlay .review-section {
+.quotation-builder-modal .review-section {
   margin-bottom: 24px;
   padding: 16px;
   background: var(--canvas);
   border-radius: 8px;
 }
 
-.modal-overlay .review-section p {
+.quotation-builder-modal .review-section p {
   margin: 4px 0;
   color: var(--ink);
 }
 
-.modal-overlay .review-table {
+.quotation-builder-modal .review-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.modal-overlay .review-table th {
+.quotation-builder-modal .review-table th {
   text-align: left;
   padding: 8px;
   border-bottom: 2px solid var(--line);
@@ -353,38 +353,38 @@
   font-weight: 600;
 }
 
-.modal-overlay .review-table td {
+.quotation-builder-modal .review-table td {
   padding: 8px;
   border-bottom: 1px solid var(--line);
   color: var(--ink);
 }
 
-.modal-overlay .review-table tbody tr:last-child td {
+.quotation-builder-modal .review-table tbody tr:last-child td {
   border-bottom: none;
 }/* Pricing */
 
 
-.modal-overlay .pricing-rows {
+.quotation-builder-modal .pricing-rows {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.modal-overlay .pricing-row {
+.quotation-builder-modal .pricing-row {
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
   font-size: 16px;
 }
 
-.modal-overlay .pricing-row.total-row {
+.quotation-builder-modal .pricing-row.total-row {
   border-top: 2px solid var(--navy);
   padding-top: 12px;
   margin-top: 8px;
   font-size: 18px;
 }
 
-.modal-overlay .review-section textarea {
+.quotation-builder-modal .review-section textarea {
   width: 100%;
   padding: 12px;
   border: 1px solid var(--line);
@@ -395,14 +395,14 @@
 }/* Footer */
 
 
-.modal-overlay .builder-footer {
+.quotation-builder-modal .builder-footer {
   padding: 24px;
   border-top: 1px solid var(--line);
   display: flex;
   gap: 12px;
 }
 
-.modal-overlay .btn-primary, .modal-overlay .btn-secondary {
+.quotation-builder-modal .btn-primary, .quotation-builder-modal .btn-secondary {
   padding: 12px 24px;
   border-radius: 6px;
   font-weight: 600;
@@ -412,118 +412,118 @@
   font-size: 14px;
 }
 
-.modal-overlay .btn-primary {
+.quotation-builder-modal .btn-primary {
   background: var(--navy);
   color: var(--white);
 }
 
-.modal-overlay .btn-primary:hover {
+.quotation-builder-modal .btn-primary:hover {
   background: #1a2844;
 }
 
-.modal-overlay .btn-primary:disabled {
+.quotation-builder-modal .btn-primary:disabled {
   background: var(--thread);
   cursor: not-allowed;
 }
 
-.modal-overlay .btn-secondary {
+.quotation-builder-modal .btn-secondary {
   background: var(--canvas);
   color: var(--navy);
   border: 1px solid var(--line);
 }
 
-.modal-overlay .btn-secondary:hover {
+.quotation-builder-modal .btn-secondary:hover {
   background: var(--line);
 }/* Disabled state for view mode */
 
 
-.modal-overlay input:disabled,
-.modal-overlay textarea:disabled {
+.quotation-builder-modal input:disabled,
+.quotation-builder-modal textarea:disabled {
   background: var(--canvas);
   color: var(--thread);
   cursor: not-allowed;
   opacity: 0.8;
 }
 
-.modal-overlay .customer-item.disabled {
+.quotation-builder-modal .customer-item.disabled {
   cursor: default;
   opacity: 0.7;
   pointer-events: none;
 }
 
 @media (max-width: 768px) {
-  .modal-overlay {
+  .quotation-builder-modal {
     padding: 12px;
     align-items: flex-start;
   }
 
-  .modal-overlay .quotation-builder {
+  .quotation-builder-modal .quotation-builder {
     width: 100%;
     max-height: calc(100vh - 24px);
     min-width: 0;
   }
 
-  .modal-overlay .builder-header,
-  .modal-overlay .builder-steps,
-  .modal-overlay .builder-content,
-  .modal-overlay .builder-footer {
+  .quotation-builder-modal .builder-header,
+  .quotation-builder-modal .builder-steps,
+  .quotation-builder-modal .builder-content,
+  .quotation-builder-modal .builder-footer {
     padding: 16px;
   }
 
-  .modal-overlay .builder-header h2 {
+  .quotation-builder-modal .builder-header h2 {
     font-size: 19px;
     min-width: 0;
   }
 
-  .modal-overlay .builder-steps {
+  .quotation-builder-modal .builder-steps {
     gap: 6px;
   }
 
-  .modal-overlay .step {
+  .quotation-builder-modal .step {
     gap: 5px;
     min-width: 0;
   }
 
-  .modal-overlay .step-label {
+  .quotation-builder-modal .step-label {
     font-size: 12px;
   }
 
-  .modal-overlay .step-line {
+  .quotation-builder-modal .step-line {
     margin: 0 4px;
   }
 
-  .modal-overlay .selected-product-item {
+  .quotation-builder-modal .selected-product-item {
     flex-wrap: wrap;
   }
 
-  .modal-overlay .product-info {
+  .quotation-builder-modal .product-info {
     min-width: 0;
     flex: 1 1 100%;
   }
 
-  .modal-overlay .product-inputs {
+  .quotation-builder-modal .product-inputs {
     flex-wrap: wrap;
     min-width: 0;
   }
 
-  .modal-overlay .item-total {
+  .quotation-builder-modal .item-total {
     min-width: 0;
   }
 
-  .modal-overlay .review-table {
+  .quotation-builder-modal .review-table {
     display: block;
     overflow-x: auto;
     white-space: nowrap;
   }
 
-  .modal-overlay .products-grid-mini {
+  .quotation-builder-modal .products-grid-mini {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 
-  .modal-overlay .builder-footer {
+  .quotation-builder-modal .builder-footer {
     flex-direction: column-reverse;
   }
 
-  .modal-overlay .builder-footer button {
+  .quotation-builder-modal .builder-footer button {
     width: 100%;
   }}

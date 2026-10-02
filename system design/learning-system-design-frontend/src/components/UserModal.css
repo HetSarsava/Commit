@@ -1,5 +1,5 @@
 /* Modal Overlay */
-.modal-overlay {
+.user-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -13,7 +13,7 @@
   padding: 20px;
 }
 
-.modal-overlay .modal-content {
+.user-modal .modal-content {
   background: var(--white);
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(28, 35, 51, 0.2);
@@ -26,7 +26,7 @@
 }/* Modal Header */
 
 
-.modal-overlay .modal-header {
+.user-modal .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -34,14 +34,14 @@
   border-bottom: 1px solid var(--line);
 }
 
-.modal-overlay .modal-header h2 {
+.user-modal .modal-header h2 {
   font-size: 17px;
   font-weight: 600;
   color: var(--navy);
   margin: 0;
 }
 
-.modal-overlay .modal-close {
+.user-modal .modal-close {
   font-size: 28px;
   font-weight: 300;
   background: none;
@@ -57,30 +57,30 @@
   transition: all 0.15s;
 }
 
-.modal-overlay .modal-close:hover {
+.user-modal .modal-close:hover {
   background: var(--canvas);
   color: var(--ink);
 }/* Modal Body */
 
 
-.modal-overlay .modal-body {
+.user-modal .modal-body {
   padding: 24px;
   overflow-y: auto;
   flex: 1;
 }/* Form Styles */
 
 
-.modal-overlay .form-group {
+.user-modal .form-group {
   margin-bottom: 20px;
 }
 
-.modal-overlay .form-row {
+.user-modal .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-.modal-overlay .form-group label {
+.user-modal .form-group label {
   display: block;
   font-size: 12px;
   font-weight: 600;
@@ -90,15 +90,15 @@
   letter-spacing: 0.03em;
 }
 
-.modal-overlay .required {
+.user-modal .required {
   color: var(--rust);
 }
 
-.modal-overlay .form-group input[type="text"],
-.modal-overlay .form-group input[type="email"],
-.modal-overlay .form-group input[type="password"],
-.modal-overlay .form-group input[type="tel"],
-.modal-overlay .form-group select {
+.user-modal .form-group input[type="text"],
+.user-modal .form-group input[type="email"],
+.user-modal .form-group input[type="password"],
+.user-modal .form-group input[type="tel"],
+.user-modal .form-group select {
   font-family: inherit;
   font-size: 14px;
   width: 100%;
@@ -110,39 +110,39 @@
   transition: all 0.15s;
 }
 
-.modal-overlay .form-group input:focus,
-.modal-overlay .form-group select:focus {
+.user-modal .form-group input:focus,
+.user-modal .form-group select:focus {
   outline: none;
   border-color: var(--brass);
   box-shadow: 0 0 0 3px rgba(184, 134, 63, 0.1);
 }
 
-.modal-overlay .form-group input:disabled {
+.user-modal .form-group input:disabled {
   background: var(--canvas-2);
   color: var(--ink-soft);
   cursor: not-allowed;
 }
 
-.modal-overlay .form-group input.error,
-.modal-overlay .form-group select.error {
+.user-modal .form-group input.error,
+.user-modal .form-group select.error {
   border-color: var(--rust);
 }
 
-.modal-overlay .error-message {
+.user-modal .error-message {
   display: block;
   font-size: 11px;
   color: var(--rust);
   margin-top: 4px;
 }
 
-.modal-overlay .help-text {
+.user-modal .help-text {
   font-size: 11px;
   color: var(--ink-soft);
   margin-top: 4px;
 }/* Checkbox */
 
 
-.modal-overlay .checkbox-label {
+.user-modal .checkbox-label {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -154,7 +154,7 @@
   letter-spacing: normal;
 }
 
-.modal-overlay .checkbox-label input[type="checkbox"] {
+.user-modal .checkbox-label input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
@@ -162,7 +162,7 @@
 }/* Modal Footer */
 
 
-.modal-overlay .modal-footer {
+.user-modal .modal-footer {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
@@ -171,7 +171,7 @@
   background: var(--canvas);
 }
 
-.modal-overlay .btn {
+.user-modal .btn {
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -184,26 +184,26 @@
   transition: all 0.15s;
 }
 
-.modal-overlay .btn:hover:not(:disabled) {
+.user-modal .btn:hover:not(:disabled) {
   background: var(--canvas);
 }
 
-.modal-overlay .btn:disabled {
+.user-modal .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.modal-overlay .btn-primary {
+.user-modal .btn-primary {
   background: var(--brass);
   color: var(--white);
   border-color: var(--brass);
 }
 
-.modal-overlay .btn-primary:hover:not(:disabled) {
+.user-modal .btn-primary:hover:not(:disabled) {
   background: #A07537;
 }
 
-.modal-overlay .btn-secondary {
+.user-modal .btn-secondary {
   background: var(--white);
   color: var(--ink);
   border-color: var(--line);
@@ -211,20 +211,20 @@
 
 
 @media (max-width: 640px) {
-  .modal-overlay .modal-content {
+  .user-modal .modal-content {
     max-width: 100%;
     max-height: 100vh;
     border-radius: 0;
   }
 
-  .modal-overlay .form-row {
+  .user-modal .form-row {
     grid-template-columns: 1fr;
   }
 
-  .modal-overlay .modal-footer {
+  .user-modal .modal-footer {
     flex-direction: column-reverse;
   }
 
-  .modal-overlay .modal-footer .btn {
+  .user-modal .modal-footer .btn {
     width: 100%;
   }}

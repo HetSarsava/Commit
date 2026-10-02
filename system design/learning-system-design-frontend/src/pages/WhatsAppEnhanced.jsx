@@ -424,8 +424,8 @@ const WhatsAppEnhanced = () => {
                   </div>
 
                   <form className="chat-input-area" onSubmit={handleSendMessage}>
-                    <button type="button" className="chat-attach-btn" title="Attach file" aria-label="Attach file">📎</button>
-                    <button type="button" className="chat-template-btn" title="Use template" aria-label="Use template">📋</button>
+                    <button type="button" className="chat-attach-btn" disabled title="File attachments are not configured" aria-label="File attachments are not configured">📎</button>
+                    <button type="button" className="chat-template-btn" disabled title="The in-chat template picker is not configured" aria-label="The in-chat template picker is not configured">📋</button>
                     <input
                       type="text"
                       className="chat-input"
@@ -513,16 +513,16 @@ const WhatsAppEnhanced = () => {
 
                 <div className="info-section">
                   <h4>Quick Actions</h4>
-                  <button type="button" className="info-action-btn primary">
+                  <button type="button" className="info-action-btn primary" disabled title="Quotation lookup is not configured">
                     📄 Open Quotation
                   </button>
-                  <button type="button" className="info-action-btn">
+                  <button type="button" className="info-action-btn" disabled title="Lead lookup is not configured">
                     📋 View Full Lead
                   </button>
-                  <button type="button" className="info-action-btn">
+                  <button type="button" className="info-action-btn" disabled title="Catalogue sharing is not configured">
                     📦 Send Catalogue
                   </button>
-                  <button type="button" className="info-action-btn">
+                  <button type="button" className="info-action-btn" disabled title="Automation resume is not configured">
                     ⚙️ Resume Automation
                   </button>
                 </div>
@@ -541,7 +541,7 @@ const WhatsAppEnhanced = () => {
           >
             <div className="templates-header">
               <h2>Message Templates</h2>
-              <button type="button" className="btn btn-primary">+ Create Template</button>
+              <button type="button" className="btn btn-primary" disabled title="Template creation is not configured">+ Create Template</button>
             </div>
 
             <div className="templates-grid">
@@ -568,8 +568,8 @@ const WhatsAppEnhanced = () => {
                     >
                       Send
                     </button>
-                    <button type="button" className="btn btn-sm btn-secondary">Edit</button>
-                    <button type="button" className="btn btn-sm btn-danger">Delete</button>
+                    <button type="button" className="btn btn-sm btn-secondary" disabled title="Editing is not configured">Edit</button>
+                    <button type="button" className="btn btn-sm btn-danger" disabled title="Deletion is not configured">Delete</button>
                   </div>
                 </div>
               ))}
@@ -587,7 +587,7 @@ const WhatsAppEnhanced = () => {
           >
             <div className="automation-header">
               <h2>WhatsApp Automations</h2>
-              <button type="button" className="btn btn-primary">+ Create Automation</button>
+              <button type="button" className="btn btn-primary" disabled title="Automation creation is not configured">+ Create Automation</button>
             </div>
 
             <div className="automation-list">
@@ -615,8 +615,8 @@ const WhatsAppEnhanced = () => {
                       />
                       <span className="toggle-slider"></span>
                     </label>
-                    <button type="button" className="btn btn-sm btn-secondary">Edit</button>
-                    <button type="button" className="btn btn-sm btn-danger">Delete</button>
+                    <button type="button" className="btn btn-sm btn-secondary" disabled title="Editing is not configured">Edit</button>
+                    <button type="button" className="btn btn-sm btn-danger" disabled title="Deletion is not configured">Delete</button>
                   </div>
                 </div>
               ))}

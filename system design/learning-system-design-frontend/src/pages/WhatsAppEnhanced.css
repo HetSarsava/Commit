@@ -509,6 +509,17 @@
   background: #e9ecef;
 }
 
+.chat-attach-btn:disabled,
+.chat-template-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.chat-attach-btn:disabled:hover,
+.chat-template-btn:disabled:hover {
+  background: #f8f9fa;
+}
+
 .chat-input {
   flex: 1 1 auto;
   min-width: 0;
@@ -715,6 +726,21 @@
 
 .info-action-btn.primary:hover {
   background: #2D3548;
+}
+
+.info-action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.info-action-btn:disabled:hover {
+  background: white;
+  border-color: #e9ecef;
+}
+
+.info-action-btn.primary:disabled:hover {
+  background: #1C2333;
+  border-color: #1C2333;
 }
 
 /* The info panel is toggled from the chat header (.info-toggle-btn) — the old

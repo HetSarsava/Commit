@@ -103,7 +103,7 @@ const Quotations = () => {
               <div className="quotation-customer">{q.customer?.companyName}</div>
               <div className="quotation-total">₹{Number(q.total).toLocaleString('en-IN')}</div>
               <div className="quotation-status">
-                <span className="badge">{q.status}</span>
+                <span className={`status-badge status-${q.status.toLowerCase()}`}>{q.status}</span>
               </div>
               <div className="quotation-actions">
                 <button className="btn-action" onClick={() => handleView(q)} title="View">

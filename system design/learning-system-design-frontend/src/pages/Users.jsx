@@ -157,7 +157,7 @@ const Users = () => {
                       </td>
                       <td className="phone">{user.phone || '-'}</td>
                       <td>
-                        <span className={`status-badge ${user.isActive ? 'active' : 'inactive'}`}>
+                        <span className={`status-badge ${user.isActive ? 'status-active' : 'status-inactive'}`}>
                           {user.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </td>

@@ -100,7 +100,7 @@ const Products = () => {
             <div className="sub">{products.length} products available</div>
           </div>
           <div className="topbar-actions">
-            <button className="btn">Import from CSV</button>
+            <button className="btn" disabled title="CSV import is not configured">Import from CSV</button>
             <button className="btn btn-primary" onClick={handleCreate}>+ Add product</button>
           </div>
         </div>
@@ -114,10 +114,15 @@ const Products = () => {
               aria-label="Search products by name or SKU"
             />
           </div>
-          <div className={`chip ${filterCategory !== 'ALL' ? 'on' : ''}`} onClick={() => setFilterCategory(filterCategory === 'ALL' ? 'SHIRTS' : 'ALL')}>
+          <button
+            type="button"
+            className={`chip ${filterCategory !== 'ALL' ? 'on' : ''}`}
+            aria-pressed={filterCategory !== 'ALL'}
+            onClick={() => setFilterCategory(filterCategory === 'ALL' ? 'SHIRTS' : 'ALL')}
+          >
             Category: {filterCategory === 'ALL' ? 'All' : filterCategory}
-          </div>
-          <div className="chip">Sort: Name A-Z</div>
+          </button>
+          <span className="chip chip-static">Sort: Name A-Z</span>
         </div>
 
         <div className="products-grid-wrap">
@@ -233,12 +238,14 @@ const Products = () => {
                 <div key={product.id} className="sel-item">
                   <div className="sel-thumb">{getProductEmoji(product.category)}</div>
                   <div className="sel-name">{product.name}</div>
-                  <div
+                  <button
+                    type="button"
                     className="sel-remove"
                     onClick={() => toggleCatalogueSelection(product)}
+                    aria-label={`Remove ${product.name} from catalogue`}
                   >
                     ✕
-                  </div>
+                  </button>
                 </div>
               ))}
             </div>
@@ -263,13 +270,15 @@ const Products = () => {
         <div className="builder-actions">
           <button
             className="action-btn primary"
-            disabled={selectedForCatalogue.length === 0}
+            disabled
+            title="Catalogue generation is not configured"
           >
             Generate PDF & share link
           </button>
           <button
             className="action-btn"
-            disabled={selectedForCatalogue.length === 0}
+            disabled
+            title="Catalogue sharing is not configured"
           >
             Send directly on WhatsApp
           </button>

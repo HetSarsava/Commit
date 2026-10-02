@@ -67,12 +67,16 @@
 }
 
 .orders-page .chip {
+  display: inline-flex;
+  align-items: center;
   padding: 7px 12px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--white);
-  font-size: 12.5px;
   color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 12.5px;
+  line-height: 1.2;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -114,6 +118,11 @@
   transform: translateY(-2px);
 }
 
+.orders-page .order-card:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
 .orders-page .order-header {
   display: flex;
   justify-content: space-between;
@@ -131,40 +140,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.orders-page .order-status {
-  font-size: 10.5px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 100px;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.orders-page .status-pending {
-  background: var(--canvas-2);
-  color: var(--ink-soft);
-}
-
-.orders-page .status-confirmed {
-  background: var(--brass-light);
-  color: var(--navy);
-}
-
-.orders-page .status-production {
-  background: var(--thread-light);
-  color: var(--thread);
-}
-
-.orders-page .status-completed {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-
-.orders-page .status-cancelled {
-  background: var(--rust-light);
-  color: var(--rust);
 }
 
 .orders-page .order-body {

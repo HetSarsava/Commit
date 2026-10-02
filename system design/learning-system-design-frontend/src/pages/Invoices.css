@@ -122,6 +122,11 @@
   transform: translateY(-2px);
 }
 
+.invoices-page .invoice-card:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
 .invoices-page .invoice-header {
   display: flex;
   justify-content: space-between;
@@ -136,35 +141,6 @@
   font-size: 15px;
   font-weight: 600;
   color: var(--navy);
-}
-
-.invoices-page .invoice-status {
-  font-size: 10.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.invoices-page .invoice-status.status-paid {
-  background: var(--thread-light);
-  color: var(--thread);
-}
-
-.invoices-page .invoice-status.status-partial {
-  background: #FFF4E6;
-  color: #D97706;
-}
-
-.invoices-page .invoice-status.status-unpaid {
-  background: #FEF2F2;
-  color: #DC2626;
-}
-
-.invoices-page .invoice-status.status-overdue {
-  background: #7F1D1D;
-  color: var(--white);
 }
 
 .invoices-page .invoice-body {

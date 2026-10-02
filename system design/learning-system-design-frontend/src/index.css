@@ -35,3 +35,19 @@ body {
 #root {
   min-height: 100vh;
 }
+
+.app-route-state {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: var(--canvas);
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.app-route-state-error {
+  color: var(--navy);
+  font-weight: 600;
+}

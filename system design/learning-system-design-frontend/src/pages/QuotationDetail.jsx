@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { quotationsAPI } from '../api/quotations';
 import { ordersAPI } from '../api/orders';
 import { whatsappAPI } from '../api/whatsapp';
+import QuotationBuilder from '../components/QuotationBuilder';
 import './QuotationDetail.css';
 
 const QuotationDetail = () => {
@@ -10,6 +11,7 @@ const QuotationDetail = () => {
   const navigate = useNavigate();
   const [quotation, setQuotation] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -30,7 +32,16 @@ const QuotationDetail = () => {
   };
 
   const handleEdit = () => {
-    navigate(`/quotations/${id}/edit`);
+    setIsEditorOpen(true);
+  };
+
+  const handleEditorSuccess = () => {
+    setIsEditorOpen(false);
+    fetchQuotation();
+  };
+
+  const handleDownloadPdf = () => {
+    window.print();
   };
 
   const handleDelete = async () => {
@@ -83,16 +94,20 @@ const QuotationDetail = () => {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner">Loading...</div>
+      <div className="quotation-detail">
+        <div className="loading-container">
+          <div className="loading-spinner">Loading...</div>
+        </div>
       </div>
     );
   }
 
   if (!quotation) {
     return (
-      <div className="loading-container">
-        <div>Quotation not found</div>
+      <div className="quotation-detail">
+        <div className="loading-container">
+          <div>Quotation not found</div>
+        </div>
       </div>
     );
   }
@@ -111,7 +126,7 @@ const QuotationDetail = () => {
           </h1>
         </div>
         <div className="topbar-actions">
-          <button className="btn btn-ghost">Download PDF</button>
+          <button className="btn btn-ghost" onClick={handleDownloadPdf}>Print / Save PDF</button>
           <button className="btn" onClick={handleEdit}>Edit</button>
           {quotation.customer?.whatsapp && (
             <button className="btn btn-whatsapp" onClick={handleSendWhatsApp}>
@@ -299,15 +314,23 @@ const QuotationDetail = () => {
           <div className="card side-card">
             <h3>Actions</h3>
             <div className="action-list">
-              <div className="action-btn wa">💬 Send on WhatsApp</div>
-              <div className="action-btn">✉ Email PDF</div>
-              <div className="action-btn">🔁 Set follow-up reminder</div>
-              <div className="action-btn" onClick={handleEdit}>✏ Edit quotation</div>
-              <div className="action-btn danger" onClick={handleDelete}>🗑 Delete quotation</div>
+              <button type="button" className="action-btn wa" onClick={handleSendWhatsApp}>💬 Send on WhatsApp</button>
+              <button type="button" className="action-btn" disabled title="Email delivery is not configured">✉ Email PDF</button>
+              <button type="button" className="action-btn" disabled title="Follow-up reminders are not configured">🔁 Set follow-up reminder</button>
+              <button type="button" className="action-btn" onClick={handleEdit}>✏ Edit quotation</button>
+              <button type="button" className="action-btn danger" onClick={handleDelete}>🗑 Delete quotation</button>
             </div>
           </div>
         </div>
       </div>
+      {isEditorOpen && (
+        <QuotationBuilder
+          quotation={quotation}
+          mode="edit"
+          onClose={() => setIsEditorOpen(false)}
+          onSuccess={handleEditorSuccess}
+        />
+      )}
     </div>
   );
 };

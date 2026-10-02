@@ -66,7 +66,7 @@ const PaymentModal = ({ invoice, onClose, onPaymentRecorded }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="payment-modal" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Record Payment</h2>

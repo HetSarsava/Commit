@@ -56,6 +56,46 @@
   padding: 16px 32px 32px;
 }
 
+/* ---------- Form controls ----------
+   A number of operational screens use simple native inputs in filters and
+   forms. Give those controls the same dependable baseline as the components
+   that already define their own page-scoped styles. More specific page and
+   modal rules continue to win. */
+
+:where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']), select, textarea) {
+  min-height: 36px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.35;
+}
+
+:where(textarea) {
+  min-height: 84px;
+  resize: vertical;
+}
+
+:where(input, textarea)::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.78;
+}
+
+:where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):focus-visible, select:focus-visible, textarea:focus-visible) {
+  outline: none;
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(184, 134, 63, 0.12);
+}
+
+:where(input:disabled, select:disabled, textarea:disabled) {
+  background: var(--canvas-2);
+  color: var(--ink-soft);
+  cursor: not-allowed;
+}
+
 /* ---------- KPI / statistics ---------- */
 
 .summary-cards {
@@ -222,6 +262,8 @@
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
+  min-height: 36px;
+  line-height: 1.2;
   padding: 8px 16px;
   border-radius: 6px;
   border: 1px solid var(--line);
@@ -231,11 +273,21 @@
   transition: all 0.15s;
 }
 
-.btn:hover:not(:disabled) {
+.btn:hover:not(:disabled),
+.btn-primary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled),
+.btn-danger:hover:not(:disabled),
+.btn-success:hover:not(:disabled),
+.btn-warning:hover:not(:disabled) {
   background: var(--canvas);
 }
 
-.btn:disabled {
+.btn:disabled,
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-danger:disabled,
+.btn-success:disabled,
+.btn-warning:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -311,6 +363,17 @@
   background: #3E6B4A;
 }
 
+.btn-warning {
+  background: #FFF4E6;
+  color: #B45309;
+  border-color: #FCD34D;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: #FDE7C2;
+  border-color: #EAB308;
+}
+
 .btn-link {
   font-family: inherit;
   font-size: 13px;
@@ -341,6 +404,8 @@
   font-family: inherit;
   font-size: 12px;
   font-weight: 500;
+  min-height: 32px;
+  line-height: 1.2;
   padding: 7px 14px;
   border-radius: 6px;
   border: 1px solid var(--line);
@@ -353,6 +418,15 @@
 .btn-small:hover:not(:disabled),
 .btn-sm:hover:not(:disabled) {
   background: var(--canvas);
+}
+
+.btn-small:disabled,
+.btn-sm:disabled,
+.btn-icon:disabled,
+.p-action-btn:disabled,
+.btn-remove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Variant colours also apply to the compact size */

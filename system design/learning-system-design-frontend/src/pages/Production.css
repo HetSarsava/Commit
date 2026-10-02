@@ -241,7 +241,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  flex: 1;
+  min-height: 0;
 }
 
 .production-page .loading-spinner {

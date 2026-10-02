@@ -69,6 +69,18 @@ const OrderDetail = () => {
     }
   };
 
+  const handleEditSourceQuotation = () => {
+    if (!order.quotation?.id) {
+      alert('This order has no source quotation to edit.');
+      return;
+    }
+    navigate(`/quotations/${order.quotation.id}`);
+  };
+
+  const handleDownloadPdf = () => {
+    window.print();
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
@@ -108,16 +120,20 @@ const OrderDetail = () => {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner">Loading...</div>
+      <div className="order-detail">
+        <div className="loading-container">
+          <div className="loading-spinner">Loading...</div>
+        </div>
       </div>
     );
   }
 
   if (!order) {
     return (
-      <div className="loading-container">
-        <div>Order not found</div>
+      <div className="order-detail">
+        <div className="loading-container">
+          <div>Order not found</div>
+        </div>
       </div>
     );
   }
@@ -136,8 +152,8 @@ const OrderDetail = () => {
           </h1>
         </div>
         <div className="topbar-actions">
-          <button className="btn">Download PDF</button>
-          <button className="btn" onClick={() => navigate(`/orders/${id}/edit`)}>Edit order</button>
+          <button className="btn" onClick={handleDownloadPdf}>Print / Save PDF</button>
+          <button className="btn" onClick={handleEditSourceQuotation} disabled={!order.quotation?.id}>Edit source quotation</button>
           {order.customer?.whatsapp && (
             <button className="btn btn-whatsapp" onClick={handleSendWhatsApp}>
               📱 Send Update
@@ -352,19 +368,19 @@ const OrderDetail = () => {
             <h3>Update status</h3>
             <div className="action-list">
               {order.status === 'PENDING' && (
-                <div className="action-btn primary" onClick={() => handleUpdateStatus('CONFIRMED')}>
+                <button type="button" className="action-btn primary" onClick={() => handleUpdateStatus('CONFIRMED')}>
                   Confirm order
-                </div>
+                </button>
               )}
               {order.status === 'CONFIRMED' && (
-                <div className="action-btn primary" onClick={() => handleUpdateStatus('IN_PRODUCTION')}>
+                <button type="button" className="action-btn primary" onClick={() => handleUpdateStatus('IN_PRODUCTION')}>
                   Start production
-                </div>
+                </button>
               )}
               {order.status === 'IN_PRODUCTION' && (
-                <div className="action-btn primary" onClick={() => handleUpdateStatus('COMPLETED')}>
+                <button type="button" className="action-btn primary" onClick={() => handleUpdateStatus('COMPLETED')}>
                   Mark as completed
-                </div>
+                </button>
               )}
             </div>
           </div>
@@ -373,12 +389,12 @@ const OrderDetail = () => {
           <div className="card side-card">
             <h3>Actions</h3>
             <div className="action-list">
-              <div className="action-btn wa">Send dispatch update</div>
-              <div className="action-btn">Log partial dispatch</div>
+              <button type="button" className="action-btn wa" disabled title="Dispatch updates are managed from the Dispatch screen">Send dispatch update</button>
+              <button type="button" className="action-btn" disabled title="Partial dispatch logging is not configured">Log partial dispatch</button>
               {order.quotation && (
-                <div className="action-btn" onClick={() => navigate(`/quotations/${order.quotation.id}`)}>
+                <button type="button" className="action-btn" onClick={() => navigate(`/quotations/${order.quotation.id}`)}>
                   View linked quotation
-                </div>
+                </button>
               )}
             </div>
           </div>

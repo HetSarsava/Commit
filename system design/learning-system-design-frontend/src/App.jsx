@@ -33,7 +33,7 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="app-route-state" role="status">Loading...</div>;
   }
 
   if (!isAuthenticated) {
@@ -49,7 +49,7 @@ const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="app-route-state" role="status">Loading...</div>;
   }
 
   return !isAuthenticated ? children : <Navigate to="/dashboard" replace />;
@@ -273,7 +273,14 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
           {/* 404 */}
-          <Route path="*" element={<div>404 - Page Not Found</div>} />
+          <Route
+            path="*"
+            element={
+              <div className="app-route-state app-route-state-error" role="alert">
+                Page not found
+              </div>
+            }
+          />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

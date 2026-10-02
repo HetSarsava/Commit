@@ -75,21 +75,27 @@
 }
 
 .products-page .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 7px 12px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--white);
-  font-size: 12.5px;
   color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 12.5px;
+  line-height: 1.2;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
   transition: all 0.15s;
 }
 
-.products-page .chip:hover {
+.products-page .chip:hover:not(.chip-static) {
   background: var(--canvas-2);
+}
+
+.products-page .chip-static {
+  cursor: default;
 }
 
 .products-page .chip.on {
@@ -215,8 +221,15 @@
   transition: opacity 0.15s;
 }
 
-.products-page .p-card:hover .p-actions {
+.products-page .p-card:hover .p-actions,
+.products-page .p-card:focus-within .p-actions {
   opacity: 1;
+}
+
+@media (hover: none) {
+  .products-page .p-actions {
+    opacity: 1;
+  }
 }
 
 /* Catalogue Builder Panel */
@@ -331,14 +344,19 @@
 }
 
 .products-page .sel-remove {
-  width: 20px;
-  height: 20px;
-  display: flex;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--ink-soft);
+  font-family: inherit;
   font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
   transition: color 0.15s;
 }
 
@@ -469,6 +487,47 @@
   }}
 
 @media (max-width: 900px) {
+  .products-page {
+    display: block;
+    min-height: 100%;
+  }
+
+  .products-page .products-grid-wrap {
+    overflow: visible;
+  }
+
   .products-page .builder {
-    display: none;
-  }}
+    width: 100%;
+    max-height: none;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .products-page .topbar {
+    padding: 16px;
+  }
+
+  .products-page .toolbar {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+
+  .products-page .search {
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .products-page .products-grid-wrap {
+    padding: 16px;
+  }
+
+  .products-page .builder-head,
+  .products-page .builder-section,
+  .products-page .analytics-strip,
+  .products-page .builder-actions {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}

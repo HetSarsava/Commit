@@ -34,6 +34,13 @@ const Invoices = () => {
     navigate(`/invoices/${invoice.id}`);
   };
 
+  const handleCardKeyDown = (event, invoice) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleView(invoice);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'PAID':
@@ -64,7 +71,7 @@ const Invoices = () => {
           <div className="sub">{invoices.length} invoices</div>
         </div>
         <div className="topbar-actions">
-          <button className="btn">Export</button>
+          <button className="btn" disabled title="Invoice export is not configured">Export</button>
           <button className="btn btn-primary" onClick={() => navigate('/orders')}>
             + New Invoice (from Order)
           </button>
@@ -136,11 +143,15 @@ const Invoices = () => {
               <div
                 key={invoice.id}
                 className="invoice-card"
+                role="button"
+                tabIndex={0}
+                aria-label={`View invoice ${invoice.invoiceNumber}`}
                 onClick={() => handleView(invoice)}
+                onKeyDown={(event) => handleCardKeyDown(event, invoice)}
               >
                 <div className="invoice-header">
                   <div className="invoice-number">{invoice.invoiceNumber}</div>
-                  <div className={`invoice-status ${getStatusColor(invoice.status)}`}>
+                  <div className={`status-badge ${getStatusColor(invoice.status)}`}>
                     {invoice.status.replace('_', ' ')}
                   </div>
                 </div>

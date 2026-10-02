@@ -107,7 +107,7 @@ const LeadModal = ({ mode, lead, onClose, onSuccess }) => {
   const isViewMode = mode === 'view';
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="form-modal lead-modal" onClick={onClose}>
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         {/* Modal Header */}
         <div className="modal-header">

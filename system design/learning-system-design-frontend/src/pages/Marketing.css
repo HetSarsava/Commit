@@ -12,15 +12,15 @@
 }
 
 .marketing-container .marketing-header h1 {
-  font-size: 32px;
+  font-size: 19px;
   font-weight: 600;
-  color: #1c2333;
-  margin: 0 0 8px 0;
+  color: var(--navy);
+  margin: 0 0 2px 0;
 }
 
 .marketing-container .marketing-subtitle {
-  color: #64748b;
-  font-size: 15px;
+  color: var(--ink-soft);
+  font-size: 12.5px;
   margin: 0;
 }/* Metrics Grid */
 
@@ -329,7 +329,7 @@
 .marketing-container .campaign-actions {
   display: flex;
   gap: 12px;
-}/
+}
 
 /* Modal */
 

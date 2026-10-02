@@ -1,5 +1,5 @@
 .quotation-detail {
-  min-height: 100vh;
+  min-height: 100%;
   background: var(--canvas);
   display: flex;
   flex-direction: column;
@@ -392,8 +392,10 @@
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 6px;
+  font-family: inherit;
   font-size: 12.5px;
   font-weight: 500;
+  text-align: left;
   color: var(--navy);
   cursor: pointer;
   background: var(--white);
@@ -402,6 +404,15 @@
 
 .quotation-detail .action-btn:hover {
   background: var(--canvas);
+}
+
+.quotation-detail .action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.quotation-detail .action-btn:disabled:hover {
+  background: var(--white);
 }
 
 .quotation-detail .action-btn.wa {
@@ -422,7 +433,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  flex: 1;
+  min-height: 0;
 }
 
 .quotation-detail .loading-spinner {
@@ -457,4 +469,11 @@
 
   .quotation-detail .content-layout {
     padding: 16px;
+  }
+
+  .quotation-detail table.items {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
   }}

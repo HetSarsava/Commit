@@ -113,16 +113,20 @@ const InvoiceDetail = () => {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner">Loading...</div>
+      <div className="invoice-detail">
+        <div className="loading-container">
+          <div className="loading-spinner">Loading...</div>
+        </div>
       </div>
     );
   }
 
   if (!invoice) {
     return (
-      <div className="loading-container">
-        <div>Invoice not found</div>
+      <div className="invoice-detail">
+        <div className="loading-container">
+          <div>Invoice not found</div>
+        </div>
       </div>
     );
   }

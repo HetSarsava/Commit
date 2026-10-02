@@ -121,7 +121,7 @@ const UserModal = ({ user, onClose }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={() => onClose(false)}>
+    <div className="user-modal" onClick={() => onClose(false)}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{isEdit ? 'Edit User' : 'Add New User'}</h2>
