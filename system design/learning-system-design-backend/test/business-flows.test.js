@@ -31,7 +31,8 @@ test('quotation, order, payment and production controllers use the same real ser
     let result;
     let error;
     const res = { json: value => { result = value; }, status: () => res };
-    await controller[name]({ body, user: { id: 'user-1' } }, res, e => { error = e; });
+    const req = { body, user: { id: 'user-1' }, get: header => header === 'Idempotency-Key' ? `business_${name}` : undefined };
+    await controller[name](req, res, e => { error = e; });
     assert.equal(error, undefined);
     const record = result.result || result;
     assert.equal(record.status, 'ACCEPTED');
@@ -39,6 +40,9 @@ test('quotation, order, payment and production controllers use the same real ser
     assert.equal(record.relatedId, relatedId);
     assert.equal(record.sentBy, 'user-1');
     assert.equal(record.conversationId, conversation.id);
+    await controller[name](req, res, e => { error = e; });
+    assert.equal(error, undefined);
+    assert.equal((result.result || result).id, record.id);
   }
   assert.equal(sends, 4);
   assert.equal((await store.messages()).length, 4);

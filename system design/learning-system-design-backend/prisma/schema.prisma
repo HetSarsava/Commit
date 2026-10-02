@@ -727,6 +727,8 @@ model WhatsappMessage {
   conversationId String
   conversation WhatsappConversation @relation(fields: [conversationId], references: [id], onDelete: Restrict)
   messageId String? @unique
+  idempotencyKey String? @unique
+  requestHash String?
   message String @db.Text
   direction String
   status String

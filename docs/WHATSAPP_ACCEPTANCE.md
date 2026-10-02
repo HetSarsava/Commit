@@ -17,10 +17,14 @@
 - The user replied from personal WhatsApp; text arrived through Meta's signed webhook and was persisted/displayed in the Commit inbox as an unresolved contact.
 - A text reply sent from the actual CRM UI was persisted and reached real `READ` status.
 - Meta rejected a deliberately nonexistent template with code 132001; authenticated API returned 502 and stored `FAILED` without claiming success.
-- All 16 automated tests passed, including business-flow controllers, SQLite/provider/HTTP coverage and the PostgreSQL adapter test (no skips in the full run).
-- Additive migration preserved a customer created before the migration in an isolated local PostgreSQL database. Both migrations also deployed successfully to a separate fresh database.
+- All 22 automated tests passed, including business-flow controllers, SQLite/provider/HTTP coverage and the PostgreSQL adapter test (no skips in the full run).
+- Additive migration preserved a customer created before the migration in an isolated local PostgreSQL database. The baseline and WhatsApp tables deployed successfully to a separate fresh database; the third request-idempotency migration was subsequently deployed and tested there.
 - Frontend production build and lint completed successfully. The changed WhatsApp page has zero lint diagnostics. Existing repository warnings remain; no unrelated features were refactored.
 - After backend restart, both inbound records, both real outbound IDs/read states and the failed-template record remained intact. Public CRM routes returned 404, unsigned webhooks 401 and unauthenticated inbox requests 401.
+
+## Follow-up hardening
+
+Persisted optional send-request keys prevent duplicate retries across backend restarts and reject conflicting payloads/users. Tests cover concurrent attempts, failed sends, accepted responses followed by storage failure, and status reconciliation. Business-flow controller tests also verify request-key forwarding and replay. The UI prevents overlapping sends and stale message responses after changing conversations. History query inputs are strictly validated. The 22-test run includes the PostgreSQL adapter and no skips; frontend build and changed-file lint pass. The original real Meta acceptance remains the live integration evidence; follow-up send tests use mocked Meta responses.
 
 ## NOT TESTED
 

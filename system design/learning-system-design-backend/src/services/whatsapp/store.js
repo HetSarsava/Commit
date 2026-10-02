@@ -15,6 +15,14 @@ class SQLiteStore {
       CREATE INDEX IF NOT EXISTS messages_conversation ON messages(conversationId);
       CREATE TABLE IF NOT EXISTS status_events (id TEXT PRIMARY KEY, messageId TEXT NOT NULL, record TEXT NOT NULL);
       CREATE INDEX IF NOT EXISTS status_events_message ON status_events(messageId);`);
+    // Additive upgrade for existing demo databases; serialize concurrent starts.
+    this.db.exec('BEGIN IMMEDIATE');
+    try {
+      if (!this.db.prepare('PRAGMA table_info(messages)').all().some(column => column.name === 'idempotencyKey')) {
+        this.db.exec('ALTER TABLE messages ADD COLUMN idempotencyKey TEXT');
+      }
+      this.db.exec('CREATE UNIQUE INDEX IF NOT EXISTS messages_idempotency ON messages(idempotencyKey); COMMIT');
+    } catch (error) { this.db.exec('ROLLBACK'); throw error; }
     this.tail = Promise.resolve();
   }
   async transaction(fn) {
@@ -48,8 +56,8 @@ class SQLiteStore {
   }
   async messages(conversationId) {
     const rows = conversationId
-      ? this.db.prepare('SELECT record FROM messages WHERE conversationId=? ORDER BY json_extract(record,\'$.timestamp\') DESC LIMIT 500').all(conversationId)
-      : this.db.prepare('SELECT record FROM messages ORDER BY json_extract(record,\'$.timestamp\') DESC LIMIT 1000').all();
+      ? this.db.prepare('SELECT record FROM messages WHERE conversationId=? ORDER BY json_extract(record,\'$.timestamp\') DESC, rowid DESC LIMIT 500').all(conversationId)
+      : this.db.prepare('SELECT record FROM messages ORDER BY json_extract(record,\'$.timestamp\') DESC, rowid DESC LIMIT 1000').all();
     return rows.map(r => JSON.parse(r.record)).reverse();
   }
   async getMessage(messageId) {
@@ -58,7 +66,7 @@ class SQLiteStore {
   }
   async createMessage(data) {
     const record = { id: randomUUID(), messageId: null, timestamp: new Date().toISOString(), statusAt: null, failure: null, metadata: null, sentBy: null, relatedId: null, messageType: 'TEXT', ...data };
-    this.db.prepare('INSERT INTO messages VALUES (?,?,?,?)').run(record.id, record.conversationId, record.messageId, JSON.stringify(record));
+    this.db.prepare('INSERT INTO messages (id,conversationId,messageId,record,idempotencyKey) VALUES (?,?,?,?,?)').run(record.id, record.conversationId, record.messageId, JSON.stringify(record), record.idempotencyKey || null);
     return record;
   }
   async updateMessage(id, patch) {
@@ -66,6 +74,10 @@ class SQLiteStore {
     const record = { ...JSON.parse(row.record), ...patch };
     this.db.prepare('UPDATE messages SET messageId=?,record=? WHERE id=?').run(record.messageId, JSON.stringify(record), id);
     return record;
+  }
+  async getRequest(idempotencyKey) {
+    const row = this.db.prepare('SELECT record FROM messages WHERE idempotencyKey=?').get(idempotencyKey);
+    return row ? JSON.parse(row.record) : null;
   }
   async event(data) {
     const result = this.db.prepare('INSERT OR IGNORE INTO status_events VALUES (?,?,?)').run(data.id, data.messageId, JSON.stringify(data));
@@ -96,10 +108,11 @@ class PrismaStore {
   async updateConversation(id, data) { return this.client.whatsappConversation.update({ where: { id }, data }); }
   async conversations() { return this.client.whatsappConversation.findMany({ orderBy: { lastMessageAt: 'desc' }, take: 1000 }); }
   async messages(conversationId) {
-    const rows = await this.client.whatsappMessage.findMany({ where: conversationId ? { conversationId } : {}, orderBy: { timestamp: 'desc' }, take: conversationId ? 500 : 1000 });
+    const rows = await this.client.whatsappMessage.findMany({ where: conversationId ? { conversationId } : {}, orderBy: [{ timestamp: 'desc' }, { id: 'desc' }], take: conversationId ? 500 : 1000 });
     return rows.reverse();
   }
   async getMessage(messageId) { return this.client.whatsappMessage.findUnique({ where: { messageId } }); }
+  async getRequest(idempotencyKey) { return this.client.whatsappMessage.findUnique({ where: { idempotencyKey } }); }
   async createMessage(data) { return this.client.whatsappMessage.create({ data: this.jsonData(data) }); }
   async updateMessage(id, data) { return this.client.whatsappMessage.update({ where: { id }, data: this.jsonData(data) }); }
   async event(data) {

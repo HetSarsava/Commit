@@ -23,23 +23,34 @@ const WhatsAppEnhanced = () => {
 
   const messagesRef = useRef(null);
   const activeTabRef = useRef(null);
+  const selectedIdRef = useRef(null);
+  const messageRequestRef = useRef(0);
+  const sendLockRef = useRef(false);
+  const pendingTextRef = useRef(null);
+  const pendingTemplateRef = useRef(null);
+
+  const requestKey = (reference, payload) => {
+    const fingerprint = JSON.stringify(payload);
+    if (reference.current?.fingerprint !== fingerprint) reference.current = { fingerprint, key: crypto.randomUUID() };
+    return reference.current.key;
+  };
 
   // Poll the real inbox and status events. Cancel stale responses after switching chats.
   useEffect(() => {
     if (activeTab !== 'inbox') return;
+    const conversationId = selectedConversation?.id;
     let cancelled = false;
     let busy = false;
     const refresh = async () => {
       if (busy) return;
       busy = true;
       try {
-        const [inbox, chat] = await Promise.all([
-          whatsappAPI.getConversations(),
-          selectedConversation?.id ? whatsappAPI.getMessages(selectedConversation.id) : Promise.resolve(null),
-        ]);
+        const inbox = await whatsappAPI.getConversations();
         if (!cancelled) {
           setConversations(inbox);
-          if (chat) setMessages(chat);
+          if (conversationId && selectedIdRef.current === conversationId) {
+            loadMessages(conversationId);
+          }
         }
       } catch { /* Keep the last known inbox on a transient network failure. */ }
       finally { busy = false; }
@@ -79,7 +90,8 @@ const WhatsAppEnhanced = () => {
       setLoadError('');
       setConversations(data);
       // Open the most recent conversation by default so the inbox is useful on first load.
-      if (!selectedConversation && data.length > 0) {
+      if (!selectedIdRef.current && data.length > 0) {
+        selectedIdRef.current = data[0].id;
         setSelectedConversation(data[0]);
         loadMessages(data[0].id);
         whatsappAPI.markAsRead(data[0].id).catch(() => {});
@@ -93,9 +105,11 @@ const WhatsAppEnhanced = () => {
   };
 
   const loadMessages = async (conversationId) => {
+    if (selectedIdRef.current !== conversationId) return;
+    const sequence = ++messageRequestRef.current;
     try {
       const data = await whatsappAPI.getMessages(conversationId);
-      setMessages(data);
+      if (selectedIdRef.current === conversationId && messageRequestRef.current === sequence) setMessages(data);
     } catch (error) {
       console.error('Failed to load messages:', error);
     }
@@ -140,6 +154,9 @@ const WhatsAppEnhanced = () => {
   };
 
   const handleSelectConversation = (conversation) => {
+    selectedIdRef.current = conversation.id;
+    setMessages([]);
+    setSendError('');
     setSelectedConversation(conversation);
     setMobilePane('chat');
     loadMessages(conversation.id);
@@ -148,33 +165,35 @@ const WhatsAppEnhanced = () => {
 
   const handleSendMessage = async (event) => {
     event?.preventDefault();
-    if (!messageInput.trim() || !selectedConversation || sending) return;
+    if (!messageInput.trim() || !selectedConversation || sendLockRef.current) return;
 
     const outgoing = messageInput;
+    const payload = { conversationId: selectedConversation.id, to: selectedConversation.phoneNumber, message: outgoing };
+    const key = requestKey(pendingTextRef, payload);
+    sendLockRef.current = true;
     setSending(true);
     setSendError('');
     try {
-      const newMessage = await whatsappAPI.sendMessage({
-        conversationId: selectedConversation.id,
-        to: selectedConversation.phoneNumber,
-        message: outgoing,
-      });
-
-      setMessages((previous) => [
-        ...previous,
-        newMessage,
-      ]);
-      setMessageInput('');
+      await whatsappAPI.sendMessage(payload, key);
+      pendingTextRef.current = null;
+      if (selectedIdRef.current === payload.conversationId) {
+        loadMessages(payload.conversationId);
+        setMessageInput(current => current === outgoing ? '' : current);
+      }
     } catch (error) {
       console.error('Failed to send message:', error);
-      setSendError(error.response?.data?.error || 'Message could not be sent.');
-      loadMessages(selectedConversation.id);
+      if (selectedIdRef.current === payload.conversationId) {
+        setSendError(error.response?.data?.error || 'Delivery is uncertain. Check the conversation before retrying.');
+        loadMessages(payload.conversationId);
+      }
     } finally {
+      sendLockRef.current = false;
       setSending(false);
     }
   };
 
   const handleSendTemplate = async (template) => {
+    if (sendLockRef.current) return;
     if (!selectedConversation) {
       alert('Please select a conversation first');
       return;
@@ -206,18 +225,26 @@ const WhatsAppEnhanced = () => {
         if (!text?.trim()) return;
         components.push({ type: 'button', sub_type: 'url', index: String(index), parameters: [{ type: 'text', text }] });
       }
-      await whatsappAPI.sendTemplate({
+      const payload = {
         conversationId: selectedConversation.id,
         to: selectedConversation.phoneNumber,
         templateName: template.name,
         language: template.language,
         components,
-      });
+      };
+      const key = requestKey(pendingTemplateRef, payload);
+      sendLockRef.current = true;
+      setSending(true);
+      await whatsappAPI.sendTemplate(payload, key);
+      pendingTemplateRef.current = null;
       alert('Meta accepted the template. Delivery status will update in the conversation.');
       loadMessages(selectedConversation.id);
     } catch (error) {
       console.error('Failed to send template:', error);
       alert(error.response?.data?.error || 'Failed to send template');
+    } finally {
+      sendLockRef.current = false;
+      setSending(false);
     }
   };
 
@@ -638,7 +665,7 @@ const WhatsAppEnhanced = () => {
                       type="button"
                       className="btn btn-sm btn-primary"
                       onClick={() => handleSendTemplate(template)}
-                      disabled={template.status !== 'APPROVED' || (template.components || []).some(c => c.type === 'CAROUSEL' || (c.type === 'HEADER' && c.format !== 'TEXT'))}
+                      disabled={sending || template.status !== 'APPROVED' || (template.components || []).some(c => c.type === 'CAROUSEL' || (c.type === 'HEADER' && c.format !== 'TEXT'))}
                     >
                       Send
                     </button>

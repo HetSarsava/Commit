@@ -43,16 +43,17 @@ Run `npm ci` in each application directory. Backend lockfile is now tracked. `np
 
 ## PostgreSQL migrations
 
-The repository previously had a Prisma schema but no migration history. Two migrations are supplied:
+The repository previously had a Prisma schema but no migration history. Three migrations are supplied:
 
 1. `202610030000_existing_schema`: a baseline generated from the original schema, with no WhatsApp changes.
 2. `202610030001_whatsapp_cloud_api`: additive WhatsApp tables, indexes and customer/lead/user relationships. It drops or rewrites no existing tables or data.
+3. `202610030002_whatsapp_send_idempotency`: nullable request-key/hash columns and a unique request-key index. Existing messages remain valid without keys.
 
 For a **new disposable development database**, set `DATABASE_URL`, run `npx prisma migrate deploy`, then `npx prisma generate`. Seed the existing CRM using its normal development process when needed.
 
 For an **existing database matching the original schema**, first review its schema/backups and mark the baseline as already applied using `npx prisma migrate resolve --applied 202610030000_existing_schema`. Then run `npx prisma migrate deploy` and `npx prisma generate`. Do not execute the baseline against existing tables. Resolve drift before deployment. Do not run reset or destructive migration commands on real data. No existing user database was migrated during this demo; migration tests used a separate local PostgreSQL cluster.
 
-SQLite creates its three tables additively on first use. It does not import old fabricated mock messages into the real inbox.
+SQLite creates its three tables additively on first use and upgrades existing message tables with a nullable request key and unique index in a transaction. It does not import old fabricated mock messages into the real inbox.
 
 ## Meta setup and free public HTTPS callback
 
@@ -99,7 +100,15 @@ Text replies require an inbound customer message within the previous **24 hours*
 
 Outbound state progression is `SENDING -> ACCEPTED -> SENT -> DELIVERED -> READ`. `ACCEPTED` means Meta returned a real message ID, not proof of delivery. A definite API rejection or failed-delivery event persists `FAILED` with a safe error/code. Network timeout or malformed successful response persists `UNKNOWN`, because the send might have been accepted. **POST sends are never retried automatically**, avoiding duplicate customer messages; reconcile uncertain sends before manually trying again. GET template requests can retry transient throttling/server failures with bounded backoff.
 
-Older status events do not downgrade delivered/read states, and a delayed sent event cannot erase a failure. Status events that race ahead of the send response are saved and reconciled when its Meta ID is attached. There is no provider-supported exactly-once outbound guarantee; use a durable outbox/client idempotency key before adding unattended bulk sends. Inbox and analytics return bounded recent records (500 messages per conversation, 1000 total messages/conversations), so displayed metrics are recent-record summaries, not full historical reporting.
+Older status events do not downgrade delivered/read states, and a delayed sent event cannot erase a failure. Status events that race ahead of the send response are saved and reconciled when its Meta ID is attached. There is no provider-supported exactly-once outbound guarantee; add a durable outbox and reconciliation before unattended bulk sends. Inbox and analytics return bounded recent records (500 messages per conversation, 1000 total messages/conversations), so displayed metrics are recent-record summaries, not full historical reporting.
+
+## Request safety
+
+All send endpoints accept an optional `Idempotency-Key` header (8–128 letters, digits, underscores or hyphens). The server stores the key and a hash of the normalized recipient, message/template, conversation, sender and domain references before calling Meta. Replaying an accepted request returns the original record without sending again. A key used for a different payload or user returns 409; a pending, uncertain or failed attempt also returns 409 without another send. Keys survive backend restarts in SQLite and PostgreSQL. Callers that omit the header retain their existing behaviour and must avoid duplicate requests themselves.
+
+The inbox creates one key per pending text/template payload and retains it after an error, preventing repeated clicks or retries from creating another message. A shared send lock prevents overlapping text/template sends. Composer keys are held in memory: reloading the page or changing the payload can create a new key, so inspect uncertain deliveries before starting a new send. This is request deduplication, not a guarantee that Meta delivers exactly once.
+
+If Meta accepts a message but subsequent persistence fails, recovery retains the known Meta ID with `UNKNOWN` so later status events can reconcile it. Message fetches only update the currently selected conversation and only apply the latest request, preventing slow responses from replacing another chat. Message ordering is deterministic even when timestamps match. History filters validate positive integer page/limit values (limit at most 100), normalized phone numbers and message types, rejecting malformed or repeated parameters with 400.
 
 ## Testing and troubleshooting
 

@@ -1,6 +1,7 @@
 const { prisma } = require('../config/database');
 const { service, store } = require('../services/whatsapp');
 const { WhatsAppError } = require('../services/whatsapp/metaProvider');
+const { parseHistoryQuery } = require('../services/whatsapp/validation');
 
 // Message templates
 const templates = {
@@ -156,7 +157,7 @@ exports.sendQuotation = async (req, res, next) => {
     };
 
     const message = templates.quotation(messageData);
-    const result = await service.send({ to: quotation.customer.whatsapp, message, sentBy: req.user.id, relatedId: quotationId, messageType: 'QUOTATION' });
+    const result = await service.send({ to: quotation.customer.whatsapp, message, sentBy: req.user.id, idempotencyKey: req.get?.('Idempotency-Key'), relatedId: quotationId, messageType: 'QUOTATION' });
 
 
     res.json({
@@ -206,7 +207,7 @@ exports.sendOrderConfirmation = async (req, res, next) => {
     };
 
     const message = templates.orderConfirmation(messageData);
-    const result = await service.send({ to: order.customer.whatsapp, message, sentBy: req.user.id, relatedId: orderId, messageType: 'ORDER_CONFIRMATION' });
+    const result = await service.send({ to: order.customer.whatsapp, message, sentBy: req.user.id, idempotencyKey: req.get?.('Idempotency-Key'), relatedId: orderId, messageType: 'ORDER_CONFIRMATION' });
 
 
     res.json({
@@ -252,7 +253,7 @@ exports.sendPaymentReminder = async (req, res, next) => {
     };
 
     const message = templates.paymentReminder(messageData);
-    const result = await service.send({ to: invoice.customer.whatsapp, message, sentBy: req.user.id, relatedId: invoiceId, messageType: 'PAYMENT_REMINDER' });
+    const result = await service.send({ to: invoice.customer.whatsapp, message, sentBy: req.user.id, idempotencyKey: req.get?.('Idempotency-Key'), relatedId: invoiceId, messageType: 'PAYMENT_REMINDER' });
 
 
     res.json({
@@ -283,8 +284,8 @@ exports.markAsRead = handler(async req => {
   if (!await store.getConversation(req.params.conversationId)) throw new WhatsAppError('Conversation not found.', 404);
   return store.transaction(s => s.updateConversation(req.params.conversationId, { unreadCount: 0 }));
 });
-exports.sendMessage = handler(req => service.send({ to: req.body.to, message: req.body.message, conversationId: req.body.conversationId, sentBy: req.user.id }));
-exports.sendTemplate = handler(req => service.send({ to: req.body.to, conversationId: req.body.conversationId, sentBy: req.user.id, messageType: 'TEMPLATE', template: { name: req.body.templateName, language: { code: req.body.language || 'en_US' }, ...(req.body.components ? { components: req.body.components } : {}) } }));
+exports.sendMessage = handler(req => service.send({ to: req.body.to, message: req.body.message, conversationId: req.body.conversationId, sentBy: req.user.id, idempotencyKey: req.get?.('Idempotency-Key') }));
+exports.sendTemplate = handler(req => service.send({ to: req.body.to, conversationId: req.body.conversationId, sentBy: req.user.id, idempotencyKey: req.get?.('Idempotency-Key'), messageType: 'TEMPLATE', template: { name: req.body.templateName, language: { code: req.body.language || 'en_US' }, ...(req.body.components ? { components: req.body.components } : {}) } }));
 exports.getTemplates = handler(async () => {
   const templates = await service.provider.templates();
   const messages = await store.messages();
@@ -297,14 +298,13 @@ exports.getTemplates = handler(async () => {
 exports.getAutomations = handler(async () => []);
 exports.toggleAutomation = handler(async () => { throw new WhatsAppError('Automatic WhatsApp workflows are not configured.', 409); });
 exports.getMessageHistory = handler(async req => {
+  const { limit, page, phone, type } = parseHistoryQuery(req.query);
   let messages = await store.messages();
-  if (req.query.type) messages = messages.filter(m => m.messageType === req.query.type);
-  if (req.query.phone) {
-    const conversation = (await store.conversations()).find(c => c.phoneNumber === req.query.phone.replace(/[^0-9]/g, ''));
+  if (type) messages = messages.filter(m => m.messageType === type);
+  if (phone) {
+    const conversation = (await store.conversations()).find(c => c.phoneNumber === phone);
     messages = messages.filter(m => m.conversationId === conversation?.id);
   }
-  const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));
-  const page = Math.max(1, Number(req.query.page) || 1);
   return { messages: messages.reverse().slice((page-1)*limit,page*limit), pagination: { page, limit, total: messages.length, totalPages: Math.ceil(messages.length/limit) } };
 });
 exports.getAnalytics = handler(async () => {
@@ -320,5 +320,5 @@ exports.sendProductionUpdate = handler(async req => {
   if (!order) throw new WhatsAppError('Order not found.', 404);
   if (typeof req.body.stage !== 'string' || !['IN_PRODUCTION','QC','PACKING','DISPATCH'].includes(req.body.stage)) throw new WhatsAppError('Invalid production stage.');
   const message = templates.productionUpdate({ customerName: order.customer.contactPerson || order.customer.companyName, orderNumber: order.orderNumber, stage: req.body.stage });
-  return service.send({ to: order.customer.whatsapp || order.customer.mobile, message, sentBy: req.user.id, messageType: 'PRODUCTION_UPDATE', relatedId: order.id });
+  return service.send({ to: order.customer.whatsapp || order.customer.mobile, message, sentBy: req.user.id, idempotencyKey: req.get?.('Idempotency-Key'), messageType: 'PRODUCTION_UPDATE', relatedId: order.id });
 });

@@ -17,7 +17,9 @@ test('Prisma store persists inbound, duplicate events and outbound status in Pos
   await service.webhook(inbound);
   await service.webhook(inbound);
   assert.equal(await prisma.whatsappMessage.count({ where: { messageId: `wamid.${id}.in` } }), 1);
-  const message = await service.send({ to: phone, message: 'PostgreSQL response' });
+  const args = { to: phone, message: 'PostgreSQL response', idempotencyKey: `postgres-${id}` };
+  const message = await service.send(args);
+  assert.equal((await service.send(args)).id, message.id);
   await service.webhook(payload({ statuses: [{ id: message.messageId, status: 'read', timestamp: String(Math.floor(Date.now()/1000)) }] }));
   assert.equal((await prisma.whatsappMessage.findUnique({ where: { id: message.id } })).status, 'READ');
   await service.webhook(payload({ statuses: [{ id: `wamid.${id}.early`, status: 'failed', timestamp: String(Math.floor(Date.now()/1000)), errors: [{ code: 131030 }] }] }));

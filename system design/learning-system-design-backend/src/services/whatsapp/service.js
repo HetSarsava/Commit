@@ -54,7 +54,13 @@ class WhatsAppService {
     return this.store.transaction(store => store.conversation(phone, info));
   }
 
-  async send({ to, message, conversationId, template, sentBy = null, messageType = 'TEXT', relatedId = null }) {
+  async send({ to, message, conversationId, template, sentBy = null, messageType = 'TEXT', relatedId = null, idempotencyKey }) {
+    if (idempotencyKey !== undefined && (typeof idempotencyKey !== 'string' || !/^[A-Za-z0-9_-]{8,128}$/.test(idempotencyKey))) {
+      throw new WhatsAppError('Idempotency-Key must contain 8–128 letters, digits, underscores or hyphens.');
+    }
+    if (conversationId !== undefined && (typeof conversationId !== 'string' || !conversationId || conversationId.length > 128)) {
+      throw new WhatsAppError('Invalid conversation ID.');
+    }
     const phone = normalizePhone(to, this.env.WHATSAPP_DEFAULT_COUNTRY);
     if (template) {
       const parsed = templateSchema.safeParse(template);
@@ -64,18 +70,35 @@ class WhatsAppService {
     } else if (typeof message !== 'string' || !message.trim() || message.length > 4096) {
       throw new WhatsAppError('Message must contain between 1 and 4096 characters.');
     }
+    const requestHash = idempotencyKey ? createHash('sha256').update(JSON.stringify({ phone, message, template, conversationId, sentBy, messageType, relatedId })).digest('hex') : null;
     const info = await this.identify(phone);
-    const record = await this.store.transaction(async store => {
+    const attempt = await this.store.transaction(async store => {
+      if (idempotencyKey) {
+        const previous = await store.getRequest(idempotencyKey);
+        if (previous) {
+          if (previous.requestHash !== requestHash) throw new WhatsAppError('This request key was already used for a different message.', 409);
+          if (['SENDING', 'UNKNOWN'].includes(previous.status)) throw new WhatsAppError('This send is pending or uncertain. Check delivery before starting a new send.', 409, { uncertain: true });
+          if (previous.status === 'FAILED') throw new WhatsAppError(previous.failure?.message || 'This send previously failed.', 409, { metaCode: previous.failure?.code });
+          return { record: previous, reused: true };
+        }
+      }
       const conversation = conversationId ? await store.getConversation(conversationId) : await store.conversation(phone, info);
       if (!conversation || conversation.phoneNumber !== phone) throw new WhatsAppError('Conversation does not match this recipient.');
       // Business snippets are ordinary text, not approved Meta templates.
       if (!template && (!conversation.lastInboundAt || Date.now() - new Date(conversation.lastInboundAt).getTime() > 24 * 60 * 60 * 1000)) {
         throw new WhatsAppError('The 24-hour reply window is closed. Send an approved Meta template first.');
       }
-      return store.createMessage({ conversationId: conversation.id, message, direction: 'OUTGOING', status: 'SENDING', sentBy, messageType, relatedId, ...(template ? { metadata: { template } } : {}) });
+      const record = await store.createMessage({ conversationId: conversation.id, message, direction: 'OUTGOING', status: 'SENDING', sentBy, messageType, relatedId, ...(idempotencyKey ? { idempotencyKey, requestHash } : {}), ...(template ? { metadata: { template } } : {}) });
+      return { record, reused: false };
     });
+    const { record } = attempt;
+    if (attempt.reused) return record;
+    let acceptedByMeta = false;
+    let acceptedMessageId;
     try {
       const result = await this.provider.send({ to: phone, message, template });
+      acceptedByMeta = true;
+      acceptedMessageId = result.messageId;
       const updated = await this.store.transaction(async store => {
         let updated = await store.updateMessage(record.id, { messageId: result.messageId, status: 'ACCEPTED', statusAt: result.timestamp });
         for (const event of (await store.events(result.messageId)).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))) {
@@ -94,10 +117,10 @@ class WhatsAppService {
       return updated;
     } catch (error) {
       await this.store.transaction(async store => {
-        await store.updateMessage(record.id, { status: error.uncertain ? 'UNKNOWN' : 'FAILED', failure: { code: error.metaCode || null, message: error instanceof WhatsAppError ? error.message : 'Delivery could not be recorded; check Meta before retrying.' }, statusAt: new Date().toISOString() });
+        await store.updateMessage(record.id, { ...(acceptedMessageId ? { messageId: acceptedMessageId } : {}), status: error.uncertain || acceptedByMeta ? 'UNKNOWN' : 'FAILED', failure: { code: error.metaCode || null, message: error instanceof WhatsAppError ? error.message : 'Delivery could not be recorded; check Meta before retrying.' }, statusAt: new Date().toISOString() });
         await this.touch(store, record.conversationId, message, record.timestamp);
       });
-      if (!(error instanceof WhatsAppError)) throw new WhatsAppError('Delivery could not be recorded; check Meta before retrying.', 503);
+      if (!(error instanceof WhatsAppError)) throw new WhatsAppError('Delivery could not be recorded; check Meta before retrying.', 503, { uncertain: acceptedByMeta });
       throw error;
     }
   }
