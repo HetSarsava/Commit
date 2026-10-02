@@ -1,10 +1,10 @@
 .login-app {
   display: flex;
   min-height: 100vh;
-}
+}/* Left: Brand Panel */
 
-/* Left: Brand Panel */
-.brand-panel {
+
+.login-app .brand-panel {
   flex: 1.1;
   background: var(--navy);
   color: var(--white);
@@ -16,7 +16,7 @@
   overflow: hidden;
 }
 
-.brand-panel::before {
+.login-app .brand-panel::before {
   content: "";
   position: absolute;
   top: -100px;
@@ -27,13 +27,13 @@
   background: radial-gradient(circle, rgba(184, 134, 63, 0.18), transparent 70%);
 }
 
-.brand-mark {
+.login-app .brand-mark {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.brand-mark .sq {
+.login-app .brand-mark .sq {
   width: 34px;
   height: 34px;
   border-radius: 8px;
@@ -47,37 +47,37 @@
   justify-content: center;
 }
 
-.brand-mark .txt {
+.login-app .brand-mark .txt {
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.03em;
 }
 
-.brand-mid {
+.login-app .brand-mid {
   max-width: 420px;
 }
 
-.brand-mid h1 {
+.login-app .brand-mid h1 {
   font-size: 30px;
   font-weight: 600;
   line-height: 1.3;
   margin-bottom: 14px;
 }
 
-.brand-mid p {
+.login-app .brand-mid p {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.65);
   line-height: 1.6;
 }
 
-.feature-list {
+.login-app .feature-list {
   display: flex;
   flex-direction: column;
   gap: 14px;
   margin-top: 28px;
 }
 
-.feature-item {
+.login-app .feature-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -85,7 +85,7 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
-.feature-dot {
+.login-app .feature-dot {
   width: 26px;
   height: 26px;
   border-radius: 7px;
@@ -98,13 +98,13 @@
   flex-shrink: 0;
 }
 
-.brand-foot {
+.login-app .brand-foot {
   font-size: 11.5px;
   color: rgba(255, 255, 255, 0.4);
-}
+}/* Right: Form Panel */
 
-/* Right: Form Panel */
-.form-panel {
+
+.login-app .form-panel {
   flex: 1;
   background: var(--white);
   display: flex;
@@ -113,25 +113,25 @@
   padding: 48px;
 }
 
-.form-box {
+.login-app .form-box {
   width: 100%;
   max-width: 360px;
 }
 
-.form-box h2 {
+.login-app .form-box h2 {
   font-size: 22px;
   font-weight: 600;
   color: var(--navy);
   margin-bottom: 6px;
 }
 
-.form-box .sub {
+.login-app .form-box .sub {
   font-size: 13px;
   color: var(--ink-soft);
   margin-bottom: 28px;
 }
 
-.error-message {
+.login-app .error-message {
   padding: 12px 14px;
   background: var(--rust-light);
   border: 1px solid var(--rust);
@@ -141,11 +141,11 @@
   margin-bottom: 16px;
 }
 
-.field {
+.login-app .field {
   margin-bottom: 16px;
 }
 
-.field label {
+.login-app .field label {
   display: block;
   font-size: 12.5px;
   font-weight: 500;
@@ -153,7 +153,7 @@
   margin-bottom: 6px;
 }
 
-.field input {
+.login-app .field input {
   width: 100%;
   padding: 11px 13px;
   border: 1px solid var(--line);
@@ -164,24 +164,24 @@
   color: var(--ink);
 }
 
-.field input:focus {
+.login-app .field input:focus {
   outline: none;
   border-color: var(--brass);
 }
 
-.field input:disabled {
+.login-app .field input:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.row-between {
+.login-app .row-between {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 22px;
 }
 
-.remember {
+.login-app .remember {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -190,24 +190,24 @@
   cursor: pointer;
 }
 
-.remember input {
+.login-app .remember input {
   width: 14px;
   height: 14px;
   cursor: pointer;
 }
 
-.forgot {
+.login-app .forgot {
   font-size: 12.5px;
   color: var(--brass);
   font-weight: 500;
   cursor: default;
 }
 
-.forgot:hover {
+.login-app .forgot:hover {
   text-decoration: none;
 }
 
-.btn-login {
+.login-app .btn-login {
   width: 100%;
   padding: 12px;
   background: var(--navy);
@@ -220,36 +220,36 @@
   transition: opacity 0.2s;
 }
 
-.btn-login:hover {
+.login-app .btn-login:hover {
   opacity: 0.9;
 }
 
-.btn-login:disabled {
+.login-app .btn-login:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.divider {
+.login-app .divider {
   display: flex;
   align-items: center;
   gap: 12px;
   margin: 22px 0;
 }
 
-.divider::before,
-.divider::after {
+.login-app .divider::before,
+.login-app .divider::after {
   content: "";
   flex: 1;
   height: 1px;
   background: var(--line);
 }
 
-.divider span {
+.login-app .divider span {
   font-size: 11.5px;
   color: var(--ink-soft);
 }
 
-.otp-btn {
+.login-app .otp-btn {
   width: 100%;
   padding: 11px;
   border: 1px solid var(--line);
@@ -266,16 +266,16 @@
   transition: background 0.2s;
 }
 
-.otp-btn:hover {
+.login-app .otp-btn:hover {
   background: var(--canvas);
 }
 
-.otp-btn:disabled {
+.login-app .otp-btn:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-.role-note {
+.login-app .role-note {
   margin-top: 26px;
   padding: 12px 14px;
   background: var(--canvas);
@@ -286,11 +286,11 @@
   border: 1px solid var(--line);
 }
 
-.role-note b {
+.login-app .role-note b {
   color: var(--navy);
 }
 
-.demo-credentials {
+.login-app .demo-credentials {
   margin-top: 16px;
   padding: 12px 14px;
   background: var(--thread-light);
@@ -301,41 +301,40 @@
   border: 1px solid var(--thread);
 }
 
-.demo-credentials p {
+.login-app .demo-credentials p {
   margin: 2px 0;
 }
 
-.demo-credentials strong {
+.login-app .demo-credentials strong {
   color: var(--navy);
 }
 
-.foot-links {
+.login-app .foot-links {
   text-align: center;
   margin-top: 24px;
   font-size: 12px;
   color: var(--ink-soft);
 }
 
-.foot-links .invite-note {
+.login-app .foot-links .invite-note {
   color: var(--brass);
   font-weight: 500;
-}
+}/* Responsive */
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .login-app {
     flex-direction: column;
   }
 
-  .brand-panel {
+  .login-app .brand-panel {
     padding: 32px 24px;
   }
 
-  .brand-mid h1 {
+  .login-app .brand-mid h1 {
     font-size: 24px;
   }
 
-  .form-panel {
+  .login-app .form-panel {
     padding: 32px 24px;
-  }
-}
+  }}

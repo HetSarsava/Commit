@@ -135,15 +135,15 @@ const Marketing = () => {
       </div>
 
       {/* Tabs */}
-      <div className="tab-navigation">
+      <div className="tabs">
         <button
-          className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
+          className={`tab ${activeTab === 'dashboard' ? 'active' : ''}`}
           onClick={() => setActiveTab('dashboard')}
         >
           Dashboard & ROI
         </button>
         <button
-          className={`tab-btn ${activeTab === 'campaigns' ? 'active' : ''}`}
+          className={`tab ${activeTab === 'campaigns' ? 'active' : ''}`}
           onClick={() => setActiveTab('campaigns')}
         >
           All Campaigns

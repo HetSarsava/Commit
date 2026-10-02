@@ -4,55 +4,40 @@
   padding: 24px 32px;
 }
 
-.quotations-header {
+.quotations-page .quotations-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 24px;
 }
 
-.quotations-header h1 {
+.quotations-page .quotations-header h1 {
   font-size: 24px;
   font-weight: 600;
   color: var(--navy);
   margin: 0 0 4px 0;
 }
 
-.header-sub {
+.quotations-page .header-sub {
   font-size: 14px;
   color: var(--thread);
 }
 
-.btn-primary {
-  background: var(--navy);
-  color: var(--white);
-  border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-primary:hover {
-  background: #1a2844;
-}
-
 /* Loading State */
-.loading-state {
+
+.quotations-page .loading-state {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 400px;
 }
 
-.spinner {
+.quotations-page .spinner {
   color: var(--navy);
   font-size: 16px;
-}
+}/* Empty State */
 
-/* Empty State */
-.empty-state {
+.quotations-page .empty-state {
   background: var(--white);
   border: 2px dashed var(--line);
   border-radius: 12px;
@@ -61,31 +46,30 @@
   margin-top: 40px;
 }
 
-.empty-icon {
+.quotations-page .empty-icon {
   font-size: 64px;
   margin-bottom: 16px;
 }
 
-.empty-state h3 {
+.quotations-page .empty-state h3 {
   font-size: 20px;
   color: var(--navy);
   margin: 0 0 8px 0;
 }
 
-.empty-state p {
+.quotations-page .empty-state p {
   font-size: 14px;
   color: var(--thread);
   margin: 0 0 24px 0;
-}
+}/* Quotations List */
 
-/* Quotations List */
-.quotations-list {
+.quotations-page .quotations-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.quotation-card {
+.quotations-page .quotation-card {
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -97,39 +81,39 @@
   transition: all 0.2s;
 }
 
-.quotation-card:hover {
+.quotations-page .quotation-card:hover {
   border-color: var(--brass);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.quotation-number {
+.quotations-page .quotation-number {
   font-weight: 600;
   color: var(--navy);
   font-family: 'IBM Plex Mono', monospace;
 }
 
-.quotation-customer {
+.quotations-page .quotation-customer {
   color: var(--ink);
 }
 
-.quotation-total {
+.quotations-page .quotation-total {
   font-weight: 600;
   color: var(--navy);
   text-align: right;
 }
 
-.quotation-status {
+.quotations-page .quotation-status {
   display: flex;
   justify-content: center;
 }
 
-.quotation-actions {
+.quotations-page .quotation-actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
 }
 
-.btn-action {
+.quotations-page .btn-action {
   background: none;
   border: none;
   cursor: pointer;
@@ -140,16 +124,16 @@
   opacity: 0.7;
 }
 
-.btn-action:hover {
+.quotations-page .btn-action:hover {
   background: var(--canvas);
   opacity: 1;
 }
 
-.btn-action.btn-danger:hover {
+.quotations-page .btn-action.btn-danger:hover {
   background: #fee;
 }
 
-.badge {
+.quotations-page .badge {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 12px;
@@ -167,46 +151,45 @@
     min-width: 0;
   }
 
-  .quotations-header {
+  .quotations-page .quotations-header {
     flex-direction: column;
     gap: 16px;
   }
 
-  .quotations-header .btn-primary {
+  .quotations-page .quotations-header .btn-primary {
     width: 100%;
   }
 
-  .quotation-card {
+  .quotations-page .quotation-card {
     min-width: 0;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px 12px;
     padding: 16px;
   }
 
-  .quotation-number,
-  .quotation-customer {
+  .quotations-page .quotation-number,
+  .quotations-page .quotation-customer {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .quotation-customer {
+  .quotations-page .quotation-customer {
     grid-column: 1 / -1;
   }
 
-  .quotation-total {
+  .quotations-page .quotation-total {
     text-align: left;
   }
 
-  .quotation-status {
+  .quotations-page .quotation-status {
     justify-content: flex-end;
   }
 
-  .quotation-actions {
+  .quotations-page .quotation-actions {
     grid-column: 1 / -1;
     justify-content: flex-start;
     border-top: 1px solid var(--canvas-2);
     padding-top: 8px;
-  }
-}
+  }}

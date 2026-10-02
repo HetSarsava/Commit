@@ -3,10 +3,9 @@
   background: var(--canvas);
   display: flex;
   flex-direction: column;
-}
+}/* Top Bar */
 
-/* Top Bar */
-.topbar {
+.quotation-detail .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -15,18 +14,18 @@
   background: var(--white);
 }
 
-.topbar .crumbs {
+.quotation-detail .topbar .crumbs {
   font-size: 12px;
   color: var(--ink-soft);
   margin-bottom: 4px;
 }
 
-.topbar .crumbs b {
+.quotation-detail .topbar .crumbs b {
   color: var(--navy);
   font-weight: 600;
 }
 
-.topbar h1 {
+.quotation-detail .topbar h1 {
   font-size: 19px;
   font-weight: 600;
   color: var(--navy);
@@ -35,7 +34,7 @@
   gap: 10px;
 }
 
-.status-pill {
+.quotation-detail .status-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -48,57 +47,14 @@
   vertical-align: middle;
 }
 
-.topbar-actions {
+.quotation-detail .topbar-actions {
   display: flex;
   gap: 10px;
 }
 
-.btn {
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 9px 16px;
-  border-radius: 6px;
-  border: 1px solid var(--line);
-  background: var(--white);
-  color: var(--ink);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.btn:hover {
-  background: var(--canvas);
-}
-
-.btn-ghost {
-  color: var(--ink-soft);
-}
-
-.btn-primary {
-  background: var(--navy);
-  color: var(--white);
-  border-color: var(--navy);
-}
-
-.btn-convert {
-  background: var(--thread);
-  color: var(--white);
-  border-color: var(--thread);
-}
-
-.btn-whatsapp {
-  background: #25D366;
-  color: var(--white);
-  border-color: #25D366;
-}
-
-.btn-whatsapp:hover {
-  background: #1EB353;
-  border-color: #1EB353;
-}
-
 /* Workflow Stepper */
-.stepper {
+
+.quotation-detail .stepper {
   display: flex;
   padding: 16px 32px;
   background: var(--white);
@@ -106,7 +62,7 @@
   gap: 0;
 }
 
-.step {
+.quotation-detail .step {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -117,11 +73,11 @@
   color: var(--ink-soft);
 }
 
-.step:last-child {
+.quotation-detail .step:last-child {
   border-right: none;
 }
 
-.step-num {
+.quotation-detail .step-num {
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -134,94 +90,90 @@
   justify-content: center;
 }
 
-.step.done .step-num {
+.quotation-detail .step.done .step-num {
   background: var(--thread);
   color: var(--white);
 }
 
-.step.current .step-num {
+.quotation-detail .step.current .step-num {
   background: var(--brass);
   color: var(--white);
 }
 
-.step.done,
-.step.current {
+.quotation-detail .step.done,
+.quotation-detail .step.current {
   color: var(--navy);
   font-weight: 500;
-}
+}/* Content Layout */
 
-/* Content Layout */
-.content-layout {
+.quotation-detail .content-layout {
   display: flex;
   flex: 1;
   padding: 28px 32px;
   gap: 28px;
 }
 
-.doc-col {
+.quotation-detail .doc-col {
   flex: 1;
   min-width: 0;
 }
 
-.side-col {
+.quotation-detail .side-col {
   width: 320px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
+}/* Card */
 
-/* Card */
-.card {
+.quotation-detail .card {
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 22px 24px;
   margin-bottom: 20px;
-}
+}/* Document Header */
 
-/* Document Header */
-.doc-header {
+.quotation-detail .doc-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
 }
 
-.doc-header .from b {
+.quotation-detail .doc-header .from b {
   display: block;
   font-size: 15px;
   color: var(--navy);
   margin-bottom: 3px;
 }
 
-.doc-header .from {
+.quotation-detail .doc-header .from {
   font-size: 12px;
   color: var(--ink-soft);
   line-height: 1.6;
 }
 
-.doc-meta {
+.quotation-detail .doc-meta {
   text-align: right;
   font-size: 12px;
   color: var(--ink-soft);
   line-height: 1.7;
 }
 
-.doc-meta .qno {
+.quotation-detail .doc-meta .qno {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 14px;
   color: var(--navy);
   font-weight: 600;
-}
+}/* Bill To */
 
-/* Bill To */
-.bill-to {
+.quotation-detail .bill-to {
   margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid var(--line);
 }
 
-.bill-to h4 {
+.quotation-detail .bill-to h4 {
   font-size: 11px;
   color: var(--ink-soft);
   font-weight: 600;
@@ -229,27 +181,26 @@
   letter-spacing: 0.02em;
 }
 
-.bill-to .co {
+.quotation-detail .bill-to .co {
   font-size: 14px;
   font-weight: 600;
   color: var(--navy);
 }
 
-.bill-to .addr {
+.quotation-detail .bill-to .addr {
   font-size: 12.5px;
   color: var(--ink-soft);
   margin-top: 2px;
   line-height: 1.5;
-}
+}/* Items Table */
 
-/* Items Table */
-table.items {
+.quotation-detail table.items {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
 }
 
-table.items th {
+.quotation-detail table.items th {
   text-align: left;
   font-size: 11px;
   font-weight: 600;
@@ -259,42 +210,41 @@ table.items th {
   background: var(--canvas);
 }
 
-table.items th.num,
-table.items td.num {
+.quotation-detail table.items th.num,
+.quotation-detail table.items td.num {
   text-align: right;
 }
 
-table.items td {
+.quotation-detail table.items td {
   padding: 11px 10px;
   border-bottom: 1px solid var(--line);
   font-size: 13px;
   vertical-align: top;
 }
 
-table.items td.num {
+.quotation-detail table.items td.num {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 12.5px;
 }
 
-.item-name {
+.quotation-detail .item-name {
   font-weight: 500;
   color: var(--navy);
 }
 
-.item-sub {
+.quotation-detail .item-sub {
   font-size: 11.5px;
   color: var(--ink-soft);
   margin-top: 2px;
-}
+}/* Totals */
 
-/* Totals */
-.totals {
+.quotation-detail .totals {
   margin-top: 18px;
   margin-left: auto;
   width: 280px;
 }
 
-.totals .row {
+.quotation-detail .totals .row {
   display: flex;
   justify-content: space-between;
   padding: 6px 0;
@@ -302,11 +252,11 @@ table.items td.num {
   color: var(--ink-soft);
 }
 
-.totals .row.gst {
+.quotation-detail .totals .row.gst {
   font-size: 12px;
 }
 
-.totals .row.grand {
+.quotation-detail .totals .row.grand {
   border-top: 1px solid var(--line);
   margin-top: 6px;
   padding-top: 12px;
@@ -315,18 +265,17 @@ table.items td.num {
   color: var(--navy);
 }
 
-.totals .row .v {
+.quotation-detail .totals .row .v {
   font-family: 'IBM Plex Mono', monospace;
-}
+}/* Terms */
 
-/* Terms */
-.terms {
+.quotation-detail .terms {
   margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid var(--line);
 }
 
-.terms h4 {
+.quotation-detail .terms h4 {
   font-size: 11px;
   color: var(--ink-soft);
   font-weight: 600;
@@ -334,22 +283,21 @@ table.items td.num {
   letter-spacing: 0.02em;
 }
 
-.terms-text {
+.quotation-detail .terms-text {
   font-size: 12px;
   color: var(--ink-soft);
   line-height: 1.8;
   white-space: pre-line;
-}
+}/* Notes */
 
-/* Notes */
-.notes {
+.quotation-detail .notes {
   margin-top: 16px;
   padding: 12px 14px;
   background: var(--canvas);
   border-radius: 6px;
 }
 
-.notes h4 {
+.quotation-detail .notes h4 {
   font-size: 11px;
   color: var(--ink-soft);
   font-weight: 600;
@@ -357,14 +305,13 @@ table.items td.num {
   letter-spacing: 0.02em;
 }
 
-.notes-text {
+.quotation-detail .notes-text {
   font-size: 12px;
   color: var(--ink);
   line-height: 1.6;
-}
+}/* Bank Details */
 
-/* Bank Details */
-.bank-strip {
+.quotation-detail .bank-strip {
   margin-top: 18px;
   padding: 12px 14px;
   background: var(--canvas);
@@ -377,16 +324,15 @@ table.items td.num {
   flex-wrap: wrap;
 }
 
-.bank-strip b {
+.quotation-detail .bank-strip b {
   color: var(--navy);
-}
+}/* Side Cards */
 
-/* Side Cards */
-.side-card {
+.quotation-detail .side-card {
   margin-bottom: 0;
 }
 
-.side-card h3 {
+.quotation-detail .side-card h3 {
   font-size: 12px;
   font-weight: 600;
   color: var(--ink-soft);
@@ -394,7 +340,7 @@ table.items td.num {
   letter-spacing: 0.02em;
 }
 
-.side-row {
+.quotation-detail .side-row {
   display: flex;
   justify-content: space-between;
   padding: 7px 0;
@@ -402,20 +348,19 @@ table.items td.num {
   border-bottom: 1px solid var(--canvas-2);
 }
 
-.side-row:last-child {
+.quotation-detail .side-row:last-child {
   border-bottom: none;
 }
 
-.side-row .k {
+.quotation-detail .side-row .k {
   color: var(--ink-soft);
 }
 
-.side-row .v {
+.quotation-detail .side-row .v {
   font-weight: 500;
-}
+}/* Payment Bar */
 
-/* Payment Bar */
-.payment-bar {
+.quotation-detail .payment-bar {
   height: 8px;
   border-radius: 4px;
   background: var(--canvas-2);
@@ -423,25 +368,24 @@ table.items td.num {
   margin: 10px 0 8px;
 }
 
-.payment-bar .fill {
+.quotation-detail .payment-bar .fill {
   height: 100%;
   background: var(--thread);
   transition: width 0.3s ease;
 }
 
-.payment-note {
+.quotation-detail .payment-note {
   font-size: 11.5px;
   color: var(--ink-soft);
-}
+}/* Action List */
 
-/* Action List */
-.action-list {
+.quotation-detail .action-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.action-btn {
+.quotation-detail .action-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -456,69 +400,61 @@ table.items td.num {
   transition: all 0.15s;
 }
 
-.action-btn:hover {
+.quotation-detail .action-btn:hover {
   background: var(--canvas);
 }
 
-.action-btn.wa {
+.quotation-detail .action-btn.wa {
   background: var(--thread-light);
   border-color: var(--thread);
   color: var(--thread);
 }
 
-.action-btn.danger {
+.quotation-detail .action-btn.danger {
   color: var(--rust);
 }
 
-.action-btn.danger:hover {
+.quotation-detail .action-btn.danger:hover {
   background: var(--rust-light);
-}
+}/* Loading */
 
-/* Loading */
-.loading-container {
+.quotation-detail .loading-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
 }
 
-.loading-spinner {
+.quotation-detail .loading-spinner {
   font-size: 16px;
   color: var(--navy);
-}
+}/* Responsive */
 
-/* Responsive */
 @media (max-width: 1024px) {
-  .content-layout {
+  .quotation-detail .content-layout {
     flex-direction: column;
   }
 
-  .side-col {
+  .quotation-detail .side-col {
     width: 100%;
-  }
-}
+  }}
 
 @media (max-width: 768px) {
-  .topbar {
+  .quotation-detail .topbar {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
 
-  .topbar-actions {
+  .quotation-detail .topbar-actions {
     width: 100%;
     flex-direction: column;
   }
 
-  .btn {
-    width: 100%;
-  }
-
-  .stepper {
+  .quotation-detail .stepper {
     overflow-x: auto;
   }
 
-  .content-layout {
+  .quotation-detail .content-layout {
     padding: 16px;
-  }
-}
+  }}

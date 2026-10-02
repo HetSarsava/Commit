@@ -1,0 +1,621 @@
+/* Shared UI layer — the app's cross-page design system.
+   ------------------------------------------------------------------
+   Why this file exists:
+   Page stylesheets in src/pages/*.css are *page-scoped* (every selector is
+   prefixed with that page's root class, e.g. `.reports-page .topbar`). They
+   therefore only style the page they belong to.
+
+   Historically these files also carried the *shared* shell classes
+   (.topbar, .summary-card, .btn, .content, .tabs/.tab …) as unscoped rules.
+   Because App.jsx statically imports every page, all of them were loaded on
+   every route, so any page could use a class defined in another page's file.
+   Scoping removed that accidental fallback: pages whose own stylesheet never
+   defined a shared class lost it entirely and fell back to browser defaults.
+
+   This file makes that shared layer explicit and global. It only *adds*
+   definitions — page-scoped rules always win on specificity, so existing
+   pages keep their exact current appearance. Loaded before App.jsx in
+   main.jsx so page stylesheets can still override it.
+
+   Values are taken from the existing page stylesheets so nothing is redesigned.
+   ------------------------------------------------------------------ */
+
+/* ---------- Page shell ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--line);
+  background: var(--white);
+}
+
+.topbar h1 {
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+
+.topbar .sub {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.content,
+.content-area {
+  padding: 16px 32px 32px;
+}
+
+/* ---------- KPI / statistics ---------- */
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 16px 32px;
+}
+
+.summary-card {
+  padding: 20px;
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(28, 35, 51, 0.08);
+}
+
+.summary-card.success {
+  background: #D1FAE5;
+  border-color: #6EE7B7;
+}
+
+.summary-card.alert {
+  background: #FFFBEB;
+  border-color: #FCD34D;
+}
+
+.summary-card.danger {
+  background: #FEF2F2;
+  border-color: #FCA5A5;
+}
+
+.summary-value {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--navy);
+  font-family: 'IBM Plex Mono', monospace;
+  margin-bottom: 6px;
+}
+
+/* Matches the inventory page's KPI label exactly: sentence case, not uppercase.
+   Text-transform is deliberately NOT set here — pages that want uppercase
+   (e.g. production) declare it themselves. */
+.summary-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+/* ---------- Tabs ----------
+   The single tab pattern for the whole app: text-only labels, muted inactive,
+   brass active label with a thin brass underline sitting flush on the tab bar's
+   full-width rule. Used for both tab navigation and single-select filter rows.
+
+   The active tab's 3px underline is drawn 2px past its box (margin-bottom:-2px)
+   so it lands exactly on the bar's rule. That overhang is why the bar gives
+   itself a 2px bottom padding and paints its rule as a ::after behind the tabs:
+   the underline overlaps the rule without overflowing the box, so it survives
+   intact even when the bar turns into a horizontal scroller (see the phone
+   breakpoint at the bottom of this file). Bars wrap while there is room and
+   only scroll on small screens, where a long filter row would otherwise stack
+   into a dozen lines. */
+
+.tabs {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 4px;
+  /* The 2px bottom padding is the room the active tab's underline overhangs
+     into, so the underline lands on the bar's rule instead of above it. */
+  padding: 16px 32px 2px;
+  background: var(--white);
+}
+
+/* The bar's full-width rule. Drawn as a pseudo-element behind the tabs (rather
+   than a border) so the active tab's underline can sit on top of it and nothing
+   is clipped when the bar becomes a horizontal scroller on small screens. */
+.tabs::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--line);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.tab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  padding: 10px 20px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+  margin-bottom: -2px;
+}
+
+.tab:hover {
+  color: var(--navy);
+  background: var(--canvas);
+}
+
+.tab.active {
+  color: var(--brass);
+  border-bottom-color: var(--brass);
+  font-weight: 600;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: -2px;
+}
+
+/* Variant for tab rows embedded inside a panel/card rather than at page level */
+.tabs-compact {
+  padding: 8px 12px 2px;
+  background: transparent;
+}
+
+.tabs-compact .tab {
+  padding: 8px 12px;
+}
+
+/* ---------- Buttons ----------
+   One geometry for the whole button family. The variant classes are listed in
+   the base selector on purpose: the pages use `.btn-primary`/`.btn-secondary`
+   both with and without the bare `.btn` (33 buttons did), so a variant on its
+   own has to carry the full box, not just the colours.
+
+   inline-flex + gap is what keeps an icon and its label aligned the same way in
+   every button; without it a leading glyph sits on the text baseline and drifts
+   with the font size. */
+
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-success,
+.btn-warning {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--canvas);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--brass);
+  color: var(--white);
+  border-color: var(--brass);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #A07537;
+}
+
+.btn-secondary {
+  background: var(--white);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--canvas);
+}
+
+/* Compact action buttons used inside item rows */
+.p-action-btn,
+.btn-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-family: inherit;
+  font-size: 15px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.p-action-btn:hover:not(:disabled) {
+  background: var(--canvas);
+  border-color: var(--brass);
+  color: var(--brass);
+}
+
+.btn-remove:hover:not(:disabled) {
+  background: var(--rust-light);
+  border-color: var(--rust);
+  color: var(--rust);
+}
+
+.btn-danger {
+  background: var(--rust);
+  color: var(--white);
+  border-color: var(--rust);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #A93A25;
+}
+
+.btn-success {
+  background: var(--thread);
+  color: var(--white);
+  border-color: var(--thread);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #3E6B4A;
+}
+
+.btn-link {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-link:hover:not(:disabled) {
+  background: var(--canvas);
+  color: var(--brass);
+}
+
+/* Compact variant — sits alongside the base button system.
+   `.btn-sm` is the same control under its older name (used by the WhatsApp
+   page); it is aliased here rather than kept as a second size. */
+.btn-small,
+.btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-small:hover:not(:disabled),
+.btn-sm:hover:not(:disabled) {
+  background: var(--canvas);
+}
+
+/* Variant colours also apply to the compact size */
+.btn-small.btn-primary,
+.btn-sm.btn-primary {
+  background: var(--brass);
+  color: var(--white);
+  border-color: var(--brass);
+}
+
+.btn-small.btn-primary:hover:not(:disabled),
+.btn-sm.btn-primary:hover:not(:disabled) {
+  background: #A07537;
+}
+
+.btn-small.btn-secondary,
+.btn-sm.btn-secondary {
+  background: var(--white);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.btn-small.btn-danger,
+.btn-sm.btn-danger {
+  background: var(--rust);
+  color: var(--white);
+  border-color: var(--rust);
+}
+
+.btn-small.btn-danger:hover:not(:disabled),
+.btn-sm.btn-danger:hover:not(:disabled) {
+  background: #A93A25;
+}
+
+.btn-small.btn-success,
+.btn-sm.btn-success {
+  background: var(--thread);
+  color: var(--white);
+  border-color: var(--thread);
+}
+
+.btn-small.btn-success:hover:not(:disabled),
+.btn-sm.btn-success:hover:not(:disabled) {
+  background: #3E6B4A;
+}
+
+/* Square icon-only button (edit/delete in a list row). One size everywhere. */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-family: inherit;
+  font-size: 15px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: var(--canvas);
+  border-color: var(--brass);
+  color: var(--brass);
+}
+
+.btn-icon.danger:hover:not(:disabled),
+.btn-icon.btn-danger:hover:not(:disabled) {
+  background: var(--rust-light);
+  border-color: var(--rust);
+  color: var(--rust);
+}
+
+/* ---------- Status badges ----------
+   One badge for every status chip in the app: same box, same typography, and a
+   single palette keyed by status name, so "pending" is the same amber on the
+   purchase, proforma and dispatch pages. Pages used to declare their own copy
+   of each `.status-*` colour, which is how identical statuses ended up green on
+   one page and blue on another. */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+/* neutral */
+.status-badge.status-draft,
+.status-badge.status-inactive {
+  background: var(--canvas-2);
+  color: var(--ink-soft);
+  border-color: var(--line);
+}
+
+/* waiting on someone else */
+.status-badge.status-pending,
+.status-badge.status-sent,
+.status-badge.status-shared,
+.status-badge.status-viewed,
+.status-badge.status-partial,
+.status-badge.status-partially_paid,
+.status-badge.status-paused {
+  background: #FFF4E6;
+  color: #B45309;
+  border-color: #FCD34D;
+}
+
+/* positive / done */
+.status-badge.status-converted,
+.status-badge.status-accepted,
+.status-badge.status-confirmed,
+.status-badge.status-received,
+.status-badge.status-completed,
+.status-badge.status-delivered,
+.status-badge.status-paid,
+.status-badge.status-active {
+  background: var(--thread-light);
+  color: var(--thread);
+  border-color: #B7D3C2;
+}
+
+/* in flight */
+.status-badge.status-dispatched,
+.status-badge.status-transit {
+  background: #EFF6FF;
+  color: #2563EB;
+  border-color: #BFDBFE;
+}
+
+/* in the workshop */
+.status-badge.status-in_production,
+.status-badge.status-production {
+  background: #F3E8FF;
+  color: #7E22CE;
+  border-color: #E9D5FF;
+}
+
+/* problems */
+.status-badge.status-unpaid,
+.status-badge.status-overdue,
+.status-badge.status-cancelled,
+.status-badge.status-rejected,
+.status-badge.status-expired {
+  background: var(--rust-light);
+  color: var(--rust);
+  border-color: #E2B4A9;
+}
+
+/* ---------- KPI alias ----------
+   Dispatch and Marketing render their KPI tiles with `.metric-*` names. Same
+   surface and type as `.summary-card`, so both read as one component. */
+
+.metric-card {
+  padding: 20px;
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.metric-value {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--navy);
+  font-family: 'IBM Plex Mono', monospace;
+  margin-bottom: 6px;
+}
+
+.metric-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+/* ---------- Async states ---------- */
+
+.loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.empty-state p {
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 768px) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .topbar-actions {
+    width: 100%;
+  }
+
+  .topbar-actions .btn,
+  .topbar-actions .btn-small {
+    flex: 1 1 auto;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .summary-cards {
+    padding: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .tabs {
+    padding-left: 16px;
+    padding-right: 16px;
+    /* On phones the bar scrolls on one row instead of stacking into many rows
+       (a 12-tab filter row would otherwise wrap to ~11 lines). The scrollbar is
+       hidden so it takes no space — a visible one would shrink the box and
+       knock the active tab's underline off the bar's bottom rule. */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+}

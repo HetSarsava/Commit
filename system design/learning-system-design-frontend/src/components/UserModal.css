@@ -13,7 +13,7 @@
   padding: 20px;
 }
 
-.modal-content {
+.modal-overlay .modal-content {
   background: var(--white);
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(28, 35, 51, 0.2);
@@ -23,10 +23,10 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
+}/* Modal Header */
 
-/* Modal Header */
-.modal-header {
+
+.modal-overlay .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -34,14 +34,14 @@
   border-bottom: 1px solid var(--line);
 }
 
-.modal-header h2 {
+.modal-overlay .modal-header h2 {
   font-size: 17px;
   font-weight: 600;
   color: var(--navy);
   margin: 0;
 }
 
-.modal-close {
+.modal-overlay .modal-close {
   font-size: 28px;
   font-weight: 300;
   background: none;
@@ -57,30 +57,30 @@
   transition: all 0.15s;
 }
 
-.modal-close:hover {
+.modal-overlay .modal-close:hover {
   background: var(--canvas);
   color: var(--ink);
-}
+}/* Modal Body */
 
-/* Modal Body */
-.modal-body {
+
+.modal-overlay .modal-body {
   padding: 24px;
   overflow-y: auto;
   flex: 1;
-}
+}/* Form Styles */
 
-/* Form Styles */
-.form-group {
+
+.modal-overlay .form-group {
   margin-bottom: 20px;
 }
 
-.form-row {
+.modal-overlay .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-.form-group label {
+.modal-overlay .form-group label {
   display: block;
   font-size: 12px;
   font-weight: 600;
@@ -90,15 +90,15 @@
   letter-spacing: 0.03em;
 }
 
-.required {
+.modal-overlay .required {
   color: var(--rust);
 }
 
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="password"],
-.form-group input[type="tel"],
-.form-group select {
+.modal-overlay .form-group input[type="text"],
+.modal-overlay .form-group input[type="email"],
+.modal-overlay .form-group input[type="password"],
+.modal-overlay .form-group input[type="tel"],
+.modal-overlay .form-group select {
   font-family: inherit;
   font-size: 14px;
   width: 100%;
@@ -110,39 +110,39 @@
   transition: all 0.15s;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.modal-overlay .form-group input:focus,
+.modal-overlay .form-group select:focus {
   outline: none;
   border-color: var(--brass);
   box-shadow: 0 0 0 3px rgba(184, 134, 63, 0.1);
 }
 
-.form-group input:disabled {
+.modal-overlay .form-group input:disabled {
   background: var(--canvas-2);
   color: var(--ink-soft);
   cursor: not-allowed;
 }
 
-.form-group input.error,
-.form-group select.error {
+.modal-overlay .form-group input.error,
+.modal-overlay .form-group select.error {
   border-color: var(--rust);
 }
 
-.error-message {
+.modal-overlay .error-message {
   display: block;
   font-size: 11px;
   color: var(--rust);
   margin-top: 4px;
 }
 
-.help-text {
+.modal-overlay .help-text {
   font-size: 11px;
   color: var(--ink-soft);
   margin-top: 4px;
-}
+}/* Checkbox */
 
-/* Checkbox */
-.checkbox-label {
+
+.modal-overlay .checkbox-label {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -154,15 +154,15 @@
   letter-spacing: normal;
 }
 
-.checkbox-label input[type="checkbox"] {
+.modal-overlay .checkbox-label input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
   accent-color: var(--brass);
-}
+}/* Modal Footer */
 
-/* Modal Footer */
-.modal-footer {
+
+.modal-overlay .modal-footer {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
@@ -171,7 +171,7 @@
   background: var(--canvas);
 }
 
-.btn {
+.modal-overlay .btn {
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -184,48 +184,47 @@
   transition: all 0.15s;
 }
 
-.btn:hover:not(:disabled) {
+.modal-overlay .btn:hover:not(:disabled) {
   background: var(--canvas);
 }
 
-.btn:disabled {
+.modal-overlay .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.btn-primary {
+.modal-overlay .btn-primary {
   background: var(--brass);
   color: var(--white);
   border-color: var(--brass);
 }
 
-.btn-primary:hover:not(:disabled) {
+.modal-overlay .btn-primary:hover:not(:disabled) {
   background: #A07537;
 }
 
-.btn-secondary {
+.modal-overlay .btn-secondary {
   background: var(--white);
   color: var(--ink);
   border-color: var(--line);
-}
+}/* Responsive */
 
-/* Responsive */
+
 @media (max-width: 640px) {
-  .modal-content {
+  .modal-overlay .modal-content {
     max-width: 100%;
     max-height: 100vh;
     border-radius: 0;
   }
 
-  .form-row {
+  .modal-overlay .form-row {
     grid-template-columns: 1fr;
   }
 
-  .modal-footer {
+  .modal-overlay .modal-footer {
     flex-direction: column-reverse;
   }
 
-  .modal-footer .btn {
+  .modal-overlay .modal-footer .btn {
     width: 100%;
-  }
-}
+  }}

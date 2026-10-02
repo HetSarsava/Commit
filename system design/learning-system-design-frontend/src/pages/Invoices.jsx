@@ -78,33 +78,42 @@ const Invoices = () => {
             placeholder="Search by invoice number, company…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search invoices by invoice number or company"
           />
         </div>
-        <div className="chips">
-          <div
-            className={`chip ${filterStatus === 'ALL' ? 'on' : ''}`}
+        <div className="tabs">
+          <button
+            type="button"
+            className={`tab ${filterStatus === 'ALL' ? 'active' : ''}`}
+            aria-pressed={filterStatus === 'ALL'}
             onClick={() => setFilterStatus('ALL')}
           >
             All
-          </div>
-          <div
-            className={`chip ${filterStatus === 'UNPAID' ? 'on' : ''}`}
+          </button>
+          <button
+            type="button"
+            className={`tab ${filterStatus === 'UNPAID' ? 'active' : ''}`}
+            aria-pressed={filterStatus === 'UNPAID'}
             onClick={() => setFilterStatus('UNPAID')}
           >
             Unpaid
-          </div>
-          <div
-            className={`chip ${filterStatus === 'PARTIALLY_PAID' ? 'on' : ''}`}
+          </button>
+          <button
+            type="button"
+            className={`tab ${filterStatus === 'PARTIALLY_PAID' ? 'active' : ''}`}
+            aria-pressed={filterStatus === 'PARTIALLY_PAID'}
             onClick={() => setFilterStatus('PARTIALLY_PAID')}
           >
             Partial
-          </div>
-          <div
-            className={`chip ${filterStatus === 'PAID' ? 'on' : ''}`}
+          </button>
+          <button
+            type="button"
+            className={`tab ${filterStatus === 'PAID' ? 'active' : ''}`}
+            aria-pressed={filterStatus === 'PAID'}
             onClick={() => setFilterStatus('PAID')}
           >
             Paid
-          </div>
+          </button>
         </div>
       </div>
 

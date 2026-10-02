@@ -250,15 +250,15 @@ const PurchaseOrders = () => {
       )}
 
       {/* Tabs */}
-      <div className="filter-tabs">
+      <div className="tabs">
         <button
-          className={`filter-tab ${activeTab === 'pos' ? 'active' : ''}`}
+          className={`tab ${activeTab === 'pos' ? 'active' : ''}`}
           onClick={() => setActiveTab('pos')}
         >
           Purchase Orders
         </button>
         <button
-          className={`filter-tab ${activeTab === 'suppliers' ? 'active' : ''}`}
+          className={`tab ${activeTab === 'suppliers' ? 'active' : ''}`}
           onClick={() => setActiveTab('suppliers')}
         >
           Suppliers
@@ -267,11 +267,11 @@ const PurchaseOrders = () => {
 
       {/* PO Status Filter */}
       {activeTab === 'pos' && (
-        <div className="sub-filters">
+        <div className="tabs">
           {['all', 'DRAFT', 'SENT', 'CONFIRMED', 'PARTIAL_RECEIVED', 'RECEIVED'].map((status) => (
             <button
               key={status}
-              className={`filter-chip ${filter === status ? 'active' : ''}`}
+              className={`tab ${filter === status ? 'active' : ''}`}
               onClick={() => setFilter(status)}
             >
               {status === 'all' ? 'All' : getStatusText(status)}

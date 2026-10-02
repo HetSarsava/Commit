@@ -154,7 +154,7 @@ const Reports = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="report-tabs">
+      <div className="tabs">
         <button
           className={`tab ${activeTab === 'sales' ? 'active' : ''}`}
           onClick={() => setActiveTab('sales')}
@@ -199,20 +199,26 @@ const Reports = () => {
                 <div className="report-header">
                   <h2>Sales Report</h2>
                   <div className="report-actions">
-                    <input
-                      type="date"
-                      value={salesFilters.startDate}
-                      onChange={(e) =>
-                        setSalesFilters({ ...salesFilters, startDate: e.target.value })
-                      }
-                    />
-                    <input
-                      type="date"
-                      value={salesFilters.endDate}
-                      onChange={(e) =>
-                        setSalesFilters({ ...salesFilters, endDate: e.target.value })
-                      }
-                    />
+                    <label className="report-field">
+                      <span className="field-caption">From</span>
+                      <input
+                        type="date"
+                        value={salesFilters.startDate}
+                        onChange={(e) =>
+                          setSalesFilters({ ...salesFilters, startDate: e.target.value })
+                        }
+                      />
+                    </label>
+                    <label className="report-field">
+                      <span className="field-caption">To</span>
+                      <input
+                        type="date"
+                        value={salesFilters.endDate}
+                        onChange={(e) =>
+                          setSalesFilters({ ...salesFilters, endDate: e.target.value })
+                        }
+                      />
+                    </label>
                     <button className="btn" onClick={loadReport}>
                       Apply Filters
                     </button>
@@ -437,26 +443,32 @@ const Reports = () => {
                 <div className="report-header">
                   <h2>GST Report (GSTR-1 Format)</h2>
                   <div className="report-actions">
-                    <select
-                      value={gstFilters.month}
-                      onChange={(e) => setGSTFilters({ ...gstFilters, month: e.target.value })}
-                    >
-                      {Array.from({ length: 12 }, (_, i) => (
-                        <option key={i + 1} value={i + 1}>
-                          {new Date(2024, i).toLocaleDateString('en-IN', { month: 'long' })}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      value={gstFilters.year}
-                      onChange={(e) => setGSTFilters({ ...gstFilters, year: e.target.value })}
-                    >
-                      {[2024, 2025, 2026].map((year) => (
-                        <option key={year} value={year}>
-                          {year}
-                        </option>
-                      ))}
-                    </select>
+                    <label className="report-field">
+                      <span className="field-caption">Month</span>
+                      <select
+                        value={gstFilters.month}
+                        onChange={(e) => setGSTFilters({ ...gstFilters, month: e.target.value })}
+                      >
+                        {Array.from({ length: 12 }, (_, i) => (
+                          <option key={i + 1} value={i + 1}>
+                            {new Date(2024, i).toLocaleDateString('en-IN', { month: 'long' })}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="report-field">
+                      <span className="field-caption">Year</span>
+                      <select
+                        value={gstFilters.year}
+                        onChange={(e) => setGSTFilters({ ...gstFilters, year: e.target.value })}
+                      >
+                        {[2024, 2025, 2026].map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                     <button className="btn" onClick={loadReport}>
                       Apply Filters
                     </button>

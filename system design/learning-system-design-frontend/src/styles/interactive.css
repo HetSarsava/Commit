@@ -1,0 +1,42 @@
+/* Accessibility floor for interactive controls.
+   Loaded after all page stylesheets so it can only *enlarge* undersized
+   controls and *add* focus indicators — it never restyles a page's design. */
+
+button,
+a[href],
+input,
+select,
+textarea,
+summary,
+[role='button'],
+[role='tab'] {
+  min-height: 24px;
+}
+
+/* Compact-but-clickable controls (page-level buttons, chips, icon buttons) */
+.btn,
+.btn-sm,
+.chip,
+.action-btn,
+.icon-btn,
+.btn-icon,
+.tab,
+.p-action-btn,
+.btn-small,
+.btn-link {
+  min-height: 28px;
+  min-width: 28px;
+}
+
+/* Visible keyboard focus whenever a page forgets to define one */
+button:focus-visible,
+a[href]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role='button']:focus-visible,
+[role='tab']:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #B8863F;
+  outline-offset: 2px;
+}

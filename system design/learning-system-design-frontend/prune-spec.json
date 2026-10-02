@@ -1,0 +1,227 @@
+{
+  "pages/ActivityLogs.css": [
+    ".activity-logs-page .btn",
+    ".activity-logs-page .btn:hover",
+    ".activity-logs-page .btn-primary",
+    ".activity-logs-page .btn-primary:hover",
+    ".activity-logs-page .btn-secondary"
+  ],
+  "pages/Catalogues.css": [
+    ".catalogues-page .btn-copy",
+    ".catalogues-page .btn-copy:hover",
+    ".catalogues-page .btn-success",
+    ".catalogues-page .btn-success:hover",
+    ".catalogues-page .btn-danger",
+    ".catalogues-page .btn-danger:hover",
+    ".catalogues-page .status-draft",
+    ".catalogues-page .status-shared",
+    ".catalogues-page .status-viewed",
+    ".catalogues-page .status-expired",
+    ".catalogues-page .status-converted"
+  ],
+  "pages/ProformaInvoices.css": [
+    ".proformas-page .btn-primary",
+    ".proformas-page .btn-primary:hover",
+    ".proformas-page .btn-small",
+    ".proformas-page .btn-small:hover",
+    ".proformas-page .btn-small.btn-primary",
+    ".proformas-page .btn-small.btn-primary:hover",
+    ".proformas-page .status-pending",
+    ".proformas-page .status-accepted",
+    ".proformas-page .status-rejected",
+    ".proformas-page .status-converted"
+  ],
+  "pages/PurchaseOrders.css": [
+    ".purchase-page .btn-small",
+    ".purchase-page .btn-small:hover",
+    ".purchase-page .btn-small.btn-primary",
+    ".purchase-page .btn-small.btn-primary:hover",
+    ".purchase-page .status-badge",
+    ".purchase-page .status-draft",
+    ".purchase-page .status-sent",
+    ".purchase-page .status-confirmed",
+    ".purchase-page .status-partial",
+    ".purchase-page .status-received",
+    ".purchase-page .status-cancelled"
+  ],
+  "pages/Quotations.css": [
+    ".quotations-page .btn-primary",
+    ".quotations-page .btn-primary:hover"
+  ],
+  "pages/Reports.css": [
+    ".reports-page .btn",
+    ".reports-page .btn:hover",
+    ".reports-page .btn-primary",
+    ".reports-page .btn-primary:hover",
+    ".reports-page .btn-secondary",
+    ".reports-page .btn-secondary:hover",
+    ".reports-page .btn-danger",
+    ".reports-page .btn-danger:hover",
+    ".reports-page .btn-success",
+    ".reports-page .btn-success:hover",
+    ".reports-page .summary-card",
+    ".reports-page .summary-cards",
+    ".reports-page .summary-value",
+    ".reports-page .summary-label",
+    ".reports-page .status-badge",
+    ".reports-page .status-pending",
+    ".reports-page .status-confirmed",
+    ".reports-page .status-in_production",
+    ".reports-page .status-completed",
+    ".reports-page .status-paid",
+    ".reports-page .status-partially_paid",
+    ".reports-page .status-unpaid"
+  ],
+  "pages/Settings.css": [
+    ".settings-page .btn",
+    ".settings-page .btn:hover:not(:disabled)",
+    ".settings-page .btn:disabled",
+    ".settings-page .btn-primary",
+    ".settings-page .btn-primary:hover:not(:disabled)",
+    ".settings-page .btn-secondary",
+    ".settings-page .btn-warning",
+    ".settings-page .btn-warning:hover"
+  ],
+  "pages/Users.css": [
+    ".users-page .btn",
+    ".users-page .btn:hover",
+    ".users-page .btn-primary",
+    ".users-page .btn-primary:hover",
+    ".users-page .btn-icon",
+    ".users-page .btn-icon:hover",
+    ".users-page .btn-icon.btn-danger:hover",
+    ".users-page .status-badge",
+    ".users-page .status-badge.active",
+    ".users-page .status-badge.inactive"
+  ],
+  "pages/Inventory.css": [
+    ".inventory-page .btn",
+    ".inventory-page .btn:hover",
+    ".inventory-page .btn-secondary",
+    ".inventory-page .btn-secondary:hover",
+    ".inventory-page .btn-icon",
+    ".inventory-page .btn-icon:hover",
+    ".inventory-page .btn-icon.danger:hover"
+  ],
+  "pages/Notifications.css": [
+    ".notifications-page .btn",
+    ".notifications-page .btn:hover",
+    ".notifications-page .btn-secondary",
+    ".notifications-page .btn-secondary:hover"
+  ],
+  "pages/Orders.css": [
+    ".orders-page .btn",
+    ".orders-page .btn:hover",
+    ".orders-page .btn-primary"
+  ],
+  "pages/Invoices.css": [
+    ".invoices-page .btn",
+    ".invoices-page .btn:hover",
+    ".invoices-page .btn-primary",
+    ".invoices-page .btn-primary:hover"
+  ],
+  "pages/InvoiceDetail.css": [
+    ".invoice-detail .btn",
+    ".invoice-detail .btn:hover",
+    ".invoice-detail .btn-primary",
+    ".invoice-detail .btn-primary:hover",
+    ".invoice-detail .btn-whatsapp",
+    ".invoice-detail .btn-whatsapp:hover",
+    ".invoice-detail .btn-danger",
+    ".invoice-detail .btn-danger:hover"
+  ],
+  "pages/OrderDetail.css": [
+    ".order-detail .btn",
+    ".order-detail .btn:hover",
+    ".order-detail .btn-convert",
+    ".order-detail .btn-whatsapp",
+    ".order-detail .btn-whatsapp:hover",
+    ".order-detail .btn-danger",
+    ".order-detail .btn-danger:hover",
+    "[@media (max-width: 768px)] .order-detail .btn"
+  ],
+  "pages/QuotationDetail.css": [
+    ".quotation-detail .btn",
+    ".quotation-detail .btn:hover",
+    ".quotation-detail .btn-primary",
+    ".quotation-detail .btn-primary:hover",
+    ".quotation-detail .btn-ghost",
+    ".quotation-detail .btn-convert",
+    ".quotation-detail .btn-whatsapp",
+    ".quotation-detail .btn-whatsapp:hover",
+    "[@media (max-width: 768px)] .quotation-detail .btn"
+  ],
+  "pages/Products.css": [
+    ".products-page .btn",
+    ".products-page .btn:hover",
+    ".products-page .btn-primary",
+    ".products-page .p-action-btn",
+    ".products-page .p-action-btn:hover"
+  ],
+  "pages/Production.css": [
+    ".production-page .btn",
+    ".production-page .btn:hover",
+    ".production-page .btn-primary",
+    ".production-page .btn-primary:hover",
+    ".production-page .status-badge",
+    ".production-page .status-pending",
+    ".production-page .status-confirmed",
+    ".production-page .status-in_production",
+    ".production-page .status-completed",
+    ".production-page .status-cancelled",
+    ".production-page .summary-label",
+    ".production-page .summary-value",
+    ".production-page .summary-cards"
+  ],
+  "pages/Dispatch.css": [
+    ".dispatch-container .btn-primary",
+    ".dispatch-container .btn-primary:hover",
+    ".dispatch-container .btn-secondary",
+    ".dispatch-container .btn-secondary:hover",
+    ".dispatch-container .metric-card",
+    ".dispatch-container .metric-value",
+    ".dispatch-container .metric-label",
+    ".dispatch-container .filter-btn",
+    ".dispatch-container .filter-btn:hover",
+    ".dispatch-container .filter-btn.active",
+    ".dispatch-container .status-badge",
+    ".dispatch-container .status-pending",
+    ".dispatch-container .status-dispatched",
+    ".dispatch-container .status-transit",
+    ".dispatch-container .status-delivered",
+    ".dispatch-container .status-cancelled"
+  ],
+  "pages/Marketing.css": [
+    ".marketing-container .btn-primary",
+    ".marketing-container .btn-primary:hover",
+    ".marketing-container .btn-secondary",
+    ".marketing-container .btn-secondary:hover",
+    ".marketing-container .metric-card",
+    ".marketing-container .metric-value",
+    ".marketing-container .metric-label",
+    ".marketing-container .status-badge",
+    ".marketing-container .status-active",
+    ".marketing-container .status-paused",
+    ".marketing-container .status-completed",
+    ".marketing-container .status-cancelled"
+  ],
+  "pages/WhatsAppEnhanced.css": [
+    ".whatsapp-page-enhanced .btn",
+    ".whatsapp-page-enhanced .btn-primary",
+    ".whatsapp-page-enhanced .btn-primary:hover",
+    ".whatsapp-page-enhanced .btn-secondary",
+    ".whatsapp-page-enhanced .btn-secondary:hover",
+    ".whatsapp-page-enhanced .btn-danger",
+    ".whatsapp-page-enhanced .btn-danger:hover",
+    ".whatsapp-page-enhanced .btn-sm",
+    ".whatsapp-page-enhanced .topbar",
+    ".whatsapp-page-enhanced .topbar h1",
+    ".whatsapp-page-enhanced .topbar .sub",
+    ".whatsapp-page-enhanced .search-input",
+    ".whatsapp-page-enhanced .search-input:focus",
+    ".whatsapp-page-enhanced .chat-input",
+    ".whatsapp-page-enhanced .panel-header",
+    ".whatsapp-page-enhanced .panel-header h3"
+  
+]
+}

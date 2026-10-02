@@ -222,11 +222,11 @@ const Catalogues = () => {
       )}
 
       {/* Filter Tabs */}
-      <div className="sub-filters">
+      <div className="tabs">
         {['all', 'DRAFT', 'SHARED', 'VIEWED', 'CONVERTED', 'EXPIRED'].map((status) => (
           <button
             key={status}
-            className={`filter-chip ${filter === status ? 'active' : ''}`}
+            className={`tab ${filter === status ? 'active' : ''}`}
             onClick={() => setFilter(status)}
           >
             {status === 'all' ? 'All' : getStatusText(status)}
@@ -529,6 +529,7 @@ const Catalogues = () => {
                     type="text"
                     value={`${window.location.origin}/catalogue/${selectedCatalogue.shareLink}`}
                     readOnly
+                    aria-label="Shareable catalogue link"
                   />
                   <button
                     className="btn-small"

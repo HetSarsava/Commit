@@ -3,10 +3,9 @@
   background: var(--canvas);
   display: flex;
   flex-direction: column;
-}
+}/* Top Bar */
 
-/* Top Bar */
-.topbar {
+.invoices-page .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -15,52 +14,26 @@
   background: var(--white);
 }
 
-.topbar h1 {
+.invoices-page .topbar h1 {
   font-size: 19px;
   font-weight: 600;
   color: var(--navy);
   margin-bottom: 2px;
 }
 
-.topbar .sub {
+.invoices-page .topbar .sub {
   font-size: 12px;
   color: var(--ink-soft);
 }
 
-.topbar-actions {
+.invoices-page .topbar-actions {
   display: flex;
   gap: 10px;
 }
 
-.btn {
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 9px 16px;
-  border-radius: 6px;
-  border: 1px solid var(--line);
-  background: var(--white);
-  color: var(--ink);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.btn:hover {
-  background: var(--canvas);
-}
-
-.btn-primary {
-  background: var(--brass);
-  color: var(--white);
-  border-color: var(--brass);
-}
-
-.btn-primary:hover {
-  background: #A07537;
-}
-
 /* Toolbar */
-.toolbar {
+
+.invoices-page .toolbar {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -69,12 +42,12 @@
   border-bottom: 1px solid var(--line);
 }
 
-.search {
+.invoices-page .search {
   flex: 1;
   max-width: 400px;
 }
 
-.search input {
+.invoices-page .search input {
   width: 100%;
   font-family: inherit;
   font-size: 13px;
@@ -87,85 +60,54 @@
   transition: all 0.15s;
 }
 
-.search input:focus {
+.invoices-page .search input:focus {
   border-color: var(--brass);
 }
-
-.chips {
-  display: flex;
-  gap: 8px;
-}
-
-.chip {
-  font-size: 12px;
-  font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 100px;
-  border: 1px solid var(--line);
-  background: var(--white);
-  color: var(--ink);
-  cursor: pointer;
-  transition: all 0.15s;
-  user-select: none;
-}
-
-.chip:hover {
-  background: var(--canvas);
-}
-
-.chip.on {
-  background: var(--navy);
-  color: var(--white);
-  border-color: var(--navy);
-}
-
 /* Content Area */
-.content-area {
+
+.invoices-page .content-area {
   flex: 1;
   padding: 24px 32px;
-}
+}/* Empty State */
 
-/* Empty State */
-.empty-state {
+.invoices-page .empty-state {
   text-align: center;
   padding: 80px 32px;
 }
 
-.empty-icon {
+.invoices-page .empty-icon {
   font-size: 64px;
   color: var(--line);
   margin-bottom: 16px;
 }
 
-.empty-state h3 {
+.invoices-page .empty-state h3 {
   font-size: 17px;
   font-weight: 600;
   color: var(--navy);
   margin-bottom: 8px;
 }
 
-.empty-state p {
+.invoices-page .empty-state p {
   font-size: 14px;
   color: var(--ink-soft);
   margin-bottom: 24px;
-}
+}/* Loading State */
 
-/* Loading State */
-.loading-state {
+.invoices-page .loading-state {
   text-align: center;
   padding: 80px 32px;
   color: var(--ink-soft);
   font-size: 14px;
-}
+}/* Invoices List */
 
-/* Invoices List */
-.invoices-list {
+.invoices-page .invoices-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   gap: 20px;
 }
 
-.invoice-card {
+.invoices-page .invoice-card {
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -174,13 +116,13 @@
   transition: all 0.2s;
 }
 
-.invoice-card:hover {
+.invoices-page .invoice-card:hover {
   border-color: var(--brass);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   transform: translateY(-2px);
 }
 
-.invoice-header {
+.invoices-page .invoice-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -189,14 +131,14 @@
   border-bottom: 1px solid var(--canvas-2);
 }
 
-.invoice-number {
+.invoices-page .invoice-number {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 15px;
   font-weight: 600;
   color: var(--navy);
 }
 
-.invoice-status {
+.invoices-page .invoice-status {
   font-size: 10.5px;
   font-weight: 600;
   text-transform: uppercase;
@@ -205,35 +147,35 @@
   border-radius: 4px;
 }
 
-.invoice-status.status-paid {
+.invoices-page .invoice-status.status-paid {
   background: var(--thread-light);
   color: var(--thread);
 }
 
-.invoice-status.status-partial {
+.invoices-page .invoice-status.status-partial {
   background: #FFF4E6;
   color: #D97706;
 }
 
-.invoice-status.status-unpaid {
+.invoices-page .invoice-status.status-unpaid {
   background: #FEF2F2;
   color: #DC2626;
 }
 
-.invoice-status.status-overdue {
+.invoices-page .invoice-status.status-overdue {
   background: #7F1D1D;
   color: var(--white);
 }
 
-.invoice-body {
+.invoices-page .invoice-body {
   margin-bottom: 16px;
 }
 
-.invoice-customer {
+.invoices-page .invoice-customer {
   margin-bottom: 12px;
 }
 
-.invoice-customer strong {
+.invoices-page .invoice-customer strong {
   display: block;
   font-size: 14.5px;
   font-weight: 600;
@@ -241,33 +183,33 @@
   margin-bottom: 2px;
 }
 
-.invoice-contact {
+.invoices-page .invoice-contact {
   font-size: 12px;
   color: var(--ink-soft);
 }
 
-.invoice-details {
+.invoices-page .invoice-details {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.invoice-meta {
+.invoices-page .invoice-meta {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
 }
 
-.invoice-meta .label {
+.invoices-page .invoice-meta .label {
   color: var(--ink-soft);
 }
 
-.invoice-meta .value {
+.invoices-page .invoice-meta .value {
   font-weight: 500;
   color: var(--ink);
 }
 
-.invoice-footer {
+.invoices-page .invoice-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -275,69 +217,62 @@
   border-top: 1px solid var(--canvas-2);
 }
 
-.invoice-amount {
+.invoices-page .invoice-amount {
   display: flex;
   align-items: baseline;
   gap: 8px;
 }
 
-.invoice-amount .label {
+.invoices-page .invoice-amount .label {
   font-size: 11px;
   color: var(--ink-soft);
 }
 
-.invoice-amount .amount {
+.invoices-page .invoice-amount .amount {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 16px;
   font-weight: 600;
   color: var(--navy);
 }
 
-.balance-due {
+.invoices-page .balance-due {
   font-size: 12px;
   font-weight: 600;
   color: #DC2626;
   padding: 4px 8px;
   background: #FEF2F2;
   border-radius: 4px;
-}
+}/* Responsive */
 
-/* Responsive */
 @media (max-width: 768px) {
-  .topbar {
+  .invoices-page .topbar {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
 
-  .topbar-actions {
+  .invoices-page .topbar-actions {
     width: 100%;
     flex-direction: column;
   }
 
-  .btn {
+  .invoices-page .btn {
     width: 100%;
   }
 
-  .toolbar {
+  .invoices-page .toolbar {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .search {
+  .invoices-page .search {
     max-width: 100%;
   }
 
-  .chips {
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-
-  .invoices-list {
+  .invoices-page .invoices-list {
     grid-template-columns: 1fr;
   }
 
-  .content-area {
+  .invoices-page .content-area {
     padding: 16px;
-  }
-}
+  }}

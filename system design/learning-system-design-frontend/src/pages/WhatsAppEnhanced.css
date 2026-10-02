@@ -1,51 +1,49 @@
-/* WhatsApp Enhanced - Phase 1 Improvements */
+/* WhatsApp Enhanced - Phase 1 Improvements
+   Every rule is scoped to .whatsapp-page-enhanced so this page can no longer
+   leak .btn/.topbar/.search-input styles into other routes. */
 
 .whatsapp-page-enhanced {
   padding: 0;
   height: 100%;
   min-height: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   background: #f8f9fa;
 }
 
-.whatsapp-tabs {
-  display: flex;
-  gap: 0;
-  background: white;
-  border-bottom: 2px solid #e9ecef;
-  padding: 0 2rem;
-  overflow-x: auto;
+.whatsapp-page-enhanced :focus-visible {
+  outline: 2px solid #B8863F;
+  outline-offset: 2px;
+}
+
+.whatsapp-page-enhanced .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Layout only — the shared .tabs/.tab classes in src/styles/ui.css own the
+   visual styling of the section tab strip. */
+.whatsapp-page-enhanced .whatsapp-tabs {
+  flex: 0 0 auto;
   min-width: 0;
 }
 
-.whatsapp-tabs .tab {
-  padding: 1rem 1.5rem;
-  background: none;
-  border: none;
-  border-bottom: 3px solid transparent;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #6c757d;
-  cursor: pointer;
-  transition: all 0.2s;
-  flex: 0 0 auto;
-}
-
-.whatsapp-tabs .tab:hover {
-  color: #1e293b;
-  background: #f8f9fa;
-}
-
-.whatsapp-tabs .tab.active {
-  color: #1C2333;
-  border-bottom-color: #B8863F;
-  background: transparent;
-}
-
-.whatsapp-content {
-  flex: 1;
-  overflow: hidden;
+/* Tab panels: the only scroll container for the non-inbox tabs */
+.whatsapp-page-enhanced .whatsapp-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
   background: #f8f9fa;
 }
 
@@ -53,7 +51,7 @@
 
 .inbox-layout-enhanced {
   display: grid;
-  grid-template-columns: 300px 1fr 280px;
+  grid-template-columns: 300px minmax(0, 1fr) 280px;
   height: 100%;
   min-height: 0;
   min-width: 0;
@@ -61,14 +59,14 @@
   position: relative;
 }
 
-.inbox-layout-enhanced > *,
-.chat-panel-enhanced {
-  min-width: 0;
+/* Explicit layout state instead of :has() */
+.inbox-layout-enhanced.info-closed {
+  grid-template-columns: 300px minmax(0, 1fr);
 }
 
-/* When info panel is hidden */
-.inbox-layout-enhanced:has(.show-panel-btn) {
-  grid-template-columns: 300px 1fr;
+.inbox-layout-enhanced > * {
+  min-width: 0;
+  min-height: 0;
 }
 
 /* ==================== CONVERSATIONS PANEL (LEFT) ==================== */
@@ -77,10 +75,13 @@
   border-right: 1px solid #e9ecef;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  min-height: 0;
   background: white;
 }
 
 .panel-header {
+  flex: 0 0 auto;
   padding: 1.25rem 1rem;
   border-bottom: 1px solid #e9ecef;
   background: #f8f9fa;
@@ -93,62 +94,31 @@
   font-weight: 600;
 }
 
-.search-input {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-family: inherit;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #B8863F;
-}
-
-/* Conversation Filter Tabs */
+/* Conversation filter row: layout only, styled by the shared
+   .tabs/.tab classes (see src/styles/ui.css). */
 .conversation-filters {
-  display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e9ecef;
-  background: white;
+  flex: 0 0 auto;
 }
 
-.filter-tab {
-  font-size: 0.75rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 100px;
-  border: none;
-  background: transparent;
-  color: #64748b;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.filter-tab:hover {
-  background: #f8f9fa;
-  color: #1e293b;
-}
-
-.filter-tab.active {
-  background: #E8DCC4;
-  color: #1C2333;
-}
-
-/* Conversations List */
+/* Conversations List — the actual scroll container of this panel */
 .conversations-list {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
 }
 
 .conversation-item {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  background: white;
+  border: 0;
+  border-bottom: 1px solid #f1f3f5;
   display: flex;
   gap: 0.75rem;
   padding: 0.875rem 1rem;
-  border-bottom: 1px solid #f1f3f5;
   cursor: pointer;
   transition: background 0.2s;
 }
@@ -159,7 +129,7 @@
 
 .conversation-item.active {
   background: #E8DCC4;
-  border-left: 3px solid #B8863F;
+  box-shadow: inset 3px 0 0 #B8863F;
 }
 
 .conversation-avatar {
@@ -192,9 +162,15 @@
   font-weight: 600;
   color: #1e293b;
   font-size: 0.9rem;
+  min-width: 0;
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .conversation-time {
+  flex: 0 0 auto;
   font-size: 0.7rem;
   color: #94a3b8;
 }
@@ -204,6 +180,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .conversation-preview {
@@ -229,8 +206,13 @@
 /* Conversation Badges (NEW!) */
 .conversation-badges {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.35rem;
   margin-top: 0.35rem;
+}
+
+.unread-badge {
+  flex: 0 0 auto;
 }
 
 .conv-badge {
@@ -257,28 +239,57 @@
 .chat-panel-enhanced {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  min-height: 0;
   background: #F7F5F0;
   position: relative;
 }
 
+/* Header never scrolls; its own content wraps/truncates instead of overflowing */
 .chat-header-enhanced {
-  padding: 0.875rem 1.5rem;
+  flex: 0 0 auto;
+  padding: 0.75rem 1rem;
   background: white;
   border-bottom: 1px solid #e9ecef;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.chat-back-btn {
+  display: none;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  background: white;
+  color: #1e293b;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.chat-back-btn:hover {
+  background: #f8f9fa;
 }
 
 .chat-header-left {
   display: flex;
   gap: 0.75rem;
   align-items: center;
+  min-width: 0;
+  flex: 1 1 220px;
 }
 
 .chat-avatar-enhanced {
   width: 40px;
   height: 40px;
+  flex: 0 0 auto;
   border-radius: 50%;
   background: linear-gradient(135deg, #1C2333, #2D3548);
   display: flex;
@@ -289,29 +300,70 @@
   font-size: 1rem;
 }
 
+.chat-header-info {
+  min-width: 0;
+}
+
 .chat-header-info h3 {
   margin: 0;
   font-size: 1rem;
   color: #1e293b;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chat-header-meta {
   font-size: 0.75rem;
   color: #64748b;
   margin-top: 0.15rem;
+  overflow-wrap: anywhere;
 }
 
-/* Automation Status Indicator (NEW!) */
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.info-toggle-btn {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  background: white;
+  color: #1e293b;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.info-toggle-btn:hover {
+  border-color: #B8863F;
+}
+
+/* Automation Status Indicator — wraps instead of pushing the header wider */
 .automation-status {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 0.875rem;
-  border-radius: 100px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.4rem 0.75rem;
+  border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 500;
+  line-height: 1.35;
   border: 1px solid;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .automation-status.active {
@@ -333,10 +385,13 @@
   background: currentColor;
 }
 
-/* Chat Messages */
+/* Chat Messages — independent scroll container between header and composer */
 .chat-messages-enhanced {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -372,6 +427,7 @@
 .message {
   display: flex;
   max-width: 65%;
+  min-width: 0;
 }
 
 .message-received {
@@ -394,7 +450,10 @@
   border-radius: 10px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   position: relative;
-  word-wrap: break-word;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   font-size: 0.875rem;
   line-height: 1.5;
 }
@@ -416,20 +475,23 @@
   text-align: right;
 }
 
-/* Chat Input */
+/* Chat Input — pinned below the scrolling message area */
 .chat-input-area {
+  flex: 0 0 auto;
   padding: 0.75rem 1rem;
   background: white;
   border-top: 1px solid #e9ecef;
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  min-width: 0;
 }
 
 .chat-attach-btn,
 .chat-template-btn {
-  width: 36px;
-  height: 36px;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: none;
   background: #f8f9fa;
@@ -448,7 +510,8 @@
 }
 
 .chat-input {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   padding: 0.65rem 1rem;
   border: 1px solid #e9ecef;
   border-radius: 20px;
@@ -464,8 +527,9 @@
 }
 
 .chat-send-btn {
-  width: 36px;
-  height: 36px;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: none;
   background: #4A7C59;
@@ -484,12 +548,14 @@
 
 /* Compose Hint (NEW!) */
 .compose-hint {
+  flex: 0 0 auto;
   font-size: 0.7rem;
   color: #64748b;
   text-align: center;
   padding: 0.5rem 1rem;
   background: #f8f9fa;
   border-top: 1px solid #e9ecef;
+  overflow-wrap: anywhere;
 }
 
 .chat-empty-state {
@@ -501,7 +567,7 @@
   color: #94a3b8;
 }
 
-.empty-icon {
+.chat-empty-state .empty-icon {
   font-size: 4rem;
   margin-bottom: 1rem;
   opacity: 0.3;
@@ -521,11 +587,14 @@
 /* ==================== INFO PANEL (RIGHT - NEW!) ==================== */
 
 .info-panel-enhanced {
-  width: 280px;
+  min-width: 0;
+  min-height: 0;
   border-left: 1px solid #e9ecef;
   background: white;
   padding: 1.25rem 1rem;
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -546,8 +615,9 @@
 }
 
 .close-panel-btn {
-  width: 24px;
-  height: 24px;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: none;
   background: #f8f9fa;
@@ -583,21 +653,26 @@
 .info-row {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   font-size: 0.8rem;
   padding: 0.35rem 0;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .info-label {
   color: #64748b;
   font-weight: 500;
+  flex: 0 0 auto;
 }
 
 .info-value {
   font-weight: 500;
   text-align: right;
   color: #1e293b;
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 
@@ -642,30 +717,8 @@
   background: #2D3548;
 }
 
-/* Show Panel Button */
-.show-panel-btn {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  background: white;
-  border: 1px solid #e9ecef;
-  border-right: none;
-  padding: 0.75rem 0.5rem;
-  border-radius: 6px 0 0 6px;
-  font-size: 0.75rem;
-  color: #64748b;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-  z-index: 10;
-}
-
-.show-panel-btn:hover {
-  background: #f8f9fa;
-  color: #1e293b;
-  padding-right: 0.75rem;
-}
+/* The info panel is toggled from the chat header (.info-toggle-btn) — the old
+   absolutely positioned .show-panel-btn was clipped and unreachable. */
 
 /* ==================== OTHER TABS (unchanged styles) ==================== */
 
@@ -682,6 +735,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   margin-bottom: 2rem;
 }
 
@@ -693,57 +748,10 @@
   font-size: 1.5rem;
 }
 
-.btn {
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  border: 1px solid;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s;
-}
-
-.btn-primary {
-  background: #1C2333;
-  color: white;
-  border-color: #1C2333;
-}
-
-.btn-primary:hover {
-  background: #2D3548;
-}
-
-.btn-secondary {
-  background: white;
-  color: #1e293b;
-  border-color: #e9ecef;
-}
-
-.btn-secondary:hover {
-  background: #f8f9fa;
-  border-color: #B8863F;
-}
-
-.btn-danger {
-  background: white;
-  color: #C4472F;
-  border-color: #F5E3DE;
-}
-
-.btn-danger:hover {
-  background: #F5E3DE;
-}
-
-.btn-sm {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.75rem;
-}
-
 /* Templates Grid */
 .templates-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));
   gap: 1.5rem;
 }
 
@@ -763,6 +771,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
   margin-bottom: 0.75rem;
 }
 
@@ -770,9 +780,12 @@
   margin: 0;
   font-size: 1.1rem;
   color: #1e293b;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .template-status {
+  flex: 0 0 auto;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   font-size: 0.7rem;
@@ -818,7 +831,8 @@
 
 .template-stats {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
   margin-bottom: 1rem;
   font-size: 0.8rem;
   color: #64748b;
@@ -826,6 +840,7 @@
 
 .template-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
@@ -841,10 +856,12 @@
   background: white;
   border: 1px solid #e9ecef;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
   transition: box-shadow 0.2s;
 }
 
@@ -856,10 +873,12 @@
   display: flex;
   gap: 1rem;
   align-items: flex-start;
-  flex: 1;
+  flex: 1 1 320px;
+  min-width: 0;
 }
 
 .automation-icon {
+  flex: 0 0 auto;
   font-size: 2rem;
   width: 48px;
   height: 48px;
@@ -870,10 +889,16 @@
   border-radius: 8px;
 }
 
+.automation-info {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .automation-info h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
   color: #1e293b;
+  overflow-wrap: anywhere;
 }
 
 .automation-info p {
@@ -881,19 +906,26 @@
   color: #64748b;
   font-size: 0.875rem;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .automation-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   font-size: 0.8rem;
   color: #94a3b8;
 }
 
+/* Actions wrap below the copy instead of overlapping it */
 .automation-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+  flex: 0 1 auto;
 }
 
 /* Toggle Switch */
@@ -969,7 +1001,7 @@ input:checked + .toggle-slider:before {
 /* Analytics Grid */
 .analytics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
   gap: 1.5rem;
   margin-bottom: 3rem;
 }
@@ -1048,8 +1080,8 @@ input:checked + .toggle-slider:before {
 }
 
 /* Loading & Empty States */
-.loading-state,
-.empty-state {
+.whatsapp-page-enhanced .loading-state,
+.whatsapp-page-enhanced .empty-state {
   text-align: center;
   padding: 2rem;
   color: #94a3b8;
@@ -1060,31 +1092,70 @@ input:checked + .toggle-slider:before {
 
 @media (max-width: 1200px) {
   .inbox-layout-enhanced {
-    grid-template-columns: 280px 1fr 260px;
+    grid-template-columns: 280px minmax(0, 1fr) 260px;
+  }
+
+  .inbox-layout-enhanced.info-closed {
+    grid-template-columns: 280px minmax(0, 1fr);
   }
 }
 
+/* Tablet: the info panel becomes an overlay drawer that is always reopenable */
 @media (max-width: 1024px) {
-  .inbox-layout-enhanced {
-    grid-template-columns: 260px 1fr;
+  .inbox-layout-enhanced,
+  .inbox-layout-enhanced.info-closed {
+    grid-template-columns: 260px minmax(0, 1fr);
   }
 
-  .info-panel-enhanced {
-    display: none;
-  }
-
-  .show-panel-btn {
-    display: none;
+  .inbox-layout-enhanced.info-open .info-panel-enhanced {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(320px, 88%);
+    z-index: 20;
+    box-shadow: -12px 0 32px rgba(28, 35, 51, 0.12);
   }
 }
 
+/* Phones: exactly one pane, with an explicit Back affordance */
 @media (max-width: 768px) {
-  .inbox-layout-enhanced {
+  .inbox-layout-enhanced,
+  .inbox-layout-enhanced.info-open,
+  .inbox-layout-enhanced.info-closed {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .conversations-panel-enhanced {
+  .inbox-layout-enhanced.mobile-list .chat-panel-enhanced {
     display: none;
+  }
+
+  .inbox-layout-enhanced.mobile-chat .conversations-panel-enhanced {
+    display: none;
+  }
+
+  .conversations-panel-enhanced {
+    border-right: 0;
+  }
+
+  .chat-back-btn {
+    display: inline-flex;
+  }
+
+  /* In the mobile list view the lead-info drawer stays out of the way;
+     it is reachable from the chat header once a conversation is open. */
+  .inbox-layout-enhanced.mobile-list .info-panel-enhanced {
+    display: none;
+  }
+
+  .whatsapp-page-enhanced .topbar {
+    padding: 1rem 1.25rem;
+  }
+
+  .templates-section,
+  .automation-section,
+  .analytics-section {
+    padding: 1.25rem;
   }
 
   .templates-grid {
@@ -1092,6 +1163,51 @@ input:checked + .toggle-slider:before {
   }
 
   .analytics-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
   }
 }
+
+/* Narrow widths: keep the chat header to two compact rows so the message list
+   and composer keep their space. Text truncates instead of stacking. */
+@media (max-width: 600px) {
+  .chat-header-enhanced {
+    padding: 0.6rem 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .chat-header-info h3 {
+    font-size: 0.95rem;
+  }
+
+  .chat-header-meta {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .automation-status {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 420px) {
+  .chat-header-actions {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    /* status truncates beside the toggle instead of stacking a third row */
+    flex-wrap: nowrap;
+  }
+
+  /* Decorative avatar is dropped first — names and status stay readable */
+  .chat-avatar-enhanced {
+    display: none;
+  }
+}
+
+/* Phone tab behaviour is handled by the shared .tabs class, which wraps
+   instead of scrolling so no label is ever clipped. */

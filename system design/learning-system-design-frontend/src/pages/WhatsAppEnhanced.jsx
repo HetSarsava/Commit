@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { whatsappAPI } from '../api/whatsapp';
 import './WhatsAppEnhanced.css';
 
@@ -15,6 +15,11 @@ const WhatsAppEnhanced = () => {
   const [automations, setAutomations] = useState([]);
   const [analytics, setAnalytics] = useState({});
   const [showInfoPanel, setShowInfoPanel] = useState(true);
+  // Compact viewports show either the list or the chat — never a squashed triple column.
+  const [mobilePane, setMobilePane] = useState('list');
+
+  const messagesRef = useRef(null);
+  const activeTabRef = useRef(null);
 
   useEffect(() => {
     if (activeTab === 'inbox') {
@@ -26,6 +31,18 @@ const WhatsAppEnhanced = () => {
     } else if (activeTab === 'analytics') {
       loadAnalytics();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  // Keep the newest message visible without ever scrolling the page shell.
+  useEffect(() => {
+    const node = messagesRef.current;
+    if (node) node.scrollTop = node.scrollHeight;
+  }, [messages, selectedConversation?.id]);
+
+  // The tab strip scrolls horizontally on phones — follow the selected tab.
+  useEffect(() => {
+    activeTabRef.current?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }, [activeTab]);
 
   const loadConversations = async () => {
@@ -92,20 +109,31 @@ const WhatsAppEnhanced = () => {
 
   const handleSelectConversation = (conversation) => {
     setSelectedConversation(conversation);
+    setMobilePane('chat');
     loadMessages(conversation.id);
   };
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (event) => {
+    event?.preventDefault();
     if (!messageInput.trim() || !selectedConversation) return;
 
+    const outgoing = messageInput;
     try {
       const newMessage = await whatsappAPI.sendMessage({
         conversationId: selectedConversation.id,
         to: selectedConversation.phoneNumber,
-        message: messageInput,
+        message: outgoing,
       });
 
-      setMessages([...messages, newMessage]);
+      setMessages((previous) => [
+        ...previous,
+        newMessage || {
+          id: `local-${Date.now()}`,
+          direction: 'OUTGOING',
+          message: outgoing,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
       setMessageInput('');
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -150,14 +178,6 @@ const WhatsAppEnhanced = () => {
     return `${hours}:${minutes}`;
   };
 
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
   // Filter conversations based on active filter
   const filteredConversations = conversations.filter(conv => {
     // Search filter
@@ -178,49 +198,54 @@ const WhatsAppEnhanced = () => {
     return true; // 'all' filter
   });
 
+  const tabs = [
+    { id: 'inbox', label: '💬 Inbox' },
+    { id: 'templates', label: '📋 Templates' },
+    { id: 'automation', label: '⚙️ Automation' },
+    { id: 'analytics', label: '📊 Analytics' },
+  ];
+
   return (
-    <div className="whatsapp-page-enhanced">
+    <div className="whatsapp-page-enhanced page-fill">
       {/* Top Bar */}
       <div className="topbar">
-        <div>
+        <div className="topbar-text">
           <h1>WhatsApp Business</h1>
           <div className="sub">CRM-Integrated messaging with automation</div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="whatsapp-tabs">
-        <button
-          className={`tab ${activeTab === 'inbox' ? 'active' : ''}`}
-          onClick={() => setActiveTab('inbox')}
-        >
-          💬 Inbox
-        </button>
-        <button
-          className={`tab ${activeTab === 'templates' ? 'active' : ''}`}
-          onClick={() => setActiveTab('templates')}
-        >
-          📋 Templates
-        </button>
-        <button
-          className={`tab ${activeTab === 'automation' ? 'active' : ''}`}
-          onClick={() => setActiveTab('automation')}
-        >
-          ⚙️ Automation
-        </button>
-        <button
-          className={`tab ${activeTab === 'analytics' ? 'active' : ''}`}
-          onClick={() => setActiveTab('analytics')}
-        >
-          📊 Analytics
-        </button>
+      <div className="whatsapp-tabs tabs" role="tablist" aria-label="WhatsApp sections">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            ref={activeTab === tab.id ? activeTabRef : undefined}
+            role="tab"
+            id={`whatsapp-tab-${tab.id}`}
+            aria-selected={activeTab === tab.id}
+            aria-controls={`whatsapp-panel-${tab.id}`}
+            className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Content */}
       <div className="whatsapp-content">
-        {/* ==================== INBOX TAB (Enhanced with 3 columns) ==================== */}
+        {/* ==================== INBOX TAB (3 columns, explicit pane state) ==================== */}
         {activeTab === 'inbox' && (
-          <div className="inbox-layout-enhanced">
+          <div
+            id="whatsapp-panel-inbox"
+            role="tabpanel"
+            aria-labelledby="whatsapp-tab-inbox"
+            className={`inbox-layout-enhanced ${showInfoPanel ? 'info-open' : 'info-closed'} ${
+              mobilePane === 'chat' ? 'mobile-chat' : 'mobile-list'
+            }`}
+          >
             {/* Conversations List */}
             <div className="conversations-panel-enhanced">
               <div className="panel-header">
@@ -229,27 +254,35 @@ const WhatsAppEnhanced = () => {
                   type="text"
                   className="search-input"
                   placeholder="Search conversations..."
+                  aria-label="Search conversations"
+                  autoComplete="off"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
 
               {/* Filter Tabs */}
-              <div className="conversation-filters">
+              <div className="conversation-filters tabs tabs-compact" role="group" aria-label="Filter conversations">
                 <button
-                  className={`filter-tab ${conversationFilter === 'all' ? 'active' : ''}`}
+                  type="button"
+                  className={`tab ${conversationFilter === 'all' ? 'active' : ''}`}
+                  aria-pressed={conversationFilter === 'all'}
                   onClick={() => setConversationFilter('all')}
                 >
                   All
                 </button>
                 <button
-                  className={`filter-tab ${conversationFilter === 'needs-human' ? 'active' : ''}`}
+                  type="button"
+                  className={`tab ${conversationFilter === 'needs-human' ? 'active' : ''}`}
+                  aria-pressed={conversationFilter === 'needs-human'}
                   onClick={() => setConversationFilter('needs-human')}
                 >
                   Needs human
                 </button>
                 <button
-                  className={`filter-tab ${conversationFilter === 'bot-handling' ? 'active' : ''}`}
+                  type="button"
+                  className={`tab ${conversationFilter === 'bot-handling' ? 'active' : ''}`}
+                  aria-pressed={conversationFilter === 'bot-handling'}
                   onClick={() => setConversationFilter('bot-handling')}
                 >
                   Bot handling
@@ -265,12 +298,14 @@ const WhatsAppEnhanced = () => {
                   </div>
                 ) : (
                   filteredConversations.map((conv) => (
-                    <div
+                    <button
+                      type="button"
                       key={conv.id}
                       className={`conversation-item ${selectedConversation?.id === conv.id ? 'active' : ''}`}
+                      aria-current={selectedConversation?.id === conv.id ? 'true' : undefined}
                       onClick={() => handleSelectConversation(conv)}
                     >
-                      <div className="conversation-avatar">
+                      <div className="conversation-avatar" aria-hidden="true">
                         {conv.customerName?.[0] || '?'}
                       </div>
                       <div className="conversation-info">
@@ -294,7 +329,7 @@ const WhatsAppEnhanced = () => {
                           )}
                         </div>
                       </div>
-                    </div>
+                    </button>
                   ))
                 )}
               </div>
@@ -305,12 +340,25 @@ const WhatsAppEnhanced = () => {
               {selectedConversation ? (
                 <>
                   <div className="chat-header-enhanced">
+                    <button
+                      type="button"
+                      className="chat-back-btn"
+                      onClick={() => {
+                        setMobilePane('list');
+                        setShowInfoPanel(false);
+                      }}
+                      aria-label="Back to conversations"
+                    >
+                      <span aria-hidden="true">←</span>
+                    </button>
                     <div className="chat-header-left">
-                      <div className="chat-avatar-enhanced">
+                      <div className="chat-avatar-enhanced" aria-hidden="true">
                         {selectedConversation.customerName?.[0] || '?'}
                       </div>
                       <div className="chat-header-info">
-                        <h3>{selectedConversation.customerName}</h3>
+                        <h3 title={selectedConversation.customerName}>
+                          {selectedConversation.customerName}
+                        </h3>
                         <div className="chat-header-meta">
                           {selectedConversation.leadStage && (
                             <span>Lead: {selectedConversation.leadStage}</span>
@@ -322,54 +370,75 @@ const WhatsAppEnhanced = () => {
                       </div>
                     </div>
 
-                    {/* Automation Status Indicator */}
-                    <div className={`automation-status ${selectedConversation.automationStatus === 'PAUSED' ? 'paused' : 'active'}`}>
-                      <span className="status-dot"></span>
-                      {selectedConversation.automationStatus === 'PAUSED' ? (
-                        'Automation paused — human reply needed'
-                      ) : (
-                        'Automation active'
-                      )}
+                    <div className="chat-header-actions">
+                      {/* Automation Status Indicator */}
+                      <div
+                        className={`automation-status ${selectedConversation.automationStatus === 'PAUSED' ? 'paused' : 'active'}`}
+                        title={selectedConversation.automationStatus === 'PAUSED' ? 'Automation paused — human reply needed' : 'Automation active'}
+                      >
+                        <span className="status-dot" aria-hidden="true"></span>
+                        {selectedConversation.automationStatus === 'PAUSED' ? (
+                          'Automation paused — human reply needed'
+                        ) : (
+                          'Automation active'
+                        )}
+                      </div>
+
+                      {/* Info panel is always reachable — no clipped edge handle */}
+                      <button
+                        type="button"
+                        className="info-toggle-btn"
+                        onClick={() => setShowInfoPanel((previous) => !previous)}
+                        aria-expanded={showInfoPanel}
+                        aria-controls="whatsapp-info-panel"
+                      >
+                        {showInfoPanel ? 'Hide info' : 'Lead info'}
+                      </button>
                     </div>
                   </div>
 
-                  <div className="chat-messages-enhanced">
-                    {messages.map((msg) => (
-                      <div key={msg.id} className="message-wrapper">
-                        {/* Sender Tag */}
-                        {msg.direction === 'OUTGOING' && (
-                          <div className={`sender-tag ${msg.isAutomated ? 'automated' : 'manual'}`}>
-                            {msg.isAutomated ? '⚙ Automated' : 'YOU (Manual)'}
-                          </div>
-                        )}
+                  <div className="chat-messages-enhanced" ref={messagesRef} role="log" aria-live="polite">
+                    {messages.length === 0 ? (
+                      <div className="empty-state">No messages yet</div>
+                    ) : (
+                      messages.map((msg) => (
+                        <div key={msg.id} className="message-wrapper">
+                          {/* Sender Tag */}
+                          {msg.direction === 'OUTGOING' && (
+                            <div className={`sender-tag ${msg.isAutomated ? 'automated' : 'manual'}`}>
+                              {msg.isAutomated ? '⚙ Automated' : 'YOU (Manual)'}
+                            </div>
+                          )}
 
-                        <div
-                          className={`message ${msg.direction === 'OUTGOING' ? 'message-sent' : 'message-received'}`}
-                        >
-                          <div className="message-bubble">
-                            {msg.message}
-                            <div className="message-time">{formatTime(msg.timestamp)}</div>
+                          <div
+                            className={`message ${msg.direction === 'OUTGOING' ? 'message-sent' : 'message-received'}`}
+                          >
+                            <div className="message-bubble">
+                              {msg.message}
+                              <div className="message-time">{formatTime(msg.timestamp)}</div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
 
-                  <div className="chat-input-area">
-                    <button className="chat-attach-btn" title="Attach file">📎</button>
-                    <button className="chat-template-btn" title="Use template">📋</button>
+                  <form className="chat-input-area" onSubmit={handleSendMessage}>
+                    <button type="button" className="chat-attach-btn" title="Attach file" aria-label="Attach file">📎</button>
+                    <button type="button" className="chat-template-btn" title="Use template" aria-label="Use template">📋</button>
                     <input
                       type="text"
                       className="chat-input"
-                      placeholder={`Type a message...`}
+                      placeholder="Type a message..."
+                      aria-label="Message"
+                      autoComplete="off"
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     />
-                    <button className="chat-send-btn" onClick={handleSendMessage}>
-                      ➤
+                    <button type="submit" className="chat-send-btn" aria-label="Send message">
+                      <span aria-hidden="true">➤</span>
                     </button>
-                  </div>
+                  </form>
 
                   <div className="compose-hint">
                     Replying as you — automation will {selectedConversation.automationStatus === 'PAUSED' ? 'stay paused until resumed' : 'continue after your reply'}
@@ -377,24 +446,30 @@ const WhatsAppEnhanced = () => {
                 </>
               ) : (
                 <div className="chat-empty-state">
-                  <div className="empty-icon">💬</div>
+                  <div className="empty-icon" aria-hidden="true">💬</div>
                   <h3>Select a conversation</h3>
                   <p>Choose a conversation from the list to start chatting</p>
                 </div>
               )}
             </div>
 
-            {/* Info Panel (NEW!) */}
+            {/* Info Panel */}
             {selectedConversation && showInfoPanel && (
-              <div className="info-panel-enhanced">
+              <aside
+                id="whatsapp-info-panel"
+                className="info-panel-enhanced"
+                aria-label="Lead information"
+              >
                 <div className="info-panel-header">
                   <h3>Lead Information</h3>
                   <button
+                    type="button"
                     className="close-panel-btn"
                     onClick={() => setShowInfoPanel(false)}
                     title="Hide panel"
+                    aria-label="Hide lead information"
                   >
-                    ✕
+                    <span aria-hidden="true">✕</span>
                   </button>
                 </div>
 
@@ -438,41 +513,35 @@ const WhatsAppEnhanced = () => {
 
                 <div className="info-section">
                   <h4>Quick Actions</h4>
-                  <button className="info-action-btn primary">
+                  <button type="button" className="info-action-btn primary">
                     📄 Open Quotation
                   </button>
-                  <button className="info-action-btn">
+                  <button type="button" className="info-action-btn">
                     📋 View Full Lead
                   </button>
-                  <button className="info-action-btn">
+                  <button type="button" className="info-action-btn">
                     📦 Send Catalogue
                   </button>
-                  <button className="info-action-btn">
+                  <button type="button" className="info-action-btn">
                     ⚙️ Resume Automation
                   </button>
                 </div>
-              </div>
-            )}
-
-            {/* Show Info Panel Button (when hidden) */}
-            {selectedConversation && !showInfoPanel && (
-              <button
-                className="show-panel-btn"
-                onClick={() => setShowInfoPanel(true)}
-                title="Show info panel"
-              >
-                ◀ Info
-              </button>
+              </aside>
             )}
           </div>
         )}
 
-        {/* ==================== TEMPLATES TAB (unchanged) ==================== */}
+        {/* ==================== TEMPLATES TAB ==================== */}
         {activeTab === 'templates' && (
-          <div className="templates-section">
+          <div
+            id="whatsapp-panel-templates"
+            role="tabpanel"
+            aria-labelledby="whatsapp-tab-templates"
+            className="templates-section"
+          >
             <div className="templates-header">
               <h2>Message Templates</h2>
-              <button className="btn btn-primary">+ Create Template</button>
+              <button type="button" className="btn btn-primary">+ Create Template</button>
             </div>
 
             <div className="templates-grid">
@@ -493,13 +562,14 @@ const WhatsAppEnhanced = () => {
                   </div>
                   <div className="template-actions">
                     <button
+                      type="button"
                       className="btn btn-sm btn-primary"
                       onClick={() => handleSendTemplate(template)}
                     >
                       Send
                     </button>
-                    <button className="btn btn-sm btn-secondary">Edit</button>
-                    <button className="btn btn-sm btn-danger">Delete</button>
+                    <button type="button" className="btn btn-sm btn-secondary">Edit</button>
+                    <button type="button" className="btn btn-sm btn-danger">Delete</button>
                   </div>
                 </div>
               ))}
@@ -507,31 +577,37 @@ const WhatsAppEnhanced = () => {
           </div>
         )}
 
-        {/* ==================== AUTOMATION TAB (unchanged) ==================== */}
+        {/* ==================== AUTOMATION TAB ==================== */}
         {activeTab === 'automation' && (
-          <div className="automation-section">
+          <div
+            id="whatsapp-panel-automation"
+            role="tabpanel"
+            aria-labelledby="whatsapp-tab-automation"
+            className="automation-section"
+          >
             <div className="automation-header">
               <h2>WhatsApp Automations</h2>
-              <button className="btn btn-primary">+ Create Automation</button>
+              <button type="button" className="btn btn-primary">+ Create Automation</button>
             </div>
 
             <div className="automation-list">
               {automations.map((automation) => (
                 <div key={automation.id} className="automation-card">
                   <div className="automation-main">
-                    <div className="automation-icon">⚙️</div>
+                    <div className="automation-icon" aria-hidden="true">⚙️</div>
                     <div className="automation-info">
                       <h3>{automation.name}</h3>
                       <p>{automation.description}</p>
                       <div className="automation-meta">
                         <span>Trigger: {automation.trigger}</span>
-                        <span>•</span>
+                        <span aria-hidden="true">•</span>
                         <span>Sent: {automation.executionCount} times</span>
                       </div>
                     </div>
                   </div>
                   <div className="automation-actions">
                     <label className="toggle-switch">
+                      <span className="visually-hidden">{`Enable ${automation.name}`}</span>
                       <input
                         type="checkbox"
                         checked={automation.enabled}
@@ -539,8 +615,8 @@ const WhatsAppEnhanced = () => {
                       />
                       <span className="toggle-slider"></span>
                     </label>
-                    <button className="btn btn-sm btn-secondary">Edit</button>
-                    <button className="btn btn-sm btn-danger">Delete</button>
+                    <button type="button" className="btn btn-sm btn-secondary">Edit</button>
+                    <button type="button" className="btn btn-sm btn-danger">Delete</button>
                   </div>
                 </div>
               ))}
@@ -561,14 +637,19 @@ const WhatsAppEnhanced = () => {
           </div>
         )}
 
-        {/* ==================== ANALYTICS TAB (unchanged) ==================== */}
+        {/* ==================== ANALYTICS TAB ==================== */}
         {activeTab === 'analytics' && (
-          <div className="analytics-section">
+          <div
+            id="whatsapp-panel-analytics"
+            role="tabpanel"
+            aria-labelledby="whatsapp-tab-analytics"
+            className="analytics-section"
+          >
             <h2>WhatsApp Analytics</h2>
 
             <div className="analytics-grid">
               <div className="analytics-card">
-                <div className="analytics-icon">💬</div>
+                <div className="analytics-icon" aria-hidden="true">💬</div>
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.totalConversations || 0}</div>
                   <div className="analytics-label">Total Conversations</div>
@@ -576,7 +657,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">📤</div>
+                <div className="analytics-icon" aria-hidden="true">📤</div>
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.messagesSent || 0}</div>
                   <div className="analytics-label">Messages Sent</div>
@@ -584,7 +665,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">📥</div>
+                <div className="analytics-icon" aria-hidden="true">📥</div>
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.messagesReceived || 0}</div>
                   <div className="analytics-label">Messages Received</div>
@@ -592,7 +673,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">✅</div>
+                <div className="analytics-icon" aria-hidden="true">✅</div>
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.deliveryRate || 0}%</div>
                   <div className="analytics-label">Delivery Rate</div>
@@ -600,7 +681,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">👁️</div>
+                <div className="analytics-icon" aria-hidden="true">👁️</div>
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.readRate || 0}%</div>
                   <div className="analytics-label">Read Rate</div>
@@ -608,7 +689,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">💰</div>
+                <div className="analytics-icon" aria-hidden="true">💰</div>
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.leadsGenerated || 0}</div>
                   <div className="analytics-label">Leads Generated</div>
@@ -616,7 +697,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">⚡</div>
+                <div className="analytics-icon" aria-hidden="true">⚡</div>
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.avgResponseTime || '0'}</div>
                   <div className="analytics-label">Avg Response Time</div>
@@ -624,7 +705,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">🤖</div>
+                <div className="analytics-icon" aria-hidden="true">🤖</div>
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.automatedMessages || 0}</div>
                   <div className="analytics-label">Automated Messages</div>

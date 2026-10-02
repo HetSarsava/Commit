@@ -275,30 +275,39 @@ const QuotationBuilder = ({ quotation = null, mode = 'create', onClose, onSucces
                         <small>{item.product.sku}</small>
                       </div>
                       <div className="product-inputs">
-                        <input
-                          type="number"
-                          placeholder="Qty"
-                          value={item.quantity}
-                          onChange={(e) => updateQuantity(item.productId, e.target.value)}
-                          min={item.product.moq}
-                          disabled={isViewMode}
-                        />
-                        <input
-                          type="number"
-                          placeholder="Price"
-                          value={item.unitPrice}
-                          onChange={(e) => updatePrice(item.productId, e.target.value)}
-                          step="0.01"
-                          disabled={isViewMode}
-                        />
-                        <input
-                          type="number"
-                          placeholder="Discount"
-                          value={item.discount}
-                          onChange={(e) => updateDiscount(item.productId, e.target.value)}
-                          step="0.01"
-                          disabled={isViewMode}
-                        />
+                        <label className="product-field">
+                          <span className="field-annotation">Qty</span>
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => updateQuantity(item.productId, e.target.value)}
+                            min={item.product.moq}
+                            disabled={isViewMode}
+                            aria-label={`Quantity of ${item.product.name} (minimum ${item.product.moq})`}
+                          />
+                        </label>
+                        <label className="product-field">
+                          <span className="field-annotation">Price (₹)</span>
+                          <input
+                            type="number"
+                            value={item.unitPrice}
+                            onChange={(e) => updatePrice(item.productId, e.target.value)}
+                            step="0.01"
+                            disabled={isViewMode}
+                            aria-label={`Unit price of ${item.product.name} in rupees`}
+                          />
+                        </label>
+                        <label className="product-field">
+                          <span className="field-annotation">Discount (₹)</span>
+                          <input
+                            type="number"
+                            value={item.discount}
+                            onChange={(e) => updateDiscount(item.productId, e.target.value)}
+                            step="0.01"
+                            disabled={isViewMode}
+                            aria-label={`Rupee discount on ${item.product.name}`}
+                          />
+                        </label>
                         <span className="item-total">
                           ₹{((item.quantity * item.unitPrice) - (item.discount || 0)).toLocaleString('en-IN')}
                         </span>
@@ -384,7 +393,7 @@ const QuotationBuilder = ({ quotation = null, mode = 'create', onClose, onSucces
                     <span>₹{totals.subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="pricing-row">
-                    <span>
+                    <label className="discount-field">
                       Discount:
                       <input
                         type="number"
@@ -395,9 +404,10 @@ const QuotationBuilder = ({ quotation = null, mode = 'create', onClose, onSucces
                         step="0.1"
                         style={{ width: '60px', marginLeft: '8px' }}
                         disabled={isViewMode}
+                        aria-label="Overall quotation discount percent (0 to 100)"
                       />
                       %
-                    </span>
+                    </label>
                     <span>-₹{totals.discountAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="pricing-row">
@@ -424,6 +434,7 @@ const QuotationBuilder = ({ quotation = null, mode = 'create', onClose, onSucces
                   placeholder="Add any special notes or instructions..."
                   rows="2"
                   disabled={isViewMode}
+                  aria-label="Additional notes for this quotation"
                 />
               </div>
 
@@ -435,6 +446,7 @@ const QuotationBuilder = ({ quotation = null, mode = 'create', onClose, onSucces
                   onChange={(e) => setTermsConditions(e.target.value)}
                   rows="3"
                   disabled={isViewMode}
+                  aria-label="Terms and conditions"
                 />
               </div>
             </div>

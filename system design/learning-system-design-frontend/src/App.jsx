@@ -23,7 +23,9 @@ import Catalogues from './pages/Catalogues';
 import ProformaInvoices from './pages/ProformaInvoices';
 import Dispatch from './pages/Dispatch';
 import Marketing from './pages/Marketing';
-import WhatsApp from './pages/WhatsApp';
+// NOTE: './pages/WhatsApp' is deliberately NOT imported. It is an unrouted legacy
+// page, and importing it pulled WhatsApp.css into the bundle, where its unscoped
+// rules (e.g. `.whatsapp-tabs .tab`) silently overrode the live WhatsApp page.
 import WhatsAppEnhanced from './pages/WhatsAppEnhanced';
 
 // Protected Route Component with Layout

@@ -111,6 +111,7 @@ const Products = () => {
               placeholder="Search products, SKU…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Search products by name or SKU"
             />
           </div>
           <div className={`chip ${filterCategory !== 'ALL' ? 'on' : ''}`} onClick={() => setFilterCategory(filterCategory === 'ALL' ? 'SHIRTS' : 'ALL')}>

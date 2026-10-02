@@ -153,7 +153,7 @@ const Settings = () => {
       </div>
 
       {/* Tabs */}
-      <div className="settings-tabs">
+      <div className="tabs">
         <button
           className={`tab ${activeTab === 'company' ? 'active' : ''}`}
           onClick={() => setActiveTab('company')}

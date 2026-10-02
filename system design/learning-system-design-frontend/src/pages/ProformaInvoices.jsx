@@ -175,11 +175,11 @@ const ProformaInvoices = () => {
       )}
 
       {/* Filter Tabs */}
-      <div className="sub-filters">
+      <div className="tabs">
         {['all', 'PENDING', 'ACCEPTED', 'CONVERTED', 'REJECTED'].map((status) => (
           <button
             key={status}
-            className={`filter-chip ${filter === status ? 'active' : ''}`}
+            className={`tab ${filter === status ? 'active' : ''}`}
             onClick={() => setFilter(status)}
           >
             {status === 'all' ? 'All' : getStatusText(status)}

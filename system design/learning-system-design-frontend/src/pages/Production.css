@@ -4,10 +4,9 @@
   background: var(--canvas);
   display: flex;
   flex-direction: column;
-}
+}/* Top Bar */
 
-/* Top Bar */
-.topbar {
+.production-page .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -16,52 +15,26 @@
   background: var(--white);
 }
 
-.topbar h1 {
+.production-page .topbar h1 {
   font-size: 19px;
   font-weight: 600;
   color: var(--navy);
   margin-bottom: 2px;
 }
 
-.topbar .sub {
+.production-page .topbar .sub {
   font-size: 12px;
   color: var(--ink-soft);
 }
 
-.topbar-actions {
+.production-page .topbar-actions {
   display: flex;
   gap: 10px;
 }
 
-.btn {
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 9px 16px;
-  border-radius: 6px;
-  border: 1px solid var(--line);
-  background: var(--white);
-  color: var(--ink);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.btn:hover {
-  background: var(--canvas);
-}
-
-.btn-primary {
-  background: var(--brass);
-  color: var(--white);
-  border-color: var(--brass);
-}
-
-.btn-primary:hover {
-  background: #A07537;
-}
-
 /* Summary Bar */
-.summary-bar {
+
+.production-page .summary-bar {
   display: flex;
   gap: 24px;
   padding: 16px 32px;
@@ -70,7 +43,7 @@
   overflow-x: auto;
 }
 
-.summary-item {
+.production-page .summary-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -78,22 +51,14 @@
   min-width: 80px;
 }
 
-.summary-count {
+.production-page .summary-count {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 24px;
   font-weight: 700;
 }
-
-.summary-label {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--ink-soft);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
 /* Kanban Board */
-.kanban-board {
+
+.production-page .kanban-board {
   flex: 1;
   display: flex;
   gap: 16px;
@@ -103,7 +68,7 @@
   min-width: 0;
 }
 
-.kanban-column {
+.production-page .kanban-column {
   flex: 0 0 280px;
   display: flex;
   flex-direction: column;
@@ -115,7 +80,7 @@
   min-height: 0;
 }
 
-.column-header {
+.production-page .column-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -125,7 +90,7 @@
   border-bottom: 1px solid var(--line);
 }
 
-.column-title {
+.production-page .column-title {
   font-size: 13px;
   font-weight: 600;
   color: var(--navy);
@@ -133,7 +98,7 @@
   letter-spacing: 0.03em;
 }
 
-.column-count {
+.production-page .column-count {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 12px;
   font-weight: 600;
@@ -144,7 +109,7 @@
   border: 1px solid var(--line);
 }
 
-.column-body {
+.production-page .column-body {
   flex: 1;
   padding: 12px;
   overflow-y: auto;
@@ -153,15 +118,14 @@
   gap: 12px;
 }
 
-.empty-column {
+.production-page .empty-column {
   text-align: center;
   padding: 32px 16px;
   color: var(--ink-soft);
   font-size: 13px;
-}
+}/* Production Card */
 
-/* Production Card */
-.production-card {
+.production-page .production-card {
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -171,24 +135,24 @@
   user-select: none;
 }
 
-.production-card:hover {
+.production-page .production-card:hover {
   border-color: var(--brass);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.production-card:active {
+.production-page .production-card:active {
   cursor: grabbing;
   opacity: 0.6;
 }
 
-.card-header {
+.production-page .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 }
 
-.order-ref {
+.production-page .order-ref {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11px;
   font-weight: 600;
@@ -198,7 +162,7 @@
   border-radius: 4px;
 }
 
-.worker-badge {
+.production-page .worker-badge {
   font-size: 10px;
   font-weight: 600;
   color: var(--thread);
@@ -209,11 +173,11 @@
   letter-spacing: 0.02em;
 }
 
-.card-body {
+.production-page .card-body {
   margin-bottom: 10px;
 }
 
-.product-name {
+.production-page .product-name {
   font-size: 13.5px;
   font-weight: 600;
   color: var(--navy);
@@ -221,7 +185,7 @@
   line-height: 1.3;
 }
 
-.product-meta {
+.production-page .product-meta {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -229,7 +193,7 @@
   color: var(--ink-soft);
 }
 
-.custom-tag {
+.production-page .custom-tag {
   font-weight: 600;
   color: var(--rust);
   background: #FEF2F2;
@@ -239,7 +203,7 @@
   letter-spacing: 0.02em;
 }
 
-.card-footer {
+.production-page .card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -247,7 +211,7 @@
   border-top: 1px solid var(--canvas-2);
 }
 
-.customer-name {
+.production-page .customer-name {
   font-size: 11.5px;
   color: var(--ink);
   font-weight: 500;
@@ -257,13 +221,13 @@
   text-overflow: ellipsis;
 }
 
-.due-date {
+.production-page .due-date {
   font-size: 10.5px;
   color: var(--ink-soft);
   white-space: nowrap;
 }
 
-.card-notes {
+.production-page .card-notes {
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid var(--canvas-2);
@@ -271,73 +235,69 @@
   color: var(--ink-soft);
   font-style: italic;
   line-height: 1.4;
-}
+}/* Loading */
 
-/* Loading */
-.loading-container {
+.production-page .loading-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
 }
 
-.loading-spinner {
+.production-page .loading-spinner {
   font-size: 16px;
   color: var(--navy);
-}
+}/* Scrollbar Styling */
 
-/* Scrollbar Styling */
-.kanban-board::-webkit-scrollbar,
-.column-body::-webkit-scrollbar {
+.production-page .kanban-board::-webkit-scrollbar,
+.production-page .column-body::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.kanban-board::-webkit-scrollbar-track,
-.column-body::-webkit-scrollbar-track {
+.production-page .kanban-board::-webkit-scrollbar-track,
+.production-page .column-body::-webkit-scrollbar-track {
   background: var(--canvas);
   border-radius: 4px;
 }
 
-.kanban-board::-webkit-scrollbar-thumb,
-.column-body::-webkit-scrollbar-thumb {
+.production-page .kanban-board::-webkit-scrollbar-thumb,
+.production-page .column-body::-webkit-scrollbar-thumb {
   background: var(--line);
   border-radius: 4px;
 }
 
-.kanban-board::-webkit-scrollbar-thumb:hover,
-.column-body::-webkit-scrollbar-thumb:hover {
+.production-page .kanban-board::-webkit-scrollbar-thumb:hover,
+.production-page .column-body::-webkit-scrollbar-thumb:hover {
   background: var(--ink-soft);
-}
+}/* Responsive */
 
-/* Responsive */
 @media (max-width: 768px) {
-  .topbar {
+  .production-page .topbar {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
 
-  .topbar-actions {
+  .production-page .topbar-actions {
     width: 100%;
     flex-direction: column;
   }
 
-  .btn {
+  .production-page .btn {
     width: 100%;
   }
 
-  .summary-bar {
+  .production-page .summary-bar {
     padding: 12px 16px;
     gap: 16px;
   }
 
-  .kanban-board {
+  .production-page .kanban-board {
     padding: 16px;
     gap: 12px;
   }
 
-  .kanban-column {
+  .production-page .kanban-column {
     flex: 0 0 260px;
-  }
-}
+  }}

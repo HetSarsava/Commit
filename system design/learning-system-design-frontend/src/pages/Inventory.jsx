@@ -193,15 +193,15 @@ const Inventory = () => {
       )}
 
       {/* Filter Tabs */}
-      <div className="filter-tabs">
+      <div className="tabs">
         <button
-          className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
+          className={`tab ${filter === 'all' ? 'active' : ''}`}
           onClick={() => setFilter('all')}
         >
           All Materials
         </button>
         <button
-          className={`filter-tab ${filter === 'lowStock' ? 'active' : ''}`}
+          className={`tab ${filter === 'lowStock' ? 'active' : ''}`}
           onClick={() => setFilter('lowStock')}
         >
           Low Stock

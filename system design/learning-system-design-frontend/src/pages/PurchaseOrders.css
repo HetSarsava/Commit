@@ -2,49 +2,15 @@
   min-height: 100vh;
   background: var(--canvas);
 }
-
-/* Sub Filters */
-.sub-filters {
-  display: flex;
-  gap: 8px;
-  padding: 16px 32px;
-  background: var(--white);
-  border-bottom: 1px solid var(--line);
-  flex-wrap: wrap;
-}
-
-.filter-chip {
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 7px 16px;
-  border-radius: 20px;
-  border: 1px solid var(--line);
-  background: var(--white);
-  color: var(--ink);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.filter-chip:hover {
-  background: var(--canvas);
-  border-color: var(--navy);
-}
-
-.filter-chip.active {
-  background: var(--navy);
-  color: var(--white);
-  border-color: var(--navy);
-}
-
 /* PO List */
-.po-list {
+
+.purchase-page .po-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.po-card {
+.purchase-page .po-card {
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -52,12 +18,12 @@
   transition: all 0.2s;
 }
 
-.po-card:hover {
+.purchase-page .po-card:hover {
   box-shadow: 0 4px 12px rgba(28, 35, 51, 0.08);
   transform: translateY(-2px);
 }
 
-.po-header {
+.purchase-page .po-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -66,7 +32,7 @@
   background: var(--canvas);
 }
 
-.po-header h3 {
+.purchase-page .po-header h3 {
   font-size: 16px;
   font-weight: 600;
   color: var(--navy);
@@ -74,90 +40,43 @@
   font-family: 'IBM Plex Mono', monospace;
 }
 
-.po-supplier {
+.purchase-page .po-supplier {
   font-size: 13px;
   color: var(--ink-soft);
   margin: 0;
 }
 
-.po-header-right {
+.purchase-page .po-header-right {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.po-amount {
+.purchase-page .po-amount {
   font-size: 18px;
   font-weight: 600;
   color: var(--navy);
   font-family: 'IBM Plex Mono', monospace;
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 6px 14px;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: 1px solid;
-}
-
-.status-draft {
-  background: #F3F4F6;
-  color: #6B7280;
-  border-color: #D1D5DB;
-}
-
-.status-sent {
-  background: #DBEAFE;
-  color: #1E40AF;
-  border-color: #93C5FD;
-}
-
-.status-confirmed {
-  background: #D1FAE5;
-  color: #065F46;
-  border-color: #6EE7B7;
-}
-
-.status-partial {
-  background: #FEF3C7;
-  color: #92400E;
-  border-color: #FCD34D;
-}
-
-.status-received {
-  background: #D1FAE5;
-  color: #065F46;
-  border-color: #6EE7B7;
-}
-
-.status-cancelled {
-  background: #FEE2E2;
-  color: #991B1B;
-  border-color: #FCA5A5;
-}
-
-.po-body {
+.purchase-page .po-body {
   padding: 20px 24px;
 }
 
-.po-info {
+.purchase-page .po-info {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
 }
 
-.po-info-item {
+.purchase-page .po-info-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.po-info-item .label {
+.purchase-page .po-info-item .label {
   font-size: 11px;
   font-weight: 600;
   color: var(--ink-soft);
@@ -165,19 +84,19 @@
   letter-spacing: 0.05em;
 }
 
-.po-info-item span:last-child {
+.purchase-page .po-info-item span:last-child {
   font-size: 14px;
   font-weight: 500;
   color: var(--navy);
 }
 
-.po-items {
+.purchase-page .po-items {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.po-item {
+.purchase-page .po-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -187,20 +106,20 @@
   border: 1px solid var(--line);
 }
 
-.po-item-name {
+.purchase-page .po-item-name {
   font-size: 13px;
   font-weight: 600;
   color: var(--navy);
 }
 
-.po-item-qty {
+.purchase-page .po-item-qty {
   font-size: 13px;
   font-weight: 600;
   color: var(--ink);
   font-family: 'IBM Plex Mono', monospace;
 }
 
-.po-footer {
+.purchase-page .po-footer {
   display: flex;
   gap: 10px;
   padding: 16px 24px;
@@ -208,43 +127,15 @@
   background: var(--canvas);
 }
 
-.btn-small {
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: 1px solid var(--line);
-  background: var(--white);
-  color: var(--ink);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.btn-small:hover {
-  background: var(--navy);
-  color: var(--white);
-  border-color: var(--navy);
-}
-
-.btn-small.btn-primary {
-  background: var(--brass);
-  color: var(--white);
-  border-color: var(--brass);
-}
-
-.btn-small.btn-primary:hover {
-  background: #9a6e30;
-}
-
 /* Suppliers Grid */
-.suppliers-grid {
+
+.purchase-page .suppliers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
 }
 
-.supplier-card {
+.purchase-page .supplier-card {
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -252,12 +143,12 @@
   transition: all 0.2s;
 }
 
-.supplier-card:hover {
+.purchase-page .supplier-card:hover {
   box-shadow: 0 4px 12px rgba(28, 35, 51, 0.08);
   transform: translateY(-2px);
 }
 
-.supplier-card h3 {
+.purchase-page .supplier-card h3 {
   font-size: 16px;
   font-weight: 600;
   color: var(--navy);
@@ -266,19 +157,19 @@
   border-bottom: 2px solid var(--canvas);
 }
 
-.supplier-info {
+.purchase-page .supplier-info {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-.supplier-info-item {
+.purchase-page .supplier-info-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.supplier-info-item .label {
+.purchase-page .supplier-info-item .label {
   font-size: 11px;
   font-weight: 600;
   color: var(--ink-soft);
@@ -286,26 +177,25 @@
   letter-spacing: 0.05em;
 }
 
-.supplier-info-item span:last-child {
+.purchase-page .supplier-info-item span:last-child {
   font-size: 13px;
   color: var(--navy);
 }
 
-.supplier-info-item .mono {
+.purchase-page .supplier-info-item .mono {
   font-family: 'IBM Plex Mono', monospace;
   font-weight: 600;
-}
+}/* Modal Specific */
 
-/* Modal Specific */
-.modal-content.large {
+.purchase-page .modal-content.large {
   max-width: 900px;
 }
 
-.modal-body {
+.purchase-page .modal-body {
   padding: 28px;
 }
 
-.form-section {
+.purchase-page .form-section {
   margin: 28px 0;
   padding: 24px;
   background: var(--canvas);
@@ -313,21 +203,21 @@
   border: 1px solid var(--line);
 }
 
-.form-section-header {
+.purchase-page .form-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.form-section-header h3 {
+.purchase-page .form-section-header h3 {
   font-size: 15px;
   font-weight: 600;
   color: var(--navy);
   margin: 0;
 }
 
-.po-item-form {
+.purchase-page .po-item-form {
   padding: 20px;
   background: var(--white);
   border-radius: 8px;
@@ -336,7 +226,7 @@
   position: relative;
 }
 
-.btn-remove {
+.purchase-page .btn-remove {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -356,51 +246,46 @@
   transition: all 0.2s;
 }
 
-.btn-remove:hover {
+.purchase-page .btn-remove:hover {
   background: #DC2626;
   color: var(--white);
   border-color: #DC2626;
-}
+}/* Responsive */
 
-/* Responsive */
 @media (max-width: 768px) {
-  .sub-filters {
-    padding: 12px 16px;
-  }
 
-  .po-header {
+  .purchase-page .po-header {
     flex-direction: column;
     gap: 16px;
   }
 
-  .po-header-right {
+  .purchase-page .po-header-right {
     width: 100%;
     justify-content: space-between;
   }
 
-  .po-info {
+  .purchase-page .po-info {
     grid-template-columns: 1fr;
   }
 
-  .po-footer {
+  .purchase-page .po-footer {
     flex-direction: column;
   }
 
-  .btn-small {
+  .purchase-page .btn-small {
     width: 100%;
   }
 
-  .suppliers-grid {
+  .purchase-page .suppliers-grid {
     grid-template-columns: 1fr;
   }
 
-  .form-section-header {
+  .purchase-page .form-section-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
 
-  .form-section-header .btn-small {
+  .purchase-page .form-section-header .btn-small {
     width: 100%;
-  }
-}
+  }}

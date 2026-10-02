@@ -1,57 +1,60 @@
+/* ============================================================
+   Application shell
+   Single layout model:
+   .app-layout (owns viewport height)
+     ├── .rail (docked icon rail / compact drawer)
+     └── .main-content (fills remaining width)
+          ├── .app-topbar (fixed height, never scrolls)
+          └── .page-content (THE page scroll container)
+   ============================================================ */
+
 .app-layout {
   display: flex;
   height: 100vh;
+  height: 100dvh; /* avoids mobile browser chrome clipping the shell */
   min-height: 0;
-  overflow: hidden;
+  overflow: hidden; /* the shell itself never scrolls; .page-content does */
+  background: var(--canvas);
 }
 
-/* Expandable Icon Rail */
+/* ---------- Rail ---------- */
+
 .rail {
+  position: relative;
+  flex: 0 0 auto; /* in flow: no margin-left math, no horizontal overflow */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   width: 64px;
+  padding: 14px 6px;
   background: var(--navy);
-  flex-shrink: 0;
+  overflow: visible; /* must NOT clip the header controls */
+  transition: width 0.25s ease;
+  z-index: 120;
+}
+
+.rail.open {
+  width: 220px;
+  padding: 14px 12px;
+}
+
+.rail-header {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 0;
-  gap: 4px;
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 100;
-  transition: width 0.3s ease;
-  overflow-x: hidden;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+  gap: 10px;
+  min-height: 0;
 }
 
-.rail.expanded {
-  width: 220px;
-  align-items: stretch;
-  padding: 20px 12px;
-}
-
-/* Rail Header */
-.rail-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  padding: 0 8px;
-  min-height: 32px;
-}
-
-.rail.expanded .rail-header {
-  padding: 0 8px 20px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+.rail.open .rail-header {
+  flex-direction: row;
 }
 
 .rail-mark {
-  width: 32px;
-  height: 32px;
-  border-radius: 7px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
   background: var(--brass);
   color: var(--navy);
   font-family: 'IBM Plex Mono', monospace;
@@ -60,62 +63,80 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.rail-mark:hover {
-  transform: scale(1.05);
+  flex: 0 0 auto;
 }
 
 .rail-title {
-  font-size: 13px;
+  display: none;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--white);
   letter-spacing: 0.5px;
   white-space: nowrap;
-  opacity: 0;
-  animation: fadeIn 0.3s ease 0.2s forwards;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
+.rail.open .rail-title {
+  display: block;
 }
 
-/* Toggle Button */
+/* Rail toggle — always in flow, always fully visible + 40px target */
 .rail-toggle {
-  position: absolute;
-  right: -12px;
-  top: 80px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--brass);
-  color: var(--navy);
-  border: 2px solid var(--canvas);
-  display: flex;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: var(--brass);
+  color: var(--navy);
+  font-size: 14px;
+  line-height: 1;
   cursor: pointer;
-  font-size: 10px;
-  transition: all 0.2s;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .rail-toggle:hover {
   background: var(--white);
-  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .rail-toggle:active {
-  transform: scale(0.95);
+  transform: scale(0.94);
 }
 
-/* Navigation Icons */
+.rail-toggle:focus-visible {
+  outline: 3px solid var(--white);
+  outline-offset: 2px;
+}
+
+/* Nav items scroll inside the rail; the rail itself never clips its header */
+.rail-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+.rail-footer {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .rail-icon {
   appearance: none;
   -webkit-appearance: none;
@@ -123,115 +144,120 @@
   background: transparent;
   font: inherit;
   width: 100%;
-  height: 38px;
+  height: 40px;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
+  padding: 0 8px;
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.15s ease;
-  position: relative;
-  padding: 0 8px;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.rail.expanded .rail-icon {
+.rail.open .rail-icon {
   justify-content: flex-start;
 }
 
 .rail-icon .icon {
-  flex-shrink: 0;
-  width: 24px;
+  flex: 0 0 24px;
   text-align: center;
 }
 
 .rail-icon .label {
+  display: none;
   font-size: 13.5px;
   white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.rail.expanded .rail-icon .label {
-  opacity: 1;
-  animation: fadeIn 0.3s ease 0.15s forwards;
+.rail.open .rail-icon .label {
+  display: block;
 }
 
 .rail-icon:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .rail-icon.active {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   color: var(--white);
   font-weight: 500;
 }
 
-/* Tooltip on hover (only when collapsed) */
-.rail:not(.expanded) .rail-icon::after {
-  content: attr(title);
-  position: absolute;
-  left: 60px;
-  background: var(--navy-light);
-  color: var(--white);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-  z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+.rail-icon:focus-visible,
+.topbar-menu-btn:focus-visible,
+.user-info:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
 }
 
-.rail:not(.expanded) .rail-icon:hover::after {
-  opacity: 1;
+/* Compact drawer scrim (inert unless open) */
+.rail-backdrop {
+  display: none;
+  border: 0;
+  padding: 0;
 }
 
-/* Main Content */
+/* ---------- Main content ---------- */
+
 .main-content {
-  flex: 1;
-  margin-left: 64px;
-  height: 100vh;
-  min-height: 0;
+  flex: 1 1 auto;
   min-width: 0;
-  background: var(--canvas);
-  overflow-x: hidden;
-  transition: margin-left 0.3s ease;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  background: var(--canvas);
 }
 
-.rail.expanded ~ .main-content {
-  margin-left: 220px;
-}
-
-/* Top Bar */
 .app-topbar {
+  flex: 0 0 auto;
   height: 64px;
-  background: var(--white);
-  border-bottom: 1px solid var(--line);
+  min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  position: sticky;
-  top: 0;
+  gap: 12px;
+  padding: 0 20px;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
   z-index: 90;
 }
 
+.topbar-menu-btn {
+  display: none;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--navy);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.topbar-menu-btn:hover {
+  background: var(--canvas);
+}
+
 .topbar-spacer {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  min-width: 0;
 }
 
 /* User Info */
@@ -239,10 +265,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
   padding: 6px 12px 6px 6px;
   border-radius: 8px;
-  transition: all 0.15s;
-  cursor: pointer;
+  transition: background 0.15s ease;
 }
 
 .user-info:hover {
@@ -252,6 +278,7 @@
 .user-avatar {
   width: 36px;
   height: 36px;
+  flex: 0 0 auto;
   border-radius: 8px;
   background: var(--brass);
   color: var(--white);
@@ -267,6 +294,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .user-name {
@@ -274,6 +302,9 @@
   font-weight: 600;
   color: var(--navy);
   line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-role {
@@ -285,53 +316,99 @@
   line-height: 1;
 }
 
-/* Page Content */
+/* The one scrolling region for page content */
 .page-content {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
 }
 
-/* Responsive */
+/* Pages that own an internal scroller ask for a definite height. */
+.page-content > .page-fill {
+  height: 100%;
+  min-height: 0;
+}
+
+/* ---------- Compact (drawer) navigation ---------- */
+
 @media (max-width: 900px) {
-  .rail.expanded {
-    width: 64px;
-    align-items: center;
-    padding: 20px 0;
+  .rail,
+  .rail.open {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(272px, 84vw);
+    padding: 14px 12px;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: 0 0 32px rgba(0, 0, 0, 0.35);
+    z-index: 200;
   }
 
-  .rail-toggle {
-    display: none;
+  .rail.open {
+    transform: translateX(0);
   }
 
-  .rail-title,
-  .rail-icon .label {
-    display: none;
+  /* Compact rail always shows labels — collapsed icons-only nav traps mobile users */
+  .rail .rail-header {
+    flex-direction: row;
   }
 
-  .main-content {
-    margin-left: 64px !important;
+  .rail .rail-title {
+    display: block;
+  }
+
+  .rail .rail-icon {
+    justify-content: flex-start;
+  }
+
+  .rail .rail-icon .label {
+    display: block;
+  }
+
+  .rail-backdrop.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(28, 35, 51, 0.45);
+    z-index: 150;
+    cursor: pointer;
+  }
+
+  .topbar-menu-btn {
+    display: inline-flex;
+  }
+
+  .app-topbar {
+    padding: 0 14px;
   }
 }
 
-@media (max-width: 600px) {
-  .rail {
-    width: 54px;
+@media (max-width: 480px) {
+  .app-topbar {
+    height: 58px;
   }
 
-  .main-content {
-    margin-left: 54px !important;
+  .user-info {
+    padding-right: 4px;
   }
+}
 
-  .rail-icon {
-    height: 34px;
-    font-size: 14px;
+@media (max-width: 430px) {
+  .user-details {
+    display: none; /* keeps the topbar from overflowing on phones */
   }
+}
 
-  .rail-mark {
-    width: 28px;
-    height: 28px;
-    font-size: 11px;
+@media (prefers-reduced-motion: reduce) {
+  .rail,
+  .rail-toggle,
+  .rail-icon,
+  .user-info {
+    transition: none;
   }
 }

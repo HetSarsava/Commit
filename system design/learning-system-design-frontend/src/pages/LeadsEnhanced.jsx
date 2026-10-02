@@ -169,15 +169,15 @@ const LeadsEnhanced = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="tab-navigation">
+      <div className="tabs">
         <button
-          className={`tab-btn ${activeTab === 'pipeline' ? 'active' : ''}`}
+          className={`tab ${activeTab === 'pipeline' ? 'active' : ''}`}
           onClick={() => setActiveTab('pipeline')}
         >
           Pipeline View
         </button>
         <button
-          className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+          className={`tab ${activeTab === 'analytics' ? 'active' : ''}`}
           onClick={() => setActiveTab('analytics')}
         >
           Analytics & Performance
@@ -188,9 +188,9 @@ const LeadsEnhanced = () => {
       {activeTab === 'pipeline' && (
         <>
           {/* Pipeline Stages Filter */}
-          <div className="pipeline-stages">
+          <div className="tabs">
             <button
-              className={`stage-chip ${selectedStage === 'ALL' ? 'active' : ''}`}
+              className={`tab ${selectedStage === 'ALL' ? 'active' : ''}`}
               onClick={() => setSelectedStage('ALL')}
             >
               <span>All</span>
@@ -202,7 +202,7 @@ const LeadsEnhanced = () => {
               return (
                 <button
                   key={stage.key}
-                  className={`stage-chip ${selectedStage === stage.key ? 'active' : ''}`}
+                  className={`tab ${selectedStage === stage.key ? 'active' : ''}`}
                   onClick={() => setSelectedStage(stage.key)}
                   style={{
                     '--stage-color': stage.color,
@@ -221,33 +221,42 @@ const LeadsEnhanced = () => {
             <input
               type="text"
               placeholder="Search leads..."
+              aria-label="Search leads"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
             />
-            <select
-              value={filterSource}
-              onChange={(e) => setFilterSource(e.target.value)}
-              className="filter-select"
-            >
-              <option value="ALL">All Sources</option>
-              {leadSources.map((source) => (
-                <option key={source} value={source}>
-                  {formatSource(source)}
-                </option>
-              ))}
-            </select>
-            <select
-              value={filterPriority}
-              onChange={(e) => setFilterPriority(e.target.value)}
-              className="filter-select"
-            >
-              <option value="ALL">All Priorities</option>
-              <option value="HOT">Hot</option>
-              <option value="WARM">Warm</option>
-              <option value="NORMAL">Normal</option>
-              <option value="COLD">Cold</option>
-            </select>
+            <label className="filter-field">
+              <span className="field-caption">Source</span>
+              <select
+                value={filterSource}
+                onChange={(e) => setFilterSource(e.target.value)}
+                aria-label="Lead source"
+                className="filter-select"
+              >
+                <option value="ALL">All Sources</option>
+                {leadSources.map((source) => (
+                  <option key={source} value={source}>
+                    {formatSource(source)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="filter-field">
+              <span className="field-caption">Priority</span>
+              <select
+                value={filterPriority}
+                onChange={(e) => setFilterPriority(e.target.value)}
+                aria-label="Lead priority"
+                className="filter-select"
+              >
+                <option value="ALL">All Priorities</option>
+                <option value="HOT">Hot</option>
+                <option value="WARM">Warm</option>
+                <option value="NORMAL">Normal</option>
+                <option value="COLD">Cold</option>
+              </select>
+            </label>
           </div>
 
           {/* Leads List */}

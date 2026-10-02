@@ -80,6 +80,7 @@ const Orders = () => {
             placeholder="Search by order number, PO number…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search orders by order number or PO number"
           />
         </div>
         <div className={`chip ${filterStatus !== 'ALL' ? 'on' : ''}`} onClick={() => setFilterStatus(filterStatus === 'ALL' ? 'CONFIRMED' : 'ALL')}>
