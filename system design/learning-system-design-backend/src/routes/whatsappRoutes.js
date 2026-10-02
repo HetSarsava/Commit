@@ -10,12 +10,16 @@ router.use(auth);
 
 // Get all conversations
 router.get('/conversations', whatsappController.getConversations);
+router.post('/conversations', whatsappController.createConversation);
+router.put('/conversations/:conversationId/read', whatsappController.markAsRead);
 
 // Get messages for a conversation
 router.get('/conversations/:conversationId/messages', whatsappController.getMessages);
 
 // Send a message
 router.post('/send', whatsappController.sendMessage);
+router.post('/send-template', whatsappController.sendTemplate);
+router.post('/send-production-update', whatsappController.sendProductionUpdate);
 
 // ==================== TEMPLATES ====================
 

@@ -9,7 +9,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "node prisma/seed.js"
+    "prisma:seed": "node prisma/seed.js",
+    "test": "node --test test/*.test.js"
   },
   "NOTE": "Prisma scripts are only needed if USE_MOCK_DB=false. By default, mock data is used.",
   "keywords": [
@@ -41,10 +42,14 @@
     "puppeteer": "^22.15.0",
     "socket.io": "^4.7.5",
     "xlsx": "^0.18.5",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "libphonenumber-js": "^1.12.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.4",
     "prisma": "^5.18.0"
+  },
+  "engines": {
+    "node": ">=22.13.0"
   }
 }

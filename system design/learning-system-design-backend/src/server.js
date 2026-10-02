@@ -41,6 +41,12 @@ connectDB();
 // Security middleware
 app.use(helmet());
 
+// Meta signs the original bytes. Mount before JSON parsing, auth, access logging,
+// and the CRM rate limiter (verification query strings contain a secret token).
+const { webhookRouter } = require('./routes/whatsappWebhook');
+const { service: whatsappService } = require('./services/whatsapp');
+app.use('/api/whatsapp/webhook', webhookRouter(whatsappService));
+
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

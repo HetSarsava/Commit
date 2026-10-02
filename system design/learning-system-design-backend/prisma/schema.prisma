@@ -42,6 +42,7 @@ model User {
   activities    Activity[]
 
   @@map("users")
+  whatsappMessages WhatsappMessage[]
 }
 
 // ============================================
@@ -132,6 +133,7 @@ model Lead {
   @@index([status])
   @@index([salesPersonId])
   @@index([source])
+  whatsappConversations WhatsappConversation[]
 }
 
 // ============================================
@@ -174,6 +176,7 @@ model Customer {
   catalogues      CatalogueShare[]
 
   @@map("customers")
+  whatsappConversations WhatsappConversation[]
 }
 
 // ============================================
@@ -701,4 +704,49 @@ model Activity {
   @@map("activities")
   @@index([leadId])
   @@index([userId])
+}
+
+// WhatsApp records are independent of transport acceptance; statuses come from Meta.
+model WhatsappConversation {
+  id String @id @default(uuid())
+  phoneNumber String @unique
+  customerName String
+  customerId String?
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  leadId String?
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  lastMessage String @default("")
+  lastMessageAt DateTime @default(now())
+  lastInboundAt DateTime?
+  unreadCount Int @default(0)
+  messages WhatsappMessage[]
+  @@map("whatsapp_conversations")
+}
+model WhatsappMessage {
+  id String @id @default(uuid())
+  conversationId String
+  conversation WhatsappConversation @relation(fields: [conversationId], references: [id], onDelete: Restrict)
+  messageId String? @unique
+  message String @db.Text
+  direction String
+  status String
+  timestamp DateTime @default(now())
+  statusAt DateTime?
+  failure Json?
+  metadata Json?
+  sentBy String?
+  sender User? @relation(fields: [sentBy], references: [id], onDelete: SetNull)
+  relatedId String?
+  messageType String @default("TEXT")
+  @@index([conversationId, timestamp])
+  @@map("whatsapp_messages")
+}
+model WhatsappStatusEvent {
+  id String @id
+  messageId String
+  status String
+  timestamp DateTime
+  failure Json?
+  @@index([messageId])
+  @@map("whatsapp_status_events")
 }
