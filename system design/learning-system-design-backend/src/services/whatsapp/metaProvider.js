@@ -78,6 +78,10 @@ class MetaProvider {
 
   async send({ to, message, template }) {
     const { phoneId } = this.config();
+    if (this.env.WHATSAPP_DEMO_MODE === 'true') {
+      const allowed = (this.env.WHATSAPP_DEMO_RECIPIENTS || '').split(',').filter(Boolean).map(value => normalizePhone(value.trim(), this.env.WHATSAPP_DEFAULT_COUNTRY));
+      if (!allowed.includes(to)) throw new WhatsAppError('This demo can only message explicitly allowed test recipients.', 403);
+    }
     const payload = { messaging_product: 'whatsapp', recipient_type: 'individual', to, ...(
       template ? { type: 'template', template } : { type: 'text', text: { preview_url: false, body: message } }
     ) };

@@ -10,7 +10,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "node prisma/seed.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "whatsapp:status": "node scripts/whatsapp-demo-status.js"
   },
   "NOTE": "Prisma scripts are only needed if USE_MOCK_DB=false. By default, mock data is used.",
   "keywords": [

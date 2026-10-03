@@ -46,6 +46,11 @@ app.use(helmet());
 const { webhookRouter } = require('./routes/whatsappWebhook');
 const { service: whatsappService } = require('./services/whatsapp');
 app.use('/api/whatsapp/webhook', webhookRouter(whatsappService));
+// Optional persistent cloud inbox; no local CRM endpoints are exposed publicly.
+if (process.env.WHATSAPP_RELAY_URL) {
+  const { RelaySync } = require('./services/whatsapp/relaySync');
+  new RelaySync({ service: whatsappService }).start();
+}
 
 // Rate limiting
 const limiter = rateLimit({

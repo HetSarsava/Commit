@@ -57,6 +57,8 @@ SQLite creates its three tables additively on first use and upgrades existing me
 
 ## Meta setup and free public HTTPS callback
 
+For a stable demo callback that queues messages while the local backend is offline, use the optional free Worker/D1 relay described in [WHATSAPP_PERSISTENT_DEMO.md](WHATSAPP_PERSISTENT_DEMO.md). The Quick Tunnel instructions below remain a temporary fallback.
+
 Use the existing Meta app and its **test number**, with your personal recipient registered in the test-number configuration. No real-number migration, purchase, paid domain, payment setup or business verification is necessary for this implementation's demo.
 
 1. Start the backend and note its `PORT`.

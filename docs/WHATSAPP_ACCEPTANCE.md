@@ -26,6 +26,18 @@
 
 Persisted optional send-request keys prevent duplicate retries across backend restarts and reject conflicting payloads/users. Tests cover concurrent attempts, failed sends, accepted responses followed by storage failure, and status reconciliation. Business-flow controller tests also verify request-key forwarding and replay. The UI prevents overlapping sends and stale message responses after changing conversations. History query inputs are strictly validated. The 22-test run includes the PostgreSQL adapter and no skips; frontend build and changed-file lint pass. The original real Meta acceptance remains the live integration evidence; follow-up send tests use mocked Meta responses.
 
+## Persistent demo follow-up — 3 October 2026
+
+- Deployed the isolated Worker/D1 inbox on Cloudflare's verified **Free ($0)** plan. Its stable callback is `https://commit-whatsapp-demo.commit-whatsapp-relay.workers.dev/api/whatsapp/webhook`. Meta callback verification succeeded and the test-app `messages` subscription was updated successfully. The temporary tunnel/gateway were stopped.
+- Approved verification/account/sync secrets are encrypted Worker secrets. The Meta sending token stays local. The local backend automatically polls the authenticated inbox and rechecks the original Meta signature before using the existing idempotent service.
+- A signed **synthetic status event**, sent while the backend was stopped, was retained once despite duplicate submission. Restarting the backend persisted it locally and acknowledged it; cloud pending count returned to zero. This transport test does not claim a new real Meta message.
+- Cloud unsigned POST and unauthorized sync requests returned 401; public CRM paths returned 404. All **26 backend tests plus six relay tests passed**, including PostgreSQL, lost-ACK recovery, recipient allowlisting and backlog limits. Worker bundle validation and deployment succeeded.
+- The private demo recipient allowlist fails closed for other numbers. No production sender, billing, paid plan or unofficial WhatsApp client was enabled.
+- Created the approved Employee system user and assigned only the Commit WA app and test WhatsApp account, with messaging and read-only phone/template asset permissions. Token generation with no scheduled expiry is prepared but not yet complete: explicit approval for Meta's named `whatsapp_business_management` API scope and private token installation are pending. The old sending token is expired, so new outbound acceptance has not been retested in this phase.
+- A fresh personal-phone message was requested for real recovery testing and has not yet been confirmed. The local backend is running again; messages arriving now will sync automatically.
+
+See `WHATSAPP_PERSISTENT_DEMO.md` for restart, deployment, privacy, retention and free-tier limits. The cloud receiver survives local downtime; viewing the CRM and sending replies still require the local backend.
+
 ## NOT TESTED
 
 - A real **failed-delivery webhook** was not induced; its processing is covered by automated tests. The real failure test was an outbound API rejection.
