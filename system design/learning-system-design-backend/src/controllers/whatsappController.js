@@ -1,4 +1,5 @@
 const { prisma } = require('../config/database');
+const { getCompany } = require('../services/companyProfile');
 const { service, store } = require('../services/whatsapp');
 const { WhatsAppError } = require('../services/whatsapp/metaProvider');
 const { parseHistoryQuery } = require('../services/whatsapp/validation');
@@ -6,7 +7,7 @@ const { parseHistoryQuery } = require('../services/whatsapp/validation');
 // Message templates
 const templates = {
   quotation: (data) => `
-🏭 *AMIT UNIFORM*
+🏭 *${data.company.name}*
 
 Dear ${data.customerName},
 
@@ -23,14 +24,14 @@ ${data.items.map((item, i) => `${i + 1}. ${item.name} - ${item.quantity} units @
 
 ✅ To proceed with the order, please reply to this message or call us.
 
-📞 Contact: +91 79 2765 4321
-📧 Email: sales@amituniform.com
+📞 Contact: ${data.company.phone}
+📧 Email: ${data.company.email}
 
-_This is an automated message from Amit Uniform CRM._
+_This is an automated message from ${data.company.name}._
   `.trim(),
 
   orderConfirmation: (data) => `
-🏭 *AMIT UNIFORM*
+🏭 *${data.company.name}*
 
 Dear ${data.customerName},
 
@@ -50,13 +51,13 @@ ${data.items.map((item, i) => `${i + 1}. ${item.name} - ${item.quantity} units`)
 
 Your order is now in production. We'll keep you updated on the progress!
 
-📞 For queries: +91 79 2765 4321
+📞 For queries: ${data.company.phone}
 
-_This is an automated message from Amit Uniform CRM._
+_This is an automated message from ${data.company.name}._
   `.trim(),
 
   productionUpdate: (data) => `
-🏭 *AMIT UNIFORM* - Production Update
+🏭 *${data.company.name}* - Production Update
 
 Dear ${data.customerName},
 
@@ -71,13 +72,13 @@ ${data.estimatedCompletion ? `📅 Expected completion: ${data.estimatedCompleti
 
 We'll notify you once ready for delivery.
 
-📞 Contact: +91 79 2765 4321
+📞 Contact: ${data.company.phone}
 
-_This is an automated message from Amit Uniform CRM._
+_This is an automated message from ${data.company.name}._
   `.trim(),
 
   paymentReminder: (data) => `
-🏭 *AMIT UNIFORM* - Payment Reminder
+🏭 *${data.company.name}* - Payment Reminder
 
 Dear ${data.customerName},
 
@@ -90,13 +91,13 @@ ${data.isOverdue ? '⚠️ This payment is overdue. Please settle at the earlies
 
 Please share payment confirmation once done.
 
-📞 For queries: +91 79 2765 4321
+📞 For queries: ${data.company.phone}
 
-_This is an automated message from Amit Uniform CRM._
+_This is an automated message from ${data.company.name}._
   `.trim(),
 
   paymentReceived: (data) => `
-🏭 *AMIT UNIFORM* - Payment Confirmation
+🏭 *${data.company.name}* - Payment Confirmation
 
 Dear ${data.customerName},
 
@@ -113,9 +114,9 @@ ${data.balanceRemaining > 0
 
 Thank you for your payment!
 
-📞 Contact: +91 79 2765 4321
+📞 Contact: ${data.company.phone}
 
-_This is an automated message from Amit Uniform CRM._
+_This is an automated message from ${data.company.name}._
   `.trim(),
 };
 
@@ -145,6 +146,7 @@ exports.sendQuotation = async (req, res, next) => {
     const validUntil = quotation.validUntil ? new Date(quotation.validUntil) : new Date(new Date(quotation.createdAt).getTime() + 30 * 86400000);
 
     const messageData = {
+      company: await getCompany(prisma),
       customerName: quotation.customer.contactPerson || quotation.customer.companyName,
       quotationNumber: quotation.quotationNumber,
       validUntil: validUntil.toLocaleDateString('en-IN'),
@@ -193,6 +195,7 @@ exports.sendOrderConfirmation = async (req, res, next) => {
     }
 
     const messageData = {
+      company: await getCompany(prisma),
       customerName: order.customer.contactPerson || order.customer.companyName,
       orderNumber: order.orderNumber,
       orderDate: new Date(order.createdAt).toLocaleDateString('en-IN'),
@@ -245,6 +248,7 @@ exports.sendPaymentReminder = async (req, res, next) => {
     const isOverdue = dueDate < new Date();
 
     const messageData = {
+      company: await getCompany(prisma),
       customerName: invoice.customer.contactPerson || invoice.customer.companyName,
       invoiceNumber: invoice.invoiceNumber,
       dueDate: dueDate.toLocaleDateString('en-IN'),
@@ -323,6 +327,6 @@ exports.sendProductionUpdate = handler(async req => {
   const order = await (prisma.salesOrder || prisma.order).findUnique({ where: { id: req.body.orderId }, include: { customer: true } });
   if (!order) throw new WhatsAppError('Order not found.', 404);
   if (typeof req.body.stage !== 'string' || !['IN_PRODUCTION','QC','PACKING','DISPATCH'].includes(req.body.stage)) throw new WhatsAppError('Invalid production stage.');
-  const message = templates.productionUpdate({ customerName: order.customer.contactPerson || order.customer.companyName, orderNumber: order.orderNumber, stage: req.body.stage });
+  const message = templates.productionUpdate({ company: await getCompany(prisma), customerName: order.customer.contactPerson || order.customer.companyName, orderNumber: order.orderNumber, stage: req.body.stage });
   return service.send({ to: order.customer.whatsapp || order.customer.mobile, message, sentBy: req.user.id, idempotencyKey: req.get?.('Idempotency-Key'), messageType: 'PRODUCTION_UPDATE', relatedId: order.id });
 });

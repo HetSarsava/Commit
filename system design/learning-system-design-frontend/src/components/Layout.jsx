@@ -1,3 +1,4 @@
+import { useCompany } from '../context/CompanyData';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -5,6 +6,7 @@ import NotificationBell from './NotificationBell';
 import './Layout.css';
 
 const Layout = ({ children }) => {
+  const company = useCompany();
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, user } = useAuth();
@@ -104,8 +106,8 @@ const Layout = ({ children }) => {
         aria-label="Main navigation"
       >
         <div className="rail-header">
-          <div className="rail-mark" aria-hidden="true">AU</div>
-          <div className="rail-title">AMIT UNIFORM</div>
+          <div className="rail-mark" aria-hidden="true">{company.initials}</div>
+          <div className="rail-title">{company.name}</div>
           <button
             className="rail-toggle"
             onClick={toggleRail}

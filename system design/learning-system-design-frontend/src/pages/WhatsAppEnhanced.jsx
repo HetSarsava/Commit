@@ -1,3 +1,4 @@
+import { useCompany } from '../context/CompanyData';
 import { useEffect, useRef, useState } from 'react';
 import { whatsappAPI } from '../api/whatsapp';
 import './WhatsAppEnhanced.css';
@@ -13,6 +14,7 @@ const messageError = text => {
 };
 
 const WhatsAppEnhanced = () => {
+  const company = useCompany();
   const [activeTab, setActiveTab] = useState('inbox');
   const [conversationFilter, setConversationFilter] = useState('all'); // all, needs-human, bot-handling
   const [searchQuery, setSearchQuery] = useState('');
@@ -350,7 +352,7 @@ const WhatsAppEnhanced = () => {
             {/* Conversations List */}
             <div className="conversations-panel-enhanced">
               <div className="panel-header">
-                <h3>Chats</h3>
+                <div className="chat-list-heading"><h3>Chats</h3>
                 <button type="button" className="btn btn-sm btn-primary" onClick={async () => {
                   const phoneNumber = window.prompt('WhatsApp number, including country code:');
                   if (!phoneNumber) return;
@@ -359,7 +361,7 @@ const WhatsAppEnhanced = () => {
                     handleSelectConversation(conversation);
                     loadConversations();
                   } catch (error) { alert(error.response?.data?.error || 'Could not start conversation.'); }
-                }}>New chat</button>
+                }}>New chat</button></div>
                 <input
                   type="text"
                   className="search-input"
@@ -654,12 +656,29 @@ const WhatsAppEnhanced = () => {
             className="templates-section"
           >
             <div className="templates-header">
-              <h2>Message Templates</h2>
+              <h2>{company.name} message examples</h2>
               <button type="button" className="btn btn-primary" disabled title="Template creation is not configured">+ Create Template</button>
             </div>
 
+            <p>Examples for your business. These drafts need WhatsApp approval before they can be sent as templates.</p>
             <div className="templates-grid">
-              {templates.map((template) => (
+              {[
+                ['Welcome', `Hello {{customer_name}}, welcome to ${company.name}. We make uniforms for schools, hospitals and businesses. How can we help you?`],
+                ['Quotation', `Hello {{customer_name}}, your uniform quotation {{quotation_number}} from ${company.name} is ready. Total: ₹{{amount}}. Please reply if you would like to place the order.`],
+                ['Order confirmation', `Hello {{customer_name}}, ${company.name} has confirmed your uniform order {{order_number}}. Expected delivery: {{delivery_date}}. Thank you!`],
+                ['Payment reminder', `Hello {{customer_name}}, ₹{{balance}} is due for invoice {{invoice_number}} from ${company.name}. Please share your payment confirmation. For help, contact ${company.phone || 'our team'}.`],
+              ].map(([title, text]) => <div className="template-card" key={title}>
+                <div className="template-header"><h3>{title}</h3><span className="template-status">Draft example</span></div>
+                <div className="template-preview">{text}</div>
+                <small>Not approved for template sending yet</small>
+              </div>)}
+            </div>
+
+            <h2>Approved test messages</h2>
+            <p>These are Meta's available test messages. Their exact approved text is shown below and will be sent unchanged.</p>
+
+            <div className="templates-grid">
+              {templates.filter(template => !template.name.startsWith('jaspers_market_')).map((template) => (
                 <div key={template.id} className="template-card">
                   <div className="template-header">
                     <h3>{template.name} ({template.language})</h3>

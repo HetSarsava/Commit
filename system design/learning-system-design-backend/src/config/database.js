@@ -10,6 +10,7 @@ if (USE_MOCK_DB) {
   // Use mock in-memory database
   const { mockPrisma } = require('../data/mockDatabase');
   prisma = mockPrisma;
+  require('../services/demoCompanyPersistence').persistDemoCompany(prisma);
 
   connectDB = async () => {
     try {

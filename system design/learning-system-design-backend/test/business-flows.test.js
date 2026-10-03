@@ -9,6 +9,7 @@ test('quotation, order, payment and production controllers use the same real ser
   const customer = { id: 'customer-1', companyName: 'Existing customer', contactPerson: 'Customer', whatsapp: '+91 98765 43210' };
   const items = [{ product: { name: 'Uniform' }, quantity: 2, unitPrice: 500 }];
   const crm = {
+    settings: { findMany: async () => ['name', 'phone', 'email'].map(key => ({ key: `company.${key}`, value: JSON.stringify({ name: 'Test Uniform Company', phone: '+91 98765 43210', email: 'sales@example.com' }[key]) })) },
     customer: { findMany: async () => [customer] },
     quotation: { findUnique: async () => ({ id: 'quote-1', quotationNumber: 'QT-1', customer, items, total: 1000, createdAt: new Date(), validUntil: new Date(Date.now()+86400000) }) },
     salesOrder: { findUnique: async () => ({ id: 'order-1', orderNumber: 'SO-1', customer, items, total: 1000, createdAt: new Date(), expectedDelivery: new Date(Date.now()+86400000) }) },
@@ -37,6 +38,8 @@ test('quotation, order, payment and production controllers use the same real ser
     const record = result.result || result;
     assert.equal(record.status, 'ACCEPTED');
     assert.equal(record.messageType, messageType);
+    assert.match(record.message, /Test Uniform Company/);
+    assert.doesNotMatch(record.message, /AMIT UNIFORM/);
     assert.equal(record.relatedId, relatedId);
     assert.equal(record.sentBy, 'user-1');
     assert.equal(record.conversationId, conversation.id);

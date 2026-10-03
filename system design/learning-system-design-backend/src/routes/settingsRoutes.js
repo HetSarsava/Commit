@@ -4,6 +4,8 @@ const settingsController = require('../controllers/settingsController');
 const { auth, requireRole } = require('../middleware/auth');
 
 // All routes require authentication
+// Only the display name is public, for the login screen.
+router.get('/branding', settingsController.getBranding);
 router.use(auth);
 
 // Get all settings (any authenticated user can view)

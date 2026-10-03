@@ -174,7 +174,7 @@ const UserModal = ({ user, onClose }) => {
                 value={formData.email}
                 onChange={handleChange}
                 className={errors.email ? 'error' : ''}
-                placeholder="user@amituniform.com"
+                placeholder="name@yourcompany.com"
                 disabled={isEdit}
               />
               {errors.email && <span className="error-message">{errors.email}</span>}

@@ -1,9 +1,11 @@
+import { useCompany } from '../context/CompanyData';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
 const Login = () => {
+  const company = useCompany();
   const navigate = useNavigate();
   const { login, error } = useAuth();
 
@@ -49,8 +51,8 @@ const Login = () => {
       {/* Left: Brand Panel */}
       <div className="brand-panel">
         <div className="brand-mark">
-          <div className="sq">AU</div>
-          <div className="txt">AMIT UNIFORM</div>
+          <div className="sq">{company.initials}</div>
+          <div className="txt">{company.name}</div>
         </div>
 
         <div className="brand-mid">
@@ -73,14 +75,14 @@ const Login = () => {
           </div>
         </div>
 
-        <div className="brand-foot">© 2026 Amit Uniform · Ahmedabad, Gujarat</div>
+        <div className="brand-foot">© {new Date().getFullYear()} {company.name}</div>
       </div>
 
       {/* Right: Form Panel */}
       <div className="form-panel">
         <div className="form-box">
           <h2>Welcome back</h2>
-          <div className="sub">Sign in to your Amit Uniform account</div>
+          <div className="sub">Sign in to your {company.name} account</div>
 
           {(localError || error) && (
             <div className="error-message">
@@ -96,7 +98,7 @@ const Login = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="admin@amituniform.com"
+                placeholder="name@yourcompany.com"
                 required
                 disabled={loading}
               />
