@@ -435,3 +435,6 @@
     display: none !important;
   }
 }
+
+.page-history { display: flex; gap: 8px; align-items: center; margin-left: 12px; }
+.page-history .btn { white-space: nowrap; }

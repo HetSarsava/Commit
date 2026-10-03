@@ -288,6 +288,8 @@ exports.getMessages = handler(async req => {
   return Promise.all((await store.messages(req.params.conversationId)).map(message => service.displayMessage(message)));
 });
 exports.createConversation = handler(req => service.createConversation(req.body.phoneNumber || req.body.to));
+exports.getCrmContext = handler(req => require('../services/whatsapp/crmContext').crmContext(service, req.params.conversationId));
+exports.linkContact = handler(req => require('../services/whatsapp/crmContext').linkContact(service, req.params.conversationId, req.body.contact));
 exports.markAsRead = handler(async req => {
   if (!await store.getConversation(req.params.conversationId)) throw new WhatsAppError('Conversation not found.', 404);
   return store.transaction(s => s.updateConversation(req.params.conversationId, { unreadCount: 0 }));

@@ -123,7 +123,7 @@ exports.createFromQuotation = async (req, res, next) => {
         terms: quotation.terms || 'Payment terms as agreed',
         notes: quotation.notes,
         status: 'PENDING',
-        createdBy: req.user.userId,
+        createdBy: req.user.id,
       },
     });
 
@@ -221,7 +221,7 @@ exports.createProforma = async (req, res, next) => {
         terms: terms || 'Payment terms as agreed',
         notes: notes || null,
         status: 'PENDING',
-        createdBy: req.user.userId,
+        createdBy: req.user.id,
       },
     });
 
@@ -347,7 +347,7 @@ exports.convertToOrder = async (req, res, next) => {
         total: proforma.total,
         status: 'PENDING',
         paymentStatus: 'UNPAID',
-        createdBy: req.user.userId,
+        createdBy: req.user.id,
       },
     });
 

@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { cataloguesAPI } from '../api/catalogues';
-import { leadsAPI } from '../api/leads';
+import apiClient from '../api/client';
 import { productsAPI } from '../api/products';
 import './Catalogues.css';
+import { useLocation } from 'react-router-dom';
 
 const Catalogues = () => {
+  const location = useLocation();
   const [catalogues, setCatalogues] = useState([]);
   const [leads, setLeads] = useState([]);
   const [products, setProducts] = useState([]);
   const [summary, setSummary] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(Boolean(location.state?.selectedProducts || location.state?.customerId));
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
   const [selectedCatalogue, setSelectedCatalogue] = useState(null);
   const [analytics, setAnalytics] = useState(null);
@@ -17,10 +19,10 @@ const Catalogues = () => {
   const [filter, setFilter] = useState('all');
 
   const [formData, setFormData] = useState({
-    customerId: '',
-    title: '',
+    customerId: location.state?.customerId || '',
+    title: location.state?.selectedProducts ? 'Uniform catalogue' : '',
     description: '',
-    products: [{ productId: '', notes: '' }],
+    products: location.state?.selectedProducts?.map(productId => ({ productId, notes: '' })) || [{ productId: '', notes: '' }],
     validUntil: '',
     notes: '',
   });
@@ -40,7 +42,7 @@ const Catalogues = () => {
         return [];
       });
 
-      const leadsDataResponse = await leadsAPI.getLeads().catch(err => {
+      const leadsDataResponse = await apiClient.get("/catalogues/contacts").then(response => ({ leads: response.data })).catch(err => {
         console.error('Failed to load leads:', err);
         return { leads: [] };
       });
@@ -87,7 +89,7 @@ const Catalogues = () => {
       loadData();
     } catch (error) {
       console.error('Failed to update status:', error);
-      alert('Failed to update status');
+      alert(error.response?.data?.error || 'Failed to update status');
     }
   };
 
@@ -103,9 +105,9 @@ const Catalogues = () => {
     }
   };
 
-  const handleCopyLink = (shareLink) => {
+  const handleCopyLink = async (shareLink) => {
     const fullLink = `${window.location.origin}/catalogue/${shareLink}`;
-    navigator.clipboard.writeText(fullLink);
+    try { await navigator.clipboard.writeText(fullLink); } catch { alert("Could not copy the link. You can open it here: " + fullLink); return; }
     alert('Link copied to clipboard!');
   };
 

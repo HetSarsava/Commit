@@ -474,3 +474,5 @@
   .marketing-container .form-row {
     grid-template-columns: 1fr;
   }}
+
+.marketing-container > .tabs { margin-bottom: 24px; }

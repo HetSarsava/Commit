@@ -211,7 +211,7 @@ exports.createPurchaseOrder = async (req, res, next) => {
         gstAmount,
         total,
         notes: notes || null,
-        createdBy: req.user.userId,
+        createdBy: req.user.id,
       },
     });
 
@@ -338,7 +338,7 @@ exports.recordMaterialReceived = async (req, res, next) => {
         referenceId: id,
         notes: `Received from PO ${id}`,
         date: receivedDate ? new Date(receivedDate) : new Date(),
-        createdBy: req.user.userId,
+        createdBy: req.user.id,
       },
     });
 

@@ -323,3 +323,5 @@
   .dispatch-container .status-filter {
     overflow-x: auto;
   }}
+
+.dispatch-container .filter-btn.active { background: var(--brass); color: white; border-color: var(--brass); }

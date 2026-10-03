@@ -302,3 +302,7 @@
   .production-page .kanban-column {
     flex: 0 0 260px;
   }}
+.production-page .summary-item { border: 0; background: transparent; cursor: pointer; border-radius: 8px; padding: 8px 12px; }
+.production-page .summary-item:hover { background: var(--white); }
+.production-page .kanban-board { scroll-snap-type: x proximity; }
+.production-page .kanban-column { scroll-snap-align: start; }

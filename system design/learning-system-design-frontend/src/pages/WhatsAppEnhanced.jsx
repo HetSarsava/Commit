@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+import apiClient from '../api/client';
 import { useCompany } from '../context/CompanyData';
 import { useEffect, useRef, useState } from 'react';
 import { whatsappAPI } from '../api/whatsapp';
@@ -15,6 +17,10 @@ const messageError = text => {
 
 const WhatsAppEnhanced = () => {
   const company = useCompany();
+  const navigate = useNavigate();
+  const [crmContext, setCrmContext] = useState(null);
+  const [contextError, setContextError] = useState("");
+  const [linkingContact, setLinkingContact] = useState(false);
   const [activeTab, setActiveTab] = useState('inbox');
   const [conversationFilter, setConversationFilter] = useState('all'); // all, needs-human, bot-handling
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,6 +46,22 @@ const WhatsAppEnhanced = () => {
   const sendLockRef = useRef(false);
   const pendingTextRef = useRef(null);
   const pendingTemplateRef = useRef(null);
+
+  useEffect(() => {
+    const id = selectedConversation?.id;
+    let cancelled = false;
+    Promise.resolve().then(() => { if (!cancelled) { setCrmContext(null); setContextError(''); } });
+    if (id) apiClient.get('/whatsapp/conversations/' + id + '/context').then(({data}) => { if (!cancelled) setCrmContext(data); }).catch(() => { if (!cancelled) setContextError('Could not load customer records. Reopen this chat to try again.'); });
+    return () => { cancelled = true; };
+  }, [selectedConversation?.id]);
+  const linkCustomer = async event => {
+    if (!event.target.value || linkingContact) return;
+    setLinkingContact(true); setContextError('');
+    const id = selectedConversation.id;
+    try { const {data} = await apiClient.put('/whatsapp/conversations/' + id + '/contact', {contact:event.target.value}); if (selectedIdRef.current === id) { setCrmContext(data); loadConversations(); } }
+    catch { setContextError('Could not link this contact. Please try again.'); }
+    finally { setLinkingContact(false); }
+  };
 
   const requestKey = (reference, payload) => {
     const fingerprint = JSON.stringify(payload);
@@ -591,6 +613,13 @@ const WhatsAppEnhanced = () => {
 
                 <div className="info-section">
                   <h4>Contact details</h4>
+                  {contextError && <p role="alert">{contextError}</p>}
+                  {crmContext && <label>Linked customer or lead
+                    <select aria-label="Linked customer or lead" disabled={linkingContact} value={crmContext.customer ? 'customer:' + crmContext.customer.id : crmContext.lead ? 'lead:' + crmContext.lead.id : ''} onChange={linkCustomer}>
+                      <option value="">Choose an existing contact</option>
+                      {crmContext.contacts.map(contact => <option key={contact.id} value={contact.id}>{contact.name}</option>)}
+                    </select>
+                  </label>}
                   <div className="info-row">
                     <span className="info-label">Company</span>
                     <span className="info-value">{selectedConversation.customerName}</span>
@@ -615,30 +644,33 @@ const WhatsAppEnhanced = () => {
                   <h4>Requirements</h4>
                   <div className="info-row">
                     <span className="info-label">Product</span>
-                    <span className="info-value">{selectedConversation.productInterest || 'Not added'}</span>
+                    <span className="info-value">{crmContext?.lead?.productInterest || selectedConversation.productInterest || 'Not added'}</span>
                   </div>
                   <div className="info-row">
                     <span className="info-label">Quantity</span>
-                    <span className="info-value">{selectedConversation.quantity || 'Not added'}</span>
+                    <span className="info-value">{crmContext?.lead?.quantity || selectedConversation.quantity || 'Not added'}</span>
                   </div>
                   <div className="info-row">
                     <span className="info-label">Budget</span>
-                    <span className="info-value">{selectedConversation.budget || 'Not added'}</span>
+                    <span className="info-value">{crmContext?.lead?.budget || selectedConversation.budget || 'Not added'}</span>
                   </div>
                 </div>
 
                 <div className="info-section">
                   <h4>Quick Actions</h4>
-                  <button type="button" className="info-action-btn primary" disabled title="Quotation lookup is not configured">
+                  {crmContext && !crmContext.quotations.length && <p>No quotation for this contact yet.</p>}
+                  {crmContext?.orders.map(order => <button key={order.id} className="info-action-btn" onClick={() => navigate('/orders/' + order.id)}>Order {order.number}</button>)}
+                  {crmContext?.invoices.map(invoice => <button key={invoice.id} className="info-action-btn" onClick={() => navigate('/invoices/' + invoice.id)}>Invoice {invoice.number}</button>)}
+                  <button type="button" className="info-action-btn primary" disabled={!crmContext?.quotations.length} title={crmContext?.quotations.length ? "Open the latest quotation" : "No quotation for this contact. Link a customer or create a quotation first."} onClick={() => navigate("/quotations/" + crmContext.quotations[0].id)}>
                     📄 Open Quotation
                   </button>
-                  <button type="button" className="info-action-btn" disabled title="Lead lookup is not configured">
+                  <button type="button" className="info-action-btn" disabled={!crmContext?.lead} title={crmContext?.lead ? "Open this lead" : "No linked lead"} onClick={() => navigate("/leads?leadId=" + encodeURIComponent(crmContext.lead.id))}>
                     📋 View Full Lead
                   </button>
-                  <button type="button" className="info-action-btn" disabled title="Catalogue sharing is not configured">
-                    📦 Send Catalogue
+                  <button type="button" className="info-action-btn" onClick={() => navigate("/catalogues", { state: { customerId: crmContext?.customer?.id || crmContext?.lead?.id } })}>
+                    📦 Choose Catalogue
                   </button>
-                  <button type="button" className="info-action-btn" disabled title="Automation resume is not configured">
+                  <button type="button" className="info-action-btn" disabled title="Automatic replies have not been set up yet">
                     ⚙️ Resume Automation
                   </button>
                 </div>
