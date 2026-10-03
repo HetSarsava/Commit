@@ -39,6 +39,10 @@ Persisted optional send-request keys prevent duplicate retries across backend re
 
 See `WHATSAPP_PERSISTENT_DEMO.md` for restart, deployment, privacy, retention and free-tier limits. The cloud receiver survives local downtime; viewing the CRM and sending replies still require the local backend.
 
+### Unattended retest — 3 October 2026
+
+All 26 backend tests (including isolated PostgreSQL) and six relay tests passed again, with zero skips. The frontend build and lint completed successfully; existing unrelated lint warnings and the large-bundle warning remain. The live Meta credential/template check succeeded and the authenticated cloud inbox was reachable. Live webhook checks returned the expected challenge for the valid verification token, 403 for an invalid token, 401 for unsigned POST and unauthorized sync, and 404 for public CRM paths. With the backend stopped, one signed synthetic status submitted twice created exactly one pending cloud payload. Restarting the backend persisted exactly one local status event and returned the cloud backlog to zero. This retest sent no additional WhatsApp messages and created no fake inbound CRM messages. A fresh real personal-phone inbound test remains unconfirmed.
+
 ## NOT TESTED
 
 - A real **failed-delivery webhook** was not induced; its processing is covered by automated tests. The real failure test was an outbound API rejection.
