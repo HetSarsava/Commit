@@ -1,6 +1,7 @@
 const { createHash } = require('node:crypto');
 const { z } = require('zod');
 const { MetaProvider, WhatsAppError, normalizePhone } = require('./metaProvider');
+const { templateText } = require('./templateText');
 
 const templateSchema = z.object({
   name: z.string().regex(/^[a-z0-9_]{1,512}$/),
@@ -33,6 +34,26 @@ class WhatsAppService {
     this.crm = crm;
     this.provider = provider;
     this.env = env;
+  }
+
+  async templatePreview(template) {
+    if (!this.provider.templates) return null;
+    try {
+      if (!this.templateCache || Date.now() - this.templateCache.at > 300000) {
+        if (!this.templateLoad) this.templateLoad = this.provider.templates().then(items => {
+          this.templateCache = { items, at: Date.now() };
+        }).finally(() => { this.templateLoad = null; });
+        await this.templateLoad;
+      }
+      const definition = this.templateCache.items.find(t => t.name === template.name && t.language === template.language.code);
+      return templateText(definition, template);
+    } catch { return null; } // A preview outage must not change delivery handling.
+  }
+
+  async displayMessage(record) {
+    if (!record.metadata?.template || !record.message.startsWith('[Template:')) return record;
+    const text = await this.templatePreview(record.metadata.template);
+    return { ...record, message: text || 'Template message — text unavailable', templatePreviewFromCurrentDefinition: Boolean(text) };
   }
 
   async identify(phone) {
@@ -71,6 +92,7 @@ class WhatsAppService {
       throw new WhatsAppError('Message must contain between 1 and 4096 characters.');
     }
     const requestHash = idempotencyKey ? createHash('sha256').update(JSON.stringify({ phone, message, template, conversationId, sentBy, messageType, relatedId })).digest('hex') : null;
+    if (template) message = await this.templatePreview(template) || message;
     const info = await this.identify(phone);
     const attempt = await this.store.transaction(async store => {
       if (idempotencyKey) {

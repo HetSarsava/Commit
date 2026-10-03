@@ -444,6 +444,10 @@
   margin-left: auto;
 }
 
+.message-text {
+  white-space: pre-wrap;
+}
+
 .message-bubble {
   background: white;
   padding: 0.6rem 0.85rem;

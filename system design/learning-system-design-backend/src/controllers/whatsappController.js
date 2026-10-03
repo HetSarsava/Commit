@@ -274,10 +274,14 @@ const handler = fn => async (req, res, next) => {
     next(error);
   }
 };
-exports.getConversations = handler(async () => (await store.conversations()).map(c => ({ ...c, automationStatus: 'PAUSED', needsHuman: true, leadStage: c.leadId ? 'Contacted' : 'Unresolved', salesperson: 'Unassigned' })));
+exports.getConversations = handler(async () => Promise.all((await store.conversations()).map(async c => {
+  const legacy = c.lastMessage.match(/^\[Template: (\w+) \(([\w_]+)\)\]$/);
+  const lastMessage = legacy ? await service.templatePreview({ name: legacy[1], language: { code: legacy[2] } }) || 'Template message' : c.lastMessage;
+  return { ...c, lastMessage, automationStatus: 'PAUSED', needsHuman: true, leadStage: c.leadId ? 'Contacted' : 'New contact', salesperson: 'Unassigned' };
+})));
 exports.getMessages = handler(async req => {
   if (!await store.getConversation(req.params.conversationId)) throw new WhatsAppError('Conversation not found.', 404);
-  return store.messages(req.params.conversationId);
+  return Promise.all((await store.messages(req.params.conversationId)).map(message => service.displayMessage(message)));
 });
 exports.createConversation = handler(req => service.createConversation(req.body.phoneNumber || req.body.to));
 exports.markAsRead = handler(async req => {

@@ -2,6 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import { whatsappAPI } from '../api/whatsapp';
 import './WhatsAppEnhanced.css';
 
+const messageStatus = status => ({ SENDING: 'Sending…', ACCEPTED: 'Waiting for delivery', SENT: 'Sent', DELIVERED: 'Delivered', READ: 'Read', FAILED: 'Not sent', UNKNOWN: 'Delivery not confirmed' }[status] || 'Status unavailable');
+const messageError = text => {
+  if (!text) return 'We could not confirm delivery. Check this chat before trying again.';
+  if (/24-hour|service window/i.test(text)) return 'This customer has not messaged you in the last 24 hours. Choose a WhatsApp-approved template to message them.';
+  if (/token|credentials|configuration/i.test(text)) return 'WhatsApp needs attention from your administrator. Please contact them to reconnect it.';
+  if (/uncertain|pending/i.test(text)) return 'Delivery is not confirmed yet. Check this chat before trying again.';
+  if (/template name|template parameters/i.test(text)) return 'This template could not be sent. Check its language and fill in all the required details.';
+  return text;
+};
+
 const WhatsAppEnhanced = () => {
   const [activeTab, setActiveTab] = useState('inbox');
   const [conversationFilter, setConversationFilter] = useState('all'); // all, needs-human, bot-handling
@@ -48,6 +58,7 @@ const WhatsAppEnhanced = () => {
         const inbox = await whatsappAPI.getConversations();
         if (!cancelled) {
           setConversations(inbox);
+          setSelectedConversation(current => inbox.find(chat => chat.id === current?.id) || current);
           if (conversationId && selectedIdRef.current === conversationId) {
             loadMessages(conversationId);
           }
@@ -89,6 +100,7 @@ const WhatsAppEnhanced = () => {
       const data = await whatsappAPI.getConversations();
       setLoadError('');
       setConversations(data);
+      setSelectedConversation(current => data.find(chat => chat.id === current?.id) || current);
       // Open the most recent conversation by default so the inbox is useful on first load.
       if (!selectedIdRef.current && data.length > 0) {
         selectedIdRef.current = data[0].id;
@@ -183,7 +195,7 @@ const WhatsAppEnhanced = () => {
     } catch (error) {
       console.error('Failed to send message:', error);
       if (selectedIdRef.current === payload.conversationId) {
-        setSendError(error.response?.data?.error || 'Delivery is uncertain. Check the conversation before retrying.');
+        setSendError(messageError(error.response?.data?.error));
         loadMessages(payload.conversationId);
       }
     } finally {
@@ -195,7 +207,7 @@ const WhatsAppEnhanced = () => {
   const handleSendTemplate = async (template) => {
     if (sendLockRef.current) return;
     if (!selectedConversation) {
-      alert('Please select a conversation first');
+      alert('Choose a customer chat first.');
       return;
     }
 
@@ -204,7 +216,7 @@ const WhatsAppEnhanced = () => {
       for (const component of template.components || []) {
         if (!['BODY', 'HEADER'].includes(component.type)) continue;
         if (component.type === 'HEADER' && component.format !== 'TEXT') {
-          alert('Media-header templates are not supported by this demo.');
+          alert('Templates with photos or files cannot be sent yet.');
           return;
         }
         const placeholders = [...new Set((component.text || '').match(/\{\{\w+\}\}/g) || [])];
@@ -237,11 +249,12 @@ const WhatsAppEnhanced = () => {
       setSending(true);
       await whatsappAPI.sendTemplate(payload, key);
       pendingTemplateRef.current = null;
-      alert('Meta accepted the template. Delivery status will update in the conversation.');
+      setActiveTab('inbox');
+      setMobilePane('chat');
       loadMessages(selectedConversation.id);
     } catch (error) {
       console.error('Failed to send template:', error);
-      alert(error.response?.data?.error || 'Failed to send template');
+      alert(messageError(error.response?.data?.error));
     } finally {
       sendLockRef.current = false;
       setSending(false);
@@ -286,10 +299,10 @@ const WhatsAppEnhanced = () => {
   });
 
   const tabs = [
-    { id: 'inbox', label: '💬 Inbox' },
+    { id: 'inbox', label: '💬 Chats' },
     { id: 'templates', label: '📋 Templates' },
-    { id: 'automation', label: '⚙️ Automation' },
-    { id: 'analytics', label: '📊 Analytics' },
+    { id: 'automation', label: '⚙️ Automatic messages' },
+    { id: 'analytics', label: '📊 Message report' },
   ];
 
   return (
@@ -298,7 +311,7 @@ const WhatsAppEnhanced = () => {
       <div className="topbar">
         <div className="topbar-text">
           <h1>WhatsApp Business</h1>
-          <div className="sub">CRM-integrated WhatsApp Cloud API messaging</div>
+          <div className="sub">Chat with customers and keep track of their orders</div>
         </div>
       </div>
       {loadError && <div role="alert">{loadError}</div>}
@@ -337,7 +350,7 @@ const WhatsAppEnhanced = () => {
             {/* Conversations List */}
             <div className="conversations-panel-enhanced">
               <div className="panel-header">
-                <h3>Conversations</h3>
+                <h3>Chats</h3>
                 <button type="button" className="btn btn-sm btn-primary" onClick={async () => {
                   const phoneNumber = window.prompt('WhatsApp number, including country code:');
                   if (!phoneNumber) return;
@@ -346,12 +359,12 @@ const WhatsAppEnhanced = () => {
                     handleSelectConversation(conversation);
                     loadConversations();
                   } catch (error) { alert(error.response?.data?.error || 'Could not start conversation.'); }
-                }}>New conversation</button>
+                }}>New chat</button>
                 <input
                   type="text"
                   className="search-input"
-                  placeholder="Search conversations..."
-                  aria-label="Search conversations"
+                  placeholder="Search name or number..."
+                  aria-label="Search name or number"
                   autoComplete="off"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -374,7 +387,7 @@ const WhatsAppEnhanced = () => {
                   aria-pressed={conversationFilter === 'needs-human'}
                   onClick={() => setConversationFilter('needs-human')}
                 >
-                  Needs human
+                  Needs reply
                 </button>
                 <button
                   type="button"
@@ -382,7 +395,7 @@ const WhatsAppEnhanced = () => {
                   aria-pressed={conversationFilter === 'bot-handling'}
                   onClick={() => setConversationFilter('bot-handling')}
                 >
-                  Bot handling
+                  Automatic replies
                 </button>
               </div>
 
@@ -391,7 +404,7 @@ const WhatsAppEnhanced = () => {
                   <div className="loading-state">Loading...</div>
                 ) : filteredConversations.length === 0 ? (
                   <div className="empty-state">
-                    {searchQuery ? 'No conversations found' : 'No conversations yet'}
+                    {searchQuery ? 'No matching chats' : 'No chats yet'}
                   </div>
                 ) : (
                   filteredConversations.map((conv) => (
@@ -422,7 +435,7 @@ const WhatsAppEnhanced = () => {
                             <span className="conv-badge needs-human">Needs you</span>
                           )}
                           {(conv.automationStatus === 'ACTIVE' || conv.isAutomated) && (
-                            <span className="conv-badge bot-handling">Bot handling</span>
+                            <span className="conv-badge bot-handling">Automatic replies</span>
                           )}
                         </div>
                       </div>
@@ -471,13 +484,13 @@ const WhatsAppEnhanced = () => {
                       {/* Automation Status Indicator */}
                       <div
                         className={`automation-status ${selectedConversation.automationStatus === 'PAUSED' ? 'paused' : 'active'}`}
-                        title={selectedConversation.automationStatus === 'PAUSED' ? 'Automation paused — human reply needed' : 'Automation active'}
+                        title={selectedConversation.automationStatus === 'PAUSED' ? 'Reply yourself' : 'Automatic replies on'}
                       >
                         <span className="status-dot" aria-hidden="true"></span>
                         {selectedConversation.automationStatus === 'PAUSED' ? (
-                          'Automation paused — human reply needed'
+                          'Reply yourself'
                         ) : (
-                          'Automation active'
+                          'Automatic replies on'
                         )}
                       </div>
 
@@ -489,7 +502,7 @@ const WhatsAppEnhanced = () => {
                         aria-expanded={showInfoPanel}
                         aria-controls="whatsapp-info-panel"
                       >
-                        {showInfoPanel ? 'Hide info' : 'Lead info'}
+                        {showInfoPanel ? 'Hide details' : 'Customer details'}
                       </button>
                     </div>
                   </div>
@@ -503,7 +516,7 @@ const WhatsAppEnhanced = () => {
                           {/* Sender Tag */}
                           {msg.direction === 'OUTGOING' && (
                             <div className={`sender-tag ${msg.isAutomated ? 'automated' : 'manual'}`}>
-                              {msg.isAutomated ? '⚙ Automated' : 'YOU (Manual)'}
+                              {msg.isAutomated ? '⚙ Automatic message' : 'You'}
                             </div>
                           )}
 
@@ -511,9 +524,10 @@ const WhatsAppEnhanced = () => {
                             className={`message ${msg.direction === 'OUTGOING' ? 'message-sent' : 'message-received'}`}
                           >
                             <div className="message-bubble">
-                              {msg.message}
-                              <div className="message-time">{formatTime(msg.timestamp)} {msg.direction === 'OUTGOING' && <span title={msg.failure?.message || ''}>{msg.status}</span>}</div>
-                              {msg.failure && <div role="status">{msg.failure.message}</div>}
+                              <div className="message-text">{msg.message}</div>
+                              {msg.templatePreviewFromCurrentDefinition && <small>Template text shown from the current approved version</small>}
+                              <div className="message-time">{formatTime(msg.timestamp)} {msg.direction === 'OUTGOING' && <span title={msg.failure?.message || ''}>{messageStatus(msg.status)}</span>}</div>
+                              {msg.failure && <div role="status">{messageError(msg.failure.message)}</div>}
                             </div>
                           </div>
                         </div>
@@ -522,8 +536,8 @@ const WhatsAppEnhanced = () => {
                   </div>
 
                   <form className="chat-input-area" onSubmit={handleSendMessage}>
-                    <button type="button" className="chat-attach-btn" disabled title="File attachments are not configured" aria-label="File attachments are not configured">📎</button>
-                    <button type="button" className="chat-template-btn" disabled title="The in-chat template picker is not configured" aria-label="The in-chat template picker is not configured">📋</button>
+                    <button type="button" className="chat-attach-btn" disabled title="Sending photos and files is not available yet" aria-label="Sending photos and files is not available yet">📎</button>
+                    <button type="button" className="chat-template-btn" onClick={() => setActiveTab('templates')} title="Choose a message template" aria-label="Choose a message template">📋</button>
                     <input
                       type="text"
                       className="chat-input"
@@ -541,14 +555,14 @@ const WhatsAppEnhanced = () => {
                   {sendError && <div role="alert">{sendError}</div>}
 
                   <div className="compose-hint">
-                    Text replies require a message from the customer within 24 hours. Use an approved template to start a conversation.
+                    You can type a reply for 24 hours after a customer messages you. After that, choose a WhatsApp-approved template.
                   </div>
                 </>
               ) : (
                 <div className="chat-empty-state">
                   <div className="empty-icon" aria-hidden="true">💬</div>
-                  <h3>Select a conversation</h3>
-                  <p>Choose a conversation from the list to start chatting</p>
+                  <h3>Select a chat</h3>
+                  <p>Choose a customer from the list to read and reply</p>
                 </div>
               )}
             </div>
@@ -558,23 +572,23 @@ const WhatsAppEnhanced = () => {
               <aside
                 id="whatsapp-info-panel"
                 className="info-panel-enhanced"
-                aria-label="Lead information"
+                aria-label="Customer details"
               >
                 <div className="info-panel-header">
-                  <h3>Lead Information</h3>
+                  <h3>Customer details</h3>
                   <button
                     type="button"
                     className="close-panel-btn"
                     onClick={() => setShowInfoPanel(false)}
                     title="Hide panel"
-                    aria-label="Hide lead information"
+                    aria-label="Hide customer details"
                   >
                     <span aria-hidden="true">✕</span>
                   </button>
                 </div>
 
                 <div className="info-section">
-                  <h4>Lead Details</h4>
+                  <h4>Contact details</h4>
                   <div className="info-row">
                     <span className="info-label">Company</span>
                     <span className="info-value">{selectedConversation.customerName}</span>
@@ -591,7 +605,7 @@ const WhatsAppEnhanced = () => {
                   </div>
                   <div className="info-row">
                     <span className="info-label">Salesperson</span>
-                    <span className="info-value">{selectedConversation.salesperson || 'Unassigned'}</span>
+                    <span className="info-value">{selectedConversation.salesperson || 'Not assigned'}</span>
                   </div>
                 </div>
 
@@ -599,15 +613,15 @@ const WhatsAppEnhanced = () => {
                   <h4>Requirements</h4>
                   <div className="info-row">
                     <span className="info-label">Product</span>
-                    <span className="info-value">{selectedConversation.productInterest || 'Not specified'}</span>
+                    <span className="info-value">{selectedConversation.productInterest || 'Not added'}</span>
                   </div>
                   <div className="info-row">
                     <span className="info-label">Quantity</span>
-                    <span className="info-value">{selectedConversation.quantity || 'N/A'}</span>
+                    <span className="info-value">{selectedConversation.quantity || 'Not added'}</span>
                   </div>
                   <div className="info-row">
                     <span className="info-label">Budget</span>
-                    <span className="info-value">{selectedConversation.budget || 'N/A'}</span>
+                    <span className="info-value">{selectedConversation.budget || 'Not added'}</span>
                   </div>
                 </div>
 
@@ -692,7 +706,7 @@ const WhatsAppEnhanced = () => {
             </div>
 
             <div className="automation-list">
-              {!automations.length && <p>Automatic workflows are not configured. Messages can be sent manually from the inbox and templates.</p>}
+              {!automations.length && <p>Automatic messages are not set up yet. You can reply in Chats or send a template.</p>}
               {automations.map((automation) => (
                 <div key={automation.id} className="automation-card">
                   <div className="automation-main">
@@ -725,7 +739,7 @@ const WhatsAppEnhanced = () => {
             </div>
 
             <div className="automation-info-box">
-              <h3>💡 Available Automations</h3>
+              <h3>💡 Ideas for automatic messages (not set up yet)</h3>
               <ul>
                 <li>Welcome message when customer sends first message</li>
                 <li>Send catalogue when customer asks for products</li>
@@ -747,7 +761,7 @@ const WhatsAppEnhanced = () => {
             aria-labelledby="whatsapp-tab-analytics"
             className="analytics-section"
           >
-            <h2>WhatsApp Analytics</h2>
+            <h2>WhatsApp message report</h2>
 
             <div className="analytics-grid">
               <div className="analytics-card">
