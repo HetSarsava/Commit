@@ -1,3 +1,4 @@
+import { useCompany } from '../context/CompanyData';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { invoicesAPI } from '../api/invoices';
@@ -7,6 +8,7 @@ import PaymentModal from '../components/PaymentModal';
 import './InvoiceDetail.css';
 
 const InvoiceDetail = () => {
+  const company = useCompany();
   const { id } = useParams();
   const navigate = useNavigate();
   const [invoice, setInvoice] = useState(null);
@@ -173,10 +175,10 @@ const InvoiceDetail = () => {
           {/* Header */}
           <div className="invoice-header">
             <div className="company-info">
-              <h2>AMIT UNIFORM</h2>
-              <p>I.O.C. Road, Chandkheda<br />Ahmedabad, Gujarat - 382424</p>
-              <p>GSTIN: <strong>24XXXXX1234X1ZX</strong></p>
-              <p>Email: info@amituniform.com | Phone: +91 79 2765 4321</p>
+              <h2>{company.name}</h2>
+              <p>{company.address}</p>
+              <p>GSTIN: <strong>{company.gstin || "Not added"}</strong></p>
+              <p>Email: {company.email} | Phone: {company.phone}</p>
             </div>
             <div className="invoice-meta">
               <h1>TAX INVOICE</h1>
@@ -379,7 +381,7 @@ const InvoiceDetail = () => {
             </div>
 
             <div className="signature-box">
-              <p>For <strong>AMIT UNIFORM</strong></p>
+              <p>For <strong>{company.name}</strong></p>
               <div className="signature-line"></div>
               <p>Authorized Signatory</p>
             </div>

@@ -1,0 +1,11 @@
+# Company branding
+
+Admins manage the identity in Settings → Company Profile. Company name, address, phone and email are mandatory; blank values and invalid email/phone formats are rejected before bulk updates, single updates or imports. GSTIN, website and logo remain optional. Existing valid demo company details are preserved.
+
+The company profile supplies sidebar name/initials, login branding, quotation/invoice company headers and signatures, WhatsApp quotation/order/payment/production message branding, and WhatsApp business examples. Saving, importing or resetting settings refreshes the shared profile without signing out. Contact/customer names, account identities and historical sent message text are not renamed.
+
+Only the company display name is exposed at the public `/api/settings/branding` route for the login screen. Address/contact/tax data remain behind authentication. Admin-only writes retain the existing role checks. PostgreSQL uses existing Settings rows; demo mode additionally persists company profile values in an additive `company_settings` table inside the ignored demo SQLite database. Other mock CRM data remains in memory. No destructive migration is required.
+
+The WhatsApp Templates pane contains company-branded uniform-business examples marked **Draft example**. They are not submitted to Meta or falsely marked approved. Unrelated Jasper's Market sample cards are omitted. The approved `hello_world` test template retains its exact Meta wording and remains available for live testing. Custom business templates require normal Meta approval before they can be sent outside the 24-hour reply window. Historical sample messages remain accurate.
+
+Validation: company required-field checks, demo profile persistence across separate process restarts, and custom company names in existing business-flow tests. Live API checks rejected invalid bulk/single/import changes with 400, preserved the original profile and confirmed public branding exposes only the name. Frontend build passes; existing unrelated lint/bundle warnings remain. Live UI confirms New chat aligns beside Chats and branded drafts appear in Templates. No WhatsApp message or Meta asset change was performed for this update.

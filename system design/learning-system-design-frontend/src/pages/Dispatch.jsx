@@ -208,7 +208,7 @@ const Dispatch = () => {
           (status) => (
             <button
               key={status}
-              className={`filter-btn ${
+              className={`btn btn-secondary filter-btn ${
                 selectedStatus === status ? 'active' : ''
               }`}
               onClick={() => setSelectedStatus(status)}

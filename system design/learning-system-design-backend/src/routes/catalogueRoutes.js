@@ -12,14 +12,16 @@ router.post('/track/enquiry', catalogueController.trackEnquiryClick);
 
 // All other routes require authentication
 router.use(auth);
+router.post('/pdf', requireRole(['ADMIN', 'SALES']), catalogueController.generatePdf);
 
 // Catalogue routes
 router.get('/', catalogueController.getAllCatalogues);
 router.get('/summary', catalogueController.getCatalogueSummary);
+router.get('/contacts', catalogueController.getContacts);
 router.get('/:id', catalogueController.getCatalogueById);
 router.get('/:id/analytics', catalogueController.getCatalogueAnalytics);
-router.post('/', requireRole(['Admin', 'Sales']), catalogueController.createCatalogue);
-router.patch('/:id/status', requireRole(['Admin', 'Sales']), catalogueController.updateCatalogueStatus);
-router.delete('/:id', requireRole(['Admin']), catalogueController.deleteCatalogue);
+router.post('/', requireRole(['ADMIN', 'SALES']), catalogueController.createCatalogue);
+router.patch('/:id/status', requireRole(['ADMIN', 'SALES']), catalogueController.updateCatalogueStatus);
+router.delete('/:id', requireRole(['ADMIN']), catalogueController.deleteCatalogue);
 
 module.exports = router;

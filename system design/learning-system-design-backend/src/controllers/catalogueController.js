@@ -1,4 +1,23 @@
 const { prisma } = require('../config/database');
+const { getCompany } = require('../services/companyProfile');
+const { cataloguePdf } = require('../services/cataloguePdf');
+exports.getContacts = async (req, res, next) => {
+  try {
+    const customers = await prisma.customer.findMany({});
+    const leads = process.env.USE_MOCK_DB !== 'false' ? await prisma.lead.findMany({}) : [];
+    res.json([...customers, ...leads].map(contact => ({ id: contact.id, companyName: contact.companyName, contactPerson: contact.contactPerson })));
+  } catch (error) { next(error); }
+};
+exports.generatePdf = async (req, res, next) => {
+  try {
+    const ids = req.body.productIds;
+    if (!Array.isArray(ids) || !ids.length || ids.length > 100 || ids.some(id => typeof id !== 'string' || id.length > 128)) return res.status(400).json({ error: 'Choose between 1 and 100 products.' });
+    const products = await Promise.all([...new Set(ids)].map(id => prisma.product.findUnique({ where: { id } })));
+    if (products.some(p => !p)) return res.status(404).json({ error: 'A selected product is no longer available.' });
+    const pdf = await cataloguePdf(await getCompany(prisma), products);
+    res.type('application/pdf').set('Content-Disposition', 'attachment; filename="product-catalogue.pdf"').send(pdf);
+  } catch (error) { next(error); }
+};
 
 // Get all catalogues
 exports.getAllCatalogues = async (req, res, next) => {
@@ -99,6 +118,8 @@ exports.getCatalogueByLink = async (req, res, next) => {
       return res.status(404).json({ error: 'Catalogue not found' });
     }
 
+    if (catalogue.status === "EXPIRED" || (catalogue.validUntil && new Date(catalogue.validUntil) < new Date())) return res.status(410).json({ error: "This catalogue has expired." });
+
     // Record view analytics
     await prisma.catalogueAnalytics.create({
       data: {
@@ -118,7 +139,7 @@ exports.getCatalogueByLink = async (req, res, next) => {
       },
     });
 
-    res.json(catalogue);
+    res.json({ title: catalogue.title, description: catalogue.description, companyName: (await getCompany(prisma)).name, items: catalogue.items.map(item => ({ id: item.id, product: { name: item.product?.name, sku: item.product?.sku, basePrice: item.product?.basePrice } })) });
   } catch (error) {
     next(error);
   }
@@ -137,14 +158,20 @@ exports.createCatalogue = async (req, res, next) => {
     } = req.body;
 
     // Validation
-    if (!customerId || !title || !products || products.length === 0) {
+    if (typeof customerId !== 'string' || typeof title !== 'string' || !title.trim() || title.length > 200 || !Array.isArray(products) || products.length === 0 || products.length > 100) {
       return res.status(400).json({
         error: 'Customer, title, and at least one product are required',
       });
     }
 
+    if (!await prisma.customer.findUnique({ where: { id: customerId } })) return res.status(400).json({ error: 'Choose an existing customer.' });
+    for (const item of products) {
+      if (typeof item.productId !== 'string' || !await prisma.product.findUnique({ where: { id: item.productId } })) return res.status(400).json({ error: 'Choose valid products for the catalogue.' });
+    }
+    if (validUntil && !Number.isFinite(new Date(validUntil).getTime())) return res.status(400).json({ error: 'Choose a valid expiry date.' });
+
     // Generate unique share link
-    const shareLink = `CAT-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+    const shareLink = `CAT-${require('node:crypto').randomUUID()}`;
 
     // Create catalogue
     const catalogue = await prisma.catalogue.create({
@@ -157,7 +184,7 @@ exports.createCatalogue = async (req, res, next) => {
         notes: notes || null,
         status: 'DRAFT',
         viewCount: 0,
-        createdBy: req.user.userId,
+        createdBy: req.user.id,
       },
     });
 

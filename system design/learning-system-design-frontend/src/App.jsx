@@ -1,5 +1,7 @@
+import SharedCatalogue from './pages/SharedCatalogue';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CompanyProvider } from './context/CompanyContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import DashboardPrototype from './pages/DashboardPrototype';
@@ -58,8 +60,9 @@ const PublicRoute = ({ children }) => {
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
+      <AuthProvider><CompanyProvider>
         <Routes>
+          <Route path="/catalogue/:shareLink" element={<SharedCatalogue />} />
           {/* Public Routes */}
           <Route
             path="/login"
@@ -282,7 +285,7 @@ function App() {
             }
           />
         </Routes>
-      </AuthProvider>
+      </CompanyProvider></AuthProvider>
     </BrowserRouter>
   );
 }

@@ -16,8 +16,8 @@ export const whatsappAPI = {
   },
 
   // Send a message
-  sendMessage: async (data) => {
-    const response = await apiClient.post('/whatsapp/send', data);
+  sendMessage: async (data, requestKey) => {
+    const response = await apiClient.post('/whatsapp/send', data, requestKey ? { headers: { 'Idempotency-Key': requestKey } } : undefined);
     return response.data;
   },
 
@@ -60,8 +60,8 @@ export const whatsappAPI = {
   },
 
   // Send template message
-  sendTemplate: async (data) => {
-    const response = await apiClient.post('/whatsapp/send-template', data);
+  sendTemplate: async (data, requestKey) => {
+    const response = await apiClient.post('/whatsapp/send-template', data, requestKey ? { headers: { 'Idempotency-Key': requestKey } } : undefined);
     return response.data;
   },
 

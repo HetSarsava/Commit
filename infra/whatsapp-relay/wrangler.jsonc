@@ -1,0 +1,14 @@
+{
+  "name": "commit-whatsapp-demo",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2026-10-03",
+  "workers_dev": true,
+  "observability": { "enabled": false },
+  "triggers": { "crons": ["17 3 * * *"] },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "commit-whatsapp-demo",
+    "database_id": "REPLACE_WITH_DEMO_DATABASE_ID",
+    "migrations_dir": "migrations"
+  }]
+}

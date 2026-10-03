@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productionAPI } from '../api/production';
 import './Production.css';
 
 const Production = () => {
+  const stageElements = useRef({});
   const navigate = useNavigate();
   const [productionItems, setProductionItems] = useState([]);
   const [summary, setSummary] = useState({});
@@ -103,12 +104,12 @@ const Production = () => {
       {/* Summary Bar */}
       <div className="summary-bar">
         {stages.map((stage) => (
-          <div key={stage.key} className="summary-item">
+          <button type="button" key={stage.key} className="summary-item" title={`Show ${stage.label}`} onClick={() => stageElements.current[stage.key]?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" })}>
             <div className="summary-count" style={{ color: stage.color }}>
               {summary[stage.key.toLowerCase()] || 0}
             </div>
             <div className="summary-label">{stage.label}</div>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -117,6 +118,7 @@ const Production = () => {
         {stages.map((stage) => (
           <div
             key={stage.key}
+            ref={node => { stageElements.current[stage.key] = node; }}
             className="kanban-column"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, stage.key)}

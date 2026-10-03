@@ -1,3 +1,4 @@
+import { useCompany } from '../context/CompanyData';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { quotationsAPI } from '../api/quotations';
@@ -7,6 +8,7 @@ import QuotationBuilder from '../components/QuotationBuilder';
 import './QuotationDetail.css';
 
 const QuotationDetail = () => {
+  const company = useCompany();
   const { id } = useParams();
   const navigate = useNavigate();
   const [quotation, setQuotation] = useState(null);
@@ -171,9 +173,9 @@ const QuotationDetail = () => {
             {/* Document Header */}
             <div className="doc-header">
               <div className="from">
-                <b>Amit Uniform</b>
-                I.O.C. Road, Chandkheda, Ahmedabad, Gujarat<br />
-                GSTIN: 24XXXXX1234X1ZX
+                <b>{company.name}</b>
+                {company.address}<br />
+                GSTIN: {company.gstin || "Not added"}
               </div>
               <div className="doc-meta">
                 <div className="qno">{quotation.quotationNumber}</div>
@@ -269,7 +271,7 @@ const QuotationDetail = () => {
               <span><b>Bank:</b> State Bank of India</span>
               <span><b>A/C No.:</b> 43377408488</span>
               <span><b>IFSC:</b> SBIN0011768</span>
-              <span><b>Branch:</b> I.O.C. Road, Chandkheda, Ahmedabad</span>
+              <span><b>Branch:</b> {company.address}</span>
             </div>
           </div>
         </div>

@@ -319,7 +319,7 @@ exports.recordMaterialConsumption = async (req, res, next) => {
         referenceId: stageId,
         notes: notes || `Consumed in production stage`,
         date: new Date(),
-        createdBy: req.user.userId,
+        createdBy: req.user.id,
       },
     });
 

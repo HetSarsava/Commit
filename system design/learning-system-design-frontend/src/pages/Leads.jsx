@@ -1,3 +1,4 @@
+import { useCompany } from '../context/CompanyData';
 import { useState, useEffect } from 'react';
 import { leadsAPI } from '../api/leads';
 import { useAuth } from '../context/AuthContext';
@@ -5,6 +6,7 @@ import LeadModal from '../components/LeadModal';
 import './Leads.css';
 
 const Leads = () => {
+  const company = useCompany();
   const { user } = useAuth();
   const [leads, setLeads] = useState([]);
   const [stats, setStats] = useState(null);
@@ -121,7 +123,7 @@ const Leads = () => {
       {/* Pipeline Rail */}
       <div className="pipeline-rail">
         <div className="rail-brand">
-          <div className="mark">AMIT UNIFORM</div>
+          <div className="mark">{company.name}</div>
           <div className="name">Lead Pipeline</div>
         </div>
 

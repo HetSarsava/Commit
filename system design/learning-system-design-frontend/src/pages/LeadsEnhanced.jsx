@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { leadsAPI } from '../api/leads';
 import { useAuth } from '../context/AuthContext';
@@ -5,6 +6,7 @@ import LeadModal from '../components/LeadModal';
 import './LeadsEnhanced.css';
 
 const LeadsEnhanced = () => {
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('pipeline'); // pipeline, analytics
   const [leads, setLeads] = useState([]);
@@ -76,6 +78,8 @@ const LeadsEnhanced = () => {
         ]);
 
         setLeads(leadsData.leads);
+        const requestedLead = leadsData.leads.find(lead => lead.id === searchParams.get("leadId"));
+        if (requestedLead) { setSelectedLead(requestedLead); setModalMode("view"); setShowModal(true); }
         setStats(statsData);
       } else if (activeTab === 'analytics') {
         const [funnelRes, sourceRes] = await Promise.all([

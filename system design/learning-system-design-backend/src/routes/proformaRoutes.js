@@ -10,10 +10,10 @@ router.use(auth);
 router.get('/', proformaController.getAllProformas);
 router.get('/summary', proformaController.getProformaSummary);
 router.get('/:id', proformaController.getProformaById);
-router.post('/from-quotation', requireRole(['Admin', 'Sales', 'Accountant']), proformaController.createFromQuotation);
-router.post('/', requireRole(['Admin', 'Sales', 'Accountant']), proformaController.createProforma);
-router.patch('/:id/status', requireRole(['Admin', 'Sales']), proformaController.updateProformaStatus);
-router.post('/:id/convert-to-order', requireRole(['Admin', 'Sales']), proformaController.convertToOrder);
-router.delete('/:id', requireRole(['Admin']), proformaController.deleteProforma);
+router.post('/from-quotation', requireRole(['ADMIN', 'SALES', 'ACCOUNTANT']), proformaController.createFromQuotation);
+router.post('/', requireRole(['ADMIN', 'SALES', 'ACCOUNTANT']), proformaController.createProforma);
+router.patch('/:id/status', requireRole(['ADMIN', 'SALES']), proformaController.updateProformaStatus);
+router.post('/:id/convert-to-order', requireRole(['ADMIN', 'SALES']), proformaController.convertToOrder);
+router.delete('/:id', requireRole(['ADMIN']), proformaController.deleteProforma);
 
 module.exports = router;

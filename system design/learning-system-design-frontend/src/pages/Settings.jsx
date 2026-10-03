@@ -1,8 +1,10 @@
+import { useCompany } from '../context/CompanyData';
 import { useState, useEffect } from 'react';
 import { settingsAPI } from '../api/settings';
 import './Settings.css';
 
 const Settings = () => {
+  const company = useCompany();
   const [activeTab, setActiveTab] = useState('company');
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
@@ -42,14 +44,17 @@ const Settings = () => {
   };
 
   const handleSave = async () => {
+    const required = ["company.name", "company.address", "company.phone", "company.email"];
+    if (required.some(key => !String(formData[key] || "").trim())) { setActiveTab("company"); alert("Please add the company name, address, phone and email."); return; }
     try {
       setSaving(true);
       await settingsAPI.updateSettings(formData);
+      await company.refreshCompany();
       alert('Settings saved successfully');
       loadSettings();
     } catch (error) {
       console.error('Failed to save settings:', error);
-      alert('Failed to save settings');
+      alert(error.response?.data?.error || 'Failed to save settings');
     } finally {
       setSaving(false);
     }
@@ -63,6 +68,7 @@ const Settings = () => {
     try {
       setSaving(true);
       await settingsAPI.resetSettings();
+      await company.refreshCompany();
       alert('Settings reset to defaults');
       loadSettings();
     } catch (error) {
@@ -105,6 +111,7 @@ const Settings = () => {
 
       if (confirm('Import settings from backup? This will overwrite current settings.')) {
         await settingsAPI.importSettings(data.settings);
+        await company.refreshCompany();
         alert('Settings imported successfully');
         loadSettings();
       }
@@ -198,22 +205,24 @@ const Settings = () => {
         {activeTab === 'company' && (
           <div className="settings-section">
             <h2>Company Profile</h2>
-            <p className="section-desc">Basic company information displayed on invoices and documents</p>
+            <p className="section-desc">Company name, address, phone and email are required. These details appear across the software, documents and business messages.</p>
 
             <div className="form-grid">
               <div className="form-group">
-                <label>Company Name</label>
+                <label htmlFor="company-name">Company Name *</label>
                 <input
                   type="text"
+                  id="company-name" required
                   value={formData['company.name'] || ''}
                   onChange={(e) => handleChange('company.name', e.target.value)}
                 />
               </div>
 
               <div className="form-group full-width">
-                <label>Address</label>
+                <label htmlFor="company-address">Address *</label>
                 <textarea
                   rows="3"
+                  id="company-address" required
                   value={formData['company.address'] || ''}
                   onChange={(e) => handleChange('company.address', e.target.value)}
                 />
@@ -230,18 +239,20 @@ const Settings = () => {
               </div>
 
               <div className="form-group">
-                <label>Phone</label>
+                <label htmlFor="company-phone">Phone *</label>
                 <input
                   type="tel"
+                  id="company-phone" required
                   value={formData['company.phone'] || ''}
                   onChange={(e) => handleChange('company.phone', e.target.value)}
                 />
               </div>
 
               <div className="form-group">
-                <label>Email</label>
+                <label htmlFor="company-email">Email *</label>
                 <input
                   type="email"
+                  id="company-email" required
                   value={formData['company.email'] || ''}
                   onChange={(e) => handleChange('company.email', e.target.value)}
                 />

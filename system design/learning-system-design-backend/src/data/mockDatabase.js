@@ -2030,10 +2030,10 @@ const mockPrisma = {
           const result = { ...cat };
 
           if (include.customer) {
-            const customer = mockData.leads.find(l => l.id === cat.customerId);
+            const customer = mockData.customers.find(c => c.id === cat.customerId) || mockData.leads.find(l => l.id === cat.customerId);
             result.customer = include.customer.select
               ? Object.keys(include.customer.select).reduce((acc, key) => {
-                  acc[key] = customer[key];
+                  acc[key] = customer?.[key];
                   return acc;
                 }, {})
               : customer;
@@ -2083,10 +2083,10 @@ const mockPrisma = {
         catalogue = { ...catalogue };
 
         if (include.customer) {
-          const customer = mockData.leads.find(l => l.id === catalogue.customerId);
+          const customer = mockData.customers.find(c => c.id === catalogue.customerId) || mockData.leads.find(l => l.id === catalogue.customerId);
           catalogue.customer = include.customer.select
             ? Object.keys(include.customer.select).reduce((acc, key) => {
-                acc[key] = customer[key];
+                acc[key] = customer?.[key];
                 return acc;
               }, {})
             : customer;
@@ -2254,7 +2254,7 @@ const mockPrisma = {
             const customer = mockData.leads.find(l => l.id === pi.customerId);
             result.customer = include.customer.select
               ? Object.keys(include.customer.select).reduce((acc, key) => {
-                  acc[key] = customer[key];
+                  acc[key] = customer?.[key];
                   return acc;
                 }, {})
               : customer;

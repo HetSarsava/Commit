@@ -276,7 +276,7 @@ exports.recordStockMovement = async (req, res, next) => {
         referenceId: referenceId || null,
         notes: notes || null,
         date: date ? new Date(date) : new Date(),
-        createdBy: req.user.userId,
+        createdBy: req.user.id,
       },
     });
 
