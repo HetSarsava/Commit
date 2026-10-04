@@ -1,4 +1,9 @@
 const { prisma } = require('../config/database');
+const { validateChanges, decode, getCompany } = require('../services/companyProfile');
+exports.getBranding = async (req, res, next) => {
+  try { const company = await getCompany(prisma); res.json({ name: company.name || 'Company' }); }
+  catch (error) { next(error); }
+};
 
 // Get all settings
 exports.getAllSettings = async (req, res, next) => {
@@ -72,6 +77,7 @@ exports.updateSettings = async (req, res, next) => {
       return res.status(400).json({ error: 'Settings object is required' });
     }
 
+    await validateChanges(prisma, settings);
     const updates = [];
     for (const [key, value] of Object.entries(settings)) {
       // Check if setting exists
@@ -92,7 +98,7 @@ exports.updateSettings = async (req, res, next) => {
           data: {
             key,
             value: JSON.stringify(value),
-            category: 'CUSTOM',
+            category: key.startsWith('company.') ? 'COMPANY' : 'CUSTOM',
             description: `Custom setting: ${key}`,
           },
         });
@@ -125,6 +131,7 @@ exports.updateSetting = async (req, res, next) => {
       return res.status(404).json({ error: 'Setting not found' });
     }
 
+    await validateChanges(prisma, { [key]: value });
     const updated = await prisma.settings.update({
       where: { key },
       data: {
@@ -205,6 +212,7 @@ exports.importSettings = async (req, res, next) => {
       return res.status(400).json({ error: 'Settings array is required' });
     }
 
+    await validateChanges(prisma, Object.fromEntries(settings.map(setting => [setting.key, decode(setting.value)])));
     const updates = [];
     for (const setting of settings) {
       const existing = await prisma.settings.findUnique({ where: { key: setting.key } });
@@ -214,7 +222,7 @@ exports.importSettings = async (req, res, next) => {
           where: { key: setting.key },
           data: {
             value: setting.value,
-            category: setting.category,
+            category: setting.key.startsWith('company.') ? 'COMPANY' : setting.category,
             description: setting.description,
             updatedAt: new Date(),
           },
@@ -225,7 +233,7 @@ exports.importSettings = async (req, res, next) => {
           data: {
             key: setting.key,
             value: setting.value,
-            category: setting.category,
+            category: setting.key.startsWith('company.') ? 'COMPANY' : setting.category,
             description: setting.description,
           },
         });

@@ -1,1 +1,11 @@
 .env
+
+# Local WhatsApp demo records and credential notes
+**/data/*.sqlite*
+.env.*
+!.env.example
+Project things.txt
+**/Project things.txt
+
+.demo/
+.tools/

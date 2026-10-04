@@ -289,3 +289,17 @@
   .purchase-page .form-section-header .btn-small {
     width: 100%;
   }}
+.purchase-page .modal-overlay { position: fixed; inset: 0; z-index: 1100; padding: 16px; background: #1c2333aa; display: flex; align-items: center; justify-content: center; }
+.purchase-page .modal-content { width: min(640px,100%); max-height: 90dvh; background: var(--white); border-radius: 12px; box-shadow: 0 20px 60px #0004; display: flex; flex-direction: column; overflow: hidden; }
+.purchase-page .modal-content.large { width: min(900px,100%); }
+.purchase-page .modal-header, .purchase-page .modal-footer { padding: 20px; display: flex; gap: 12px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+.purchase-page .modal-footer { justify-content: flex-end; border-top: 1px solid var(--line); border-bottom: 0; flex-wrap: wrap; }
+.purchase-page .modal-content > form { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.purchase-page .modal-body { overflow-y: auto; min-height: 0; padding: 20px; }
+.purchase-page .form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-bottom: 16px; }
+.purchase-page .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.purchase-page .form-grid .form-group { margin-bottom: 0; }
+.purchase-page .modal-close { flex-shrink: 0; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.purchase-page .form-error { padding: 12px 20px; color: var(--rust); }
+.purchase-page .po-item-form:has(.btn-remove) { padding-top: 48px; }
+@media(max-width:650px) { .purchase-page .form-grid { grid-template-columns: 1fr; } .purchase-page .form-section { padding: 16px; } }

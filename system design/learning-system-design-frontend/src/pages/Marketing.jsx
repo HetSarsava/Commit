@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
 import { marketingAPI } from '../api/marketing';
 import './Marketing.css';
+import { useNavigate } from 'react-router-dom';
 
 const Marketing = () => {
+  const navigate = useNavigate();
+  const [results,setResults]=useState(null), [resultsError,setResultsError]=useState(''), [spend,setSpend]=useState(''), [spendBusy,setSpendBusy]=useState(false);
+  const viewResults=async id=>{try{setResults(await marketingAPI.getCampaignById(id));setResultsError('');}catch{setResultsError('Could not load campaign results.');}};
+  const recordSpend=async()=>{if(spendBusy)return;setSpendBusy(true);try{await marketingAPI.recordSpend(results.id,{amount:Number(spend),description:'Recorded in campaign results'});setSpend('');await viewResults(results.id);fetchData();}catch(e){setResultsError(e.response?.data?.error || 'Could not record spend');}finally{setSpendBusy(false);}};
   const [activeTab, setActiveTab] = useState('dashboard');
   const [campaigns, setCampaigns] = useState([]);
   const [dashboard, setDashboard] = useState(null);
@@ -27,7 +32,7 @@ const Marketing = () => {
     fetchData();
   }, [activeTab]);
 
-  const fetchData = async () => {
+  async function fetchData() {
     try {
       setLoading(true);
       if (activeTab === 'dashboard') {
@@ -181,9 +186,9 @@ const Marketing = () => {
               <div className="metric-subtitle">Average across campaigns</div>
             </div>
             <div className="metric-card highlight">
-              <div className="metric-label">Overall ROI</div>
-              <div className="metric-value roi">{dashboard.summary.overallROI}%</div>
-              <div className="metric-subtitle">Revenue vs Spend</div>
+              <div className="metric-label">Sales ROI</div>
+              <div className="metric-value roi">{dashboard.summary.overallROI == null ? '—' : dashboard.summary.overallROI + '%'}</div>
+              <div className="metric-subtitle">Order value vs spend</div>
             </div>
             <div className="metric-card">
               <div className="metric-label">Conversion Rate</div>
@@ -191,9 +196,9 @@ const Marketing = () => {
               <div className="metric-subtitle">Lead to customer</div>
             </div>
             <div className="metric-card">
-              <div className="metric-label">Total Revenue</div>
+              <div className="metric-label">Confirmed order value</div>
               <div className="metric-value revenue">₹{dashboard.summary.totalRevenue.toLocaleString()}</div>
-              <div className="metric-subtitle">From converted leads</div>
+              <div className="metric-subtitle">Before GST, after discounts</div>
             </div>
           </div>
 
@@ -207,7 +212,7 @@ const Marketing = () => {
                 <div>Spent</div>
                 <div>Leads</div>
                 <div>CPL</div>
-                <div>Revenue</div>
+                <div>Order value</div>
                 <div>ROI</div>
               </div>
               {dashboard.platformStats.map((platform) => (
@@ -219,7 +224,7 @@ const Marketing = () => {
                   <div>₹{platform.cpl}</div>
                   <div className="revenue-value">₹{platform.revenue.toLocaleString()}</div>
                   <div className={`roi-value ${platform.roi > 0 ? 'positive' : 'negative'}`}>
-                    {platform.roi}%
+                    {platform.roi == null ? '—' : platform.roi + '%'}
                   </div>
                 </div>
               ))}
@@ -231,7 +236,7 @@ const Marketing = () => {
             <h2>Top Performing Campaigns (by ROI)</h2>
             <div className="top-campaigns">
               {dashboard.topCampaigns.map((campaign, index) => (
-                <div key={campaign.id} className="top-campaign-card">
+                <div key={campaign.id} className="top-campaign-card"><button className="btn-secondary" onClick={()=>viewResults(campaign.id)}>View leads & orders</button>
                   <div className="campaign-rank">#{index + 1}</div>
                   <div className="campaign-info">
                     <h3>{campaign.name}</h3>
@@ -247,13 +252,13 @@ const Marketing = () => {
                       <span className="stat-value">{campaign.leads}</span>
                     </div>
                     <div className="stat">
-                      <span className="stat-label">Revenue:</span>
+                      <span className="stat-label">Order value:</span>
                       <span className="stat-value">₹{campaign.revenue.toLocaleString()}</span>
                     </div>
                     <div className="stat highlight">
                       <span className="stat-label">ROI:</span>
                       <span className={`stat-value roi ${campaign.roi > 0 ? 'positive' : ''}`}>
-                        {campaign.roi}%
+                        {campaign.roi == null ? '—' : campaign.roi + '%'}
                       </span>
                     </div>
                   </div>
@@ -269,7 +274,7 @@ const Marketing = () => {
         <div className="campaigns-view">
           <div className="campaigns-grid">
             {campaigns.map((campaign) => (
-              <div key={campaign.id} className="campaign-card">
+              <div key={campaign.id} className="campaign-card"><button className="btn-secondary" onClick={()=>viewResults(campaign.id)}>View leads & orders</button>
                 <div className="campaign-card-header">
                   <div>
                     <h3>{campaign.name}</h3>
@@ -292,7 +297,7 @@ const Marketing = () => {
                   </div>
                   <div className="detail-row">
                     <span>Utilization:</span>
-                    <span>{Math.round((campaign.spent / campaign.budget) * 100)}%</span>
+                    <span>{campaign.budget > 0 ? Math.round((campaign.spent / campaign.budget) * 100) : 0}%</span>
                   </div>
                 </div>
 
@@ -312,7 +317,7 @@ const Marketing = () => {
                     </div>
                     <div className="metric-item highlight">
                       <span className={`metric-num roi ${campaign.metrics.roi > 0 ? 'positive' : ''}`}>
-                        {campaign.metrics.roi}%
+                        {campaign.metrics.roi == null ? '—' : campaign.metrics.roi + '%'}
                       </span>
                       <span className="metric-lbl">ROI</span>
                     </div>
@@ -330,6 +335,9 @@ const Marketing = () => {
         </div>
       )}
 
+
+      {resultsError && <p role="alert">{resultsError}</p>}
+      {results && <div className="modal-overlay"><section className="modal-content" role="dialog" aria-label="Campaign results"><div className="modal-header"><h2>{results.name}: results</h2><button className="btn-secondary" onClick={()=>setResults(null)}>Close</button></div><div className="campaign-results-body"><p>Spent is the campaign's manually recorded advertising cost. No ad account is connected.</p><p>Sales ROI = (confirmed order value − spend) ÷ spend × 100. Order value excludes GST and discounts; cancelled/pending orders and lead budgets are excluded. This is sales return, not profit or cash collected. With no spend, ROI is unavailable.</p><p>Spent: ₹{Number(results.spent).toLocaleString('en-IN')} · Order value: ₹{results.metrics.revenue.toLocaleString('en-IN')}</p><label>Additional spend (₹)<input type="number" min="0.01" step="0.01" value={spend} onChange={e=>setSpend(e.target.value)}/></label><button className="btn-primary" disabled={spendBusy || !(Number(spend)>0)} onClick={recordSpend}>Record spend</button><h3>Attributed leads ({results.leads.length})</h3>{results.leads.map(l=><button className="btn-secondary" key={l.id} onClick={()=>navigate('/leads?leadId='+encodeURIComponent(l.id))}>{l.companyName} · {l.status}</button>)}<h3>Attributed orders ({results.orders.length})</h3>{results.orders.map(o=><button className="btn-secondary" key={o.id} onClick={()=>navigate('/orders/'+o.id)}>{o.orderNumber} · {o.status}</button>)}{!results.orders.length && <p>No orders linked to this campaign yet.</p>}</div></section></div>}
       {/* Campaign Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>

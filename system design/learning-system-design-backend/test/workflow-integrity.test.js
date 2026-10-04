@@ -1,0 +1,57 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {mkdtempSync}=require('node:fs');
+const path=require('node:path'),os=require('node:os');
+process.env.USE_MOCK_DB='true';
+process.env.JWT_SECRET=require('node:crypto').randomBytes(32).toString('hex');
+process.env.WHATSAPP_DB_PATH=path.join(mkdtempSync(path.join(os.tmpdir(),'commit-workflows-')),'demo.sqlite');
+const {prisma}=require('../src/config/database');
+const {attribution}=require('../src/services/marketingMetrics');
+const {snapshot}=require('../src/services/invoiceSnapshot');
+test('marketing attributes real orders once and excludes cancelled orders and lead budgets',()=>{
+ const c={id:'c',spent:100},leads=[{id:'l',campaignId:'c',budget:999999}],orders=[{id:'o',customerId:'l',status:'CONFIRMED',subtotal:500,discountAmount:50},{id:'x',customerId:'l',status:'CANCELLED',subtotal:99999}];
+ const result=attribution(c,leads,orders);
+ assert.equal(result.metrics.revenue,450);assert.equal(result.metrics.roi,350);assert.equal(result.metrics.orders,1);
+ assert.equal(attribution({...c,spent:0},leads,orders).metrics.roi,null);
+});
+test('catalogue branches, duplicate invoice races, unpaid synchronization, guidelines roles and audit privacy',async t=>{
+ const express=require('express'),app=express();app.use(express.json());app.use(require('../src/middleware/mutationAudit').mutationAudit);
+ app.use((req,res,next)=>{req.user={id:'user-1',role:req.headers['x-test-role']||'ADMIN'};next();});
+ app.post('/api/products',require('../src/controllers/productController').createProduct);
+ const cat=require('../src/controllers/catalogueController'),inv=require('../src/controllers/invoiceController');
+ app.post('/api/catalogues',cat.createCatalogue);app.put('/api/catalogues/:id',cat.updateCatalogue);app.get('/api/catalogues/share/:shareLink',cat.getCatalogueByLink);app.patch('/api/catalogues/:id/status',cat.updateCatalogueStatus);app.post('/api/catalogues/track/click',cat.trackProductClick);app.get('/api/catalogues/:id/analytics',cat.getCatalogueAnalytics);
+ app.post('/api/invoices/from-order',inv.createInvoiceFromOrder);app.post('/api/invoices/:id/sync-order',inv.syncFromOrder);app.use('/api/whatsapp/guidelines',require('../src/routes/whatsappGuidelines'));app.use(require('../src/middleware/errorHandler'));
+ const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>new Promise(r=>server.close(r)));
+ const url='http://127.0.0.1:'+server.address().port;
+ const send=async(method,route,body,role='ADMIN')=>{const user=(await prisma.user.findMany({})).find(u=>u.role===role); const token=require('jsonwebtoken').sign({userId:user.id},process.env.JWT_SECRET); const r=await fetch(url+route,{method,headers:{'Content-Type':'application/json','x-test-role':role,'Authorization':'Bearer '+token},body:body?JSON.stringify(body):undefined});return {status:r.status,data:await r.json()};};
+ const productBody={sku:'WORKFLOW-PRODUCT',name:'Test shirt',moq:10,basePrice:450,category:'UNIFORM'};
+ assert.equal((await send('POST','/api/products',{...productBody,basePrice:'bad'})).status,400);
+ assert.equal((await send('POST','/api/products',productBody)).status,201);
+ assert.equal((await send('POST','/api/products',{...productBody,sku:' WORKFLOW-PRODUCT '})).status,400);
+ const product=(await prisma.product.findMany({}))[0],customer=(await prisma.customer.findMany({}))[0];
+ const payload={customerId:customer.id,title:'Workflow test',products:[{productId:product.id}],notes:'PRIVATE_NOTES'};
+ assert.equal((await send('POST','/api/catalogues',{...payload,products:[null]})).status,400);
+ assert.equal((await send('POST','/api/catalogues',{...payload,products:[{productId:product.id},{productId:product.id}]})).status,400);
+ const created=await send('POST','/api/catalogues',payload);assert.equal(created.status,201);const c=created.data.catalogue;
+ assert.equal((await send('PUT','/api/catalogues/'+c.id,{...payload,title:'Edited'})).status,200);
+ await send('PATCH','/api/catalogues/'+c.id+'/status',{status:'SHARED'});
+ const publicData=await send('GET','/api/catalogues/share/'+c.shareLink);assert.equal(publicData.status,200);assert.ok(!JSON.stringify(publicData.data).includes('PRIVATE_NOTES'));assert.equal((await prisma.catalogue.findUnique({where:{id:c.id}})).status,'VIEWED');
+ assert.equal((await send('POST','/api/catalogues/track/click',{shareLink:c.shareLink,productId:'unknown'})).status,400);
+ assert.equal((await send('POST','/api/catalogues/track/click',{shareLink:c.shareLink,productId:product.id})).status,200);
+ const analytics=(await send('GET','/api/catalogues/'+c.id+'/analytics')).data;assert.equal(analytics.summary.totalProductClicks,1);
+ assert.equal((await send('PUT','/api/catalogues/'+c.id,payload)).status,409);
+ await send('PATCH','/api/catalogues/'+c.id+'/status',{status:'EXPIRED'});assert.equal((await send('GET','/api/catalogues/share/'+c.shareLink)).status,410);
+ const order=await prisma.order.create({data:{customerId:customer.id,salesPersonId:'user-1',orderNumber:'TEST-ONE',status:'CONFIRMED',subtotal:100,taxAmount:18,total:118,notes:'',items:{create:[{productId:product.id,quantity:1,unitPrice:100,total:100}]}}});
+ const races=await Promise.all([send('POST','/api/invoices/from-order',{orderId:order.id}),send('POST','/api/invoices/from-order',{orderId:order.id})]);assert.ok(races.some(r=>[200,201].includes(r.status)));const invoices=await prisma.invoice.findMany({where:{orderId:order.id}});assert.equal(invoices.length,1);const invoice=invoices[0];
+ await prisma.order.update({where:{id:order.id},data:{notes:'Changed'}});assert.equal((await send('POST','/api/invoices/'+invoice.id+'/sync-order',{})).status,200);
+ assert.equal(snapshot(await prisma.order.findUnique({where:{id:order.id},include:{items:true}})),snapshot(await prisma.invoice.findUnique({where:{id:invoice.id},include:{items:true}})));
+ await prisma.invoice.update({where:{id:invoice.id},data:{amountPaid:1}});assert.equal((await send('POST','/api/invoices/'+invoice.id+'/sync-order',{})).status,409);
+ assert.equal((await send('PUT','/api/whatsapp/guidelines',{text:'Test guideline'},'SALES')).status,403);assert.equal((await send('PUT','/api/whatsapp/guidelines',{text:'Test guideline'})).status,200);assert.equal((await send('GET','/api/whatsapp/guidelines',null,'SALES')).data.text,'Test guideline');
+ const logs=await prisma.activityLog.findMany({});assert.ok(logs.some(l=>l.entityType==='CATALOGUE'));assert.ok(!JSON.stringify(logs).includes('PRIVATE_NOTES'));
+});
+
+test('demo catalogue, product, invoice, audit and admin guidelines survive a new process',()=>{
+ const result=require('node:child_process').execFileSync(process.execPath,['-e',"const {prisma}=require('./src/config/database');Promise.all([prisma.catalogue.findMany({}),prisma.invoice.findMany({}),prisma.activityLog.findMany({}),prisma.product.findMany({}),prisma.settings.findUnique({where:{key:'whatsapp.guidelines'}})]).then(([c,i,l,p,g])=>console.log(JSON.stringify({product:p.some(r=>r.sku==='WORKFLOW-PRODUCT'),catalogue:c.some(r=>r.title==='Edited'),invoice:i.some(r=>r.orderId),logs:l.length>0,guidelines:JSON.parse(g.value)})));"],{cwd:require('node:path').resolve(__dirname,'..'),env:process.env,encoding:'utf8'});
+ const output=JSON.parse(result.split('\n').find(line=>line.startsWith('{')));
+ assert.equal(output.product,true);assert.equal(output.catalogue,true);assert.equal(output.invoice,true);assert.equal(output.logs,true);assert.equal(output.guidelines,'Test guideline');
+});

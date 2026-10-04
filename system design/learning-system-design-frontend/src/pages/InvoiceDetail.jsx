@@ -1,3 +1,4 @@
+import { useCompany } from '../context/CompanyData';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { invoicesAPI } from '../api/invoices';
@@ -7,8 +8,10 @@ import PaymentModal from '../components/PaymentModal';
 import './InvoiceDetail.css';
 
 const InvoiceDetail = () => {
+  const company = useCompany();
   const { id } = useParams();
   const navigate = useNavigate();
+  const [showShare, setShowShare] = useState(false);
   const [invoice, setInvoice] = useState(null);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -155,9 +158,10 @@ const InvoiceDetail = () => {
           )}
           {invoice.customer?.whatsapp && invoice.balanceDue > 0 && (
             <button className="btn btn-whatsapp" onClick={handleSendPaymentReminder}>
-              📱 Send Reminder
+               Send Reminder
             </button>
           )}
+          <button className="btn" onClick={()=>setShowShare(true)}>Share Invoice</button>
           <button className="btn" onClick={handleDownloadPDF}>Download PDF</button>
           {invoice.order && (
             <button className="btn" onClick={() => navigate(`/orders/${invoice.order.id}`)}>
@@ -167,16 +171,17 @@ const InvoiceDetail = () => {
         </div>
       </div>
 
+      {showShare && <section className="card invoice-share-panel"><h2>Share this invoice</h2><p>Save the invoice as a PDF, then attach it in WhatsApp or email. The CRM page address requires login and is not a public customer link.</p><button className="btn" onClick={handleDownloadPDF}>Save PDF to share</button><button className="btn" onClick={async()=>{try{await navigator.clipboard.writeText('Invoice '+invoice.invoiceNumber+' from '+company.name+' — total ₹'+Number(invoice.total).toLocaleString('en-IN')+', balance ₹'+Number(invoice.balanceDue).toLocaleString('en-IN'));alert('Invoice summary copied');}catch{alert('Could not copy. Please use Save PDF.');}}}>Copy invoice summary</button><button className="btn" onClick={()=>setShowShare(false)}>Close</button></section>}
       {/* Invoice Document */}
       <div className="invoice-document">
         <div className="invoice-paper">
           {/* Header */}
           <div className="invoice-header">
             <div className="company-info">
-              <h2>AMIT UNIFORM</h2>
-              <p>I.O.C. Road, Chandkheda<br />Ahmedabad, Gujarat - 382424</p>
-              <p>GSTIN: <strong>24XXXXX1234X1ZX</strong></p>
-              <p>Email: info@amituniform.com | Phone: +91 79 2765 4321</p>
+              <h2>{company.name}</h2>
+              <p>{company.address}</p>
+              <p>GSTIN: <strong>{company.gstin || "Not added"}</strong></p>
+              <p>Email: {company.email} | Phone: {company.phone}</p>
             </div>
             <div className="invoice-meta">
               <h1>TAX INVOICE</h1>
@@ -379,7 +384,7 @@ const InvoiceDetail = () => {
             </div>
 
             <div className="signature-box">
-              <p>For <strong>AMIT UNIFORM</strong></p>
+              <p>For <strong>{company.name}</strong></p>
               <div className="signature-line"></div>
               <p>Authorized Signatory</p>
             </div>

@@ -323,3 +323,7 @@
   .dispatch-container .status-filter {
     overflow-x: auto;
   }}
+
+.dispatch-container .filter-btn.active { background: var(--brass); color: white; border-color: var(--brass); }
+
+.dispatch-container .dispatch-form-notice { margin-bottom: 16px; padding: 12px; line-height: 1.6; background: var(--canvas); border-radius: 6px; }

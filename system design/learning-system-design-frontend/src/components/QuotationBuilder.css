@@ -527,3 +527,10 @@
   .quotation-builder-modal .builder-footer button {
     width: 100%;
   }}
+.quotation-builder-modal .customer-search { display: block; margin-bottom: var(--space-group); }
+.quotation-builder-modal .customer-list { gap: var(--space-control); padding: 2px; }
+.quotation-builder-modal .builder-content { min-height: 0; }
+.quotation-builder-modal .builder-header, .quotation-builder-modal .builder-footer { flex-shrink: 0; }
+.quotation-builder-modal .builder-header { gap: var(--space-group); }
+.quotation-builder-modal .selected-products > h4 { margin-top: 0; }
+.quotation-builder-modal .selected-product-item:last-child { margin-bottom: 0; }

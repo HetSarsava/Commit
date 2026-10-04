@@ -1,9 +1,33 @@
 import { useState, useEffect } from 'react';
 import { productsAPI } from '../api/products';
+import { useNavigate } from 'react-router-dom';
+import apiClient from '../api/client';
 import ProductModal from '../components/ProductModal';
 import './Products.css';
 
 const Products = () => {
+  const navigate = useNavigate();
+  const [generating, setGenerating] = useState(false);
+  const [catalogueError, setCatalogueError] = useState("");
+  const [catalogueContacts, setCatalogueContacts] = useState([]);
+  const [catalogueCustomer, setCatalogueCustomer] = useState('');
+  useEffect(() => {
+    apiClient.get('/catalogues/contacts').then(response => setCatalogueContacts(response.data)).catch(() => setCatalogueError('Could not load customers. You can still download a PDF.'));
+  }, []);
+  const downloadCatalogue = async () => {
+    setGenerating(true); setCatalogueError("");
+    try {
+      const response = await apiClient.post('/catalogues/pdf', { productIds: selectedForCatalogue.map(p => p.id) }, { responseType: 'blob' });
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url; link.download = 'product-catalogue.pdf';
+      document.body.appendChild(link);
+      link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
+    catch (error) { let message = "Could not generate the catalogue. Please try again."; try { message = JSON.parse(await error.response.data.text()).error || message; } catch {} setCatalogueError(message); }
+    finally { setGenerating(false); }
+  };
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -78,16 +102,16 @@ const Products = () => {
     setSelectedForCatalogue([]);
   };
 
-  const getProductEmoji = (category) => {
-    const emojiMap = {
-      'SHIRTS': '👕',
-      'PANTS': '👖',
-      'JACKETS': '🧥',
-      'SCRUBS': '🥼',
-      'CAPS': '🧢',
-      'ACCESSORIES': '🎽',
+  const getProductPlaceholder = (category) => {
+    const categoryLabels = {
+      'SHIRTS': 'Shirts',
+      'PANTS': 'Pants',
+      'JACKETS': 'Jackets',
+      'SCRUBS': 'Scrubs',
+      'CAPS': 'Caps',
+      'ACCESSORIES': 'Accessories',
     };
-    return emojiMap[category] || '👔';
+    return categoryLabels[category] || 'Product';
   };
 
   return (
@@ -130,7 +154,7 @@ const Products = () => {
             <div className="loading-state">Loading...</div>
           ) : products.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">📦</div>
+
               <h3>No products found</h3>
               <p>Add your first product to get started</p>
               <button className="btn btn-primary" onClick={handleCreate}>+ Add product</button>
@@ -146,7 +170,7 @@ const Products = () => {
                     onClick={() => toggleCatalogueSelection(product)}
                   >
                     <div className="p-img">
-                      {getProductEmoji(product.category)}
+                      {getProductPlaceholder(product.category)}
                       {product.stockQuantity < 20 && (
                         <div className="low-stock">Low stock</div>
                       )}
@@ -174,10 +198,7 @@ const Products = () => {
                           e.stopPropagation();
                           handleEdit(product);
                         }}
-                        title="Edit"
-                      >
-                        ✏
-                      </button>
+                        title="Edit">Edit</button>
                       <button
                         className="p-action-btn"
                         onClick={(e) => {
@@ -186,7 +207,7 @@ const Products = () => {
                         }}
                         title="Delete"
                       >
-                        🗑
+                        Delete
                       </button>
                     </div>
                   </div>
@@ -208,22 +229,12 @@ const Products = () => {
           <h4>Send to</h4>
           <div className="field">
             <label>Lead / Customer</label>
-            <select>
-              <option>Select customer...</option>
-              <option>Sunrise Hospital Group</option>
-              <option>Grand Horizon Hotels</option>
-              <option>Metro Facility Services</option>
+            <select aria-label="Catalogue customer" value={catalogueCustomer} onChange={event => setCatalogueCustomer(event.target.value)}>
+              <option value="">Choose a customer when saving</option>
+              {catalogueContacts.map(contact => <option key={contact.id} value={contact.id}>{contact.companyName}</option>)}
             </select>
           </div>
-          <div className="field">
-            <label>Requirement match</label>
-            <select>
-              <option>Select requirement...</option>
-              <option>Hospital & healthcare uniforms</option>
-              <option>Hotel & hospitality wear</option>
-              <option>Security & facility staff</option>
-            </select>
-          </div>
+          <p>Choose products from the list. A customer is optional for a PDF and required when you save a catalogue.</p>
         </div>
 
         <div className="builder-section" style={{ flex: 1, overflowY: 'auto' }}>
@@ -236,7 +247,7 @@ const Products = () => {
             <div className="selected-list">
               {selectedForCatalogue.map((product) => (
                 <div key={product.id} className="sel-item">
-                  <div className="sel-thumb">{getProductEmoji(product.category)}</div>
+                  <div className="sel-thumb">{getProductPlaceholder(product.category).slice(0, 2).toUpperCase()}</div>
                   <div className="sel-name">{product.name}</div>
                   <button
                     type="button"
@@ -252,35 +263,23 @@ const Products = () => {
           )}
         </div>
 
-        <div className="analytics-strip">
-          <div className="a-stat">
-            <div className="n">86%</div>
-            <div className="l">OPEN RATE (30D)</div>
-          </div>
-          <div className="a-stat">
-            <div className="n">312</div>
-            <div className="l">PRODUCT VIEWS</div>
-          </div>
-          <div className="a-stat">
-            <div className="n">24</div>
-            <div className="l">ENQUIRY CLICKS</div>
-          </div>
-        </div>
+        <div className="analytics-strip"><div className="a-stat"><div className="n">{selectedForCatalogue.length}</div><div className="l">PRODUCTS SELECTED</div></div><p>Download a PDF, or save a catalogue for a customer to get its viewing link.</p></div>
 
         <div className="builder-actions">
+          {catalogueError && <p role="alert">{catalogueError}</p>}
           <button
             className="action-btn primary"
-            disabled
-            title="Catalogue generation is not configured"
+            disabled={generating || !selectedForCatalogue.length}
+            onClick={downloadCatalogue}
           >
-            Generate PDF & share link
+            {generating ? 'Preparing PDF…' : 'Download catalogue PDF'}
           </button>
           <button
             className="action-btn"
-            disabled
-            title="Catalogue sharing is not configured"
+            disabled={!selectedForCatalogue.length}
+            onClick={() => navigate('/catalogues', { state: { selectedProducts: selectedForCatalogue.map(p => p.id), customerId: catalogueCustomer } })}
           >
-            Send directly on WhatsApp
+            Save catalogue & get link
           </button>
           {selectedForCatalogue.length > 0 && (
             <button className="action-btn-text" onClick={clearCatalogueSelection}>

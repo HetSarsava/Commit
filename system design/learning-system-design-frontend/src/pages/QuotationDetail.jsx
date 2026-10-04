@@ -1,3 +1,4 @@
+import { useCompany } from '../context/CompanyData';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { quotationsAPI } from '../api/quotations';
@@ -7,6 +8,7 @@ import QuotationBuilder from '../components/QuotationBuilder';
 import './QuotationDetail.css';
 
 const QuotationDetail = () => {
+  const company = useCompany();
   const { id } = useParams();
   const navigate = useNavigate();
   const [quotation, setQuotation] = useState(null);
@@ -130,7 +132,7 @@ const QuotationDetail = () => {
           <button className="btn" onClick={handleEdit}>Edit</button>
           {quotation.customer?.whatsapp && (
             <button className="btn btn-whatsapp" onClick={handleSendWhatsApp}>
-              📱 Send via WhatsApp
+               Send via WhatsApp
             </button>
           )}
           <button className="btn btn-convert" onClick={handleConvertToOrder}>
@@ -171,9 +173,9 @@ const QuotationDetail = () => {
             {/* Document Header */}
             <div className="doc-header">
               <div className="from">
-                <b>Amit Uniform</b>
-                I.O.C. Road, Chandkheda, Ahmedabad, Gujarat<br />
-                GSTIN: 24XXXXX1234X1ZX
+                <b>{company.name}</b>
+                {company.address}<br />
+                GSTIN: {company.gstin || "Not added"}
               </div>
               <div className="doc-meta">
                 <div className="qno">{quotation.quotationNumber}</div>
@@ -269,7 +271,7 @@ const QuotationDetail = () => {
               <span><b>Bank:</b> State Bank of India</span>
               <span><b>A/C No.:</b> 43377408488</span>
               <span><b>IFSC:</b> SBIN0011768</span>
-              <span><b>Branch:</b> I.O.C. Road, Chandkheda, Ahmedabad</span>
+              <span><b>Branch:</b> {company.address}</span>
             </div>
           </div>
         </div>
@@ -314,11 +316,11 @@ const QuotationDetail = () => {
           <div className="card side-card">
             <h3>Actions</h3>
             <div className="action-list">
-              <button type="button" className="action-btn wa" onClick={handleSendWhatsApp}>💬 Send on WhatsApp</button>
-              <button type="button" className="action-btn" disabled title="Email delivery is not configured">✉ Email PDF</button>
-              <button type="button" className="action-btn" disabled title="Follow-up reminders are not configured">🔁 Set follow-up reminder</button>
-              <button type="button" className="action-btn" onClick={handleEdit}>✏ Edit quotation</button>
-              <button type="button" className="action-btn danger" onClick={handleDelete}>🗑 Delete quotation</button>
+              <button type="button" className="action-btn wa" onClick={handleSendWhatsApp}> Send on WhatsApp</button>
+              <button type="button" className="action-btn" disabled title="Email delivery is not configured"> Email PDF</button>
+              <button type="button" className="action-btn" disabled title="Follow-up reminders are not configured"> Set follow-up reminder</button>
+              <button type="button" className="action-btn" onClick={handleEdit}> Edit quotation</button>
+              <button type="button" className="action-btn danger" onClick={handleDelete}> Delete quotation</button>
             </div>
           </div>
         </div>

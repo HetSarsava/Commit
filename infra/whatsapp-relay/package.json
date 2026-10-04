@@ -1,0 +1,13 @@
+{
+  "name": "commit-whatsapp-relay",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "migrate:local": "wrangler d1 migrations apply commit-whatsapp-demo --local",
+    "migrate:remote": "wrangler d1 migrations apply commit-whatsapp-demo --remote"
+  },
+  "devDependencies": { "wrangler": "^4.0.0" }
+}

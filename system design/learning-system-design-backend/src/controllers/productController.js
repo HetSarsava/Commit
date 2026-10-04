@@ -79,7 +79,7 @@ exports.getProduct = async (req, res, next) => {
 // Create product
 exports.createProduct = async (req, res, next) => {
   try {
-    console.log('Creating product with data:', JSON.stringify(req.body, null, 2));
+
 
     const {
       sku,
@@ -101,22 +101,22 @@ exports.createProduct = async (req, res, next) => {
     } = req.body;
 
     // Validate required fields
-    if (!sku || !sku.trim()) {
+    if (typeof sku !== "string" || !sku.trim()) {
       return res.status(400).json({ error: 'SKU is required' });
     }
-    if (!name || !name.trim()) {
+    if (typeof name !== "string" || !name.trim()) {
       return res.status(400).json({ error: 'Product name is required' });
     }
-    if (!moq || moq <= 0) {
+    if (!Number.isInteger(Number(moq)) || Number(moq) <= 0) {
       return res.status(400).json({ error: 'MOQ must be greater than 0' });
     }
-    if (!basePrice || basePrice <= 0) {
+    if (!Number.isFinite(Number(basePrice)) || Number(basePrice) <= 0) {
       return res.status(400).json({ error: 'Price must be greater than 0' });
     }
 
     // Check if SKU already exists
     const existingProduct = await prisma.product.findUnique({
-      where: { sku },
+      where: { sku:sku.trim() },
     });
 
     if (existingProduct) {

@@ -29,7 +29,7 @@ exports.createSupplier = async (req, res, next) => {
       notes,
     } = req.body;
 
-    if (!name || !phone) {
+    if (typeof name !== 'string' || !name.trim() || typeof phone !== 'string' || !phone.trim()) {
       return res.status(400).json({
         error: 'Supplier name and phone are required',
       });
@@ -167,7 +167,7 @@ exports.createPurchaseOrder = async (req, res, next) => {
     } = req.body;
 
     // Validation
-    if (!supplierId || !items || items.length === 0) {
+    if (typeof supplierId !== 'string' || !Array.isArray(items) || !items.length || items.length > 100) {
       return res.status(400).json({
         error: 'Supplier and at least one item are required',
       });
@@ -182,6 +182,10 @@ exports.createPurchaseOrder = async (req, res, next) => {
       return res.status(404).json({ error: 'Supplier not found' });
     }
 
+    if(items.some(item=>!item||typeof item.materialId!=='string'||!Number.isFinite(Number(item.quantity))||Number(item.quantity)<=0||!Number.isFinite(Number(item.rate))||Number(item.rate)<=0)) return res.status(400).json({error:'Every item needs a material, positive quantity and positive rate.'});
+    if(new Set(items.map(item=>item.materialId)).size!==items.length) return res.status(400).json({error:'Choose each material once and combine its quantity.'});
+    for(const item of items) if(!await prisma.material.findUnique({where:{id:item.materialId}}))return res.status(400).json({error:'One of the selected materials no longer exists.'});
+    if(expectedDeliveryDate&&!Number.isFinite(Date.parse(expectedDeliveryDate)))return res.status(400).json({error:'Choose a valid expected delivery date.'});
     // Generate PO number
     const count = await prisma.purchaseOrder.count({});
     const poNumber = `PO-${new Date().getFullYear()}${(new Date().getMonth() + 1)
@@ -211,7 +215,7 @@ exports.createPurchaseOrder = async (req, res, next) => {
         gstAmount,
         total,
         notes: notes || null,
-        createdBy: req.user.userId,
+        createdBy: req.user.id,
       },
     });
 
@@ -338,7 +342,7 @@ exports.recordMaterialReceived = async (req, res, next) => {
         referenceId: id,
         notes: `Received from PO ${id}`,
         date: receivedDate ? new Date(receivedDate) : new Date(),
-        createdBy: req.user.userId,
+        createdBy: req.user.id,
       },
     });
 

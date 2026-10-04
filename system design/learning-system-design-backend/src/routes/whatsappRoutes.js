@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const whatsappController = require('../controllers/whatsappController');
-const { auth } = require('../middleware/auth');
+const { auth, requireRole } = require('../middleware/auth');
 
 // All routes require authentication
 router.use(auth);
@@ -10,12 +10,18 @@ router.use(auth);
 
 // Get all conversations
 router.get('/conversations', whatsappController.getConversations);
+router.post('/conversations', whatsappController.createConversation);
+router.get('/conversations/:conversationId/context', whatsappController.getCrmContext);
+router.put('/conversations/:conversationId/contact', requireRole(['ADMIN', 'SALES', 'MARKETING']), whatsappController.linkContact);
+router.put('/conversations/:conversationId/read', whatsappController.markAsRead);
 
 // Get messages for a conversation
 router.get('/conversations/:conversationId/messages', whatsappController.getMessages);
 
 // Send a message
 router.post('/send', whatsappController.sendMessage);
+router.post('/send-template', whatsappController.sendTemplate);
+router.post('/send-production-update', whatsappController.sendProductionUpdate);
 
 // ==================== TEMPLATES ====================
 

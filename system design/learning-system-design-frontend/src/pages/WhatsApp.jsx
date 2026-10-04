@@ -166,25 +166,25 @@ const WhatsApp = () => {
           className={`tab ${activeTab === 'inbox' ? 'active' : ''}`}
           onClick={() => setActiveTab('inbox')}
         >
-          💬 Inbox
+           Inbox
         </button>
         <button
           className={`tab ${activeTab === 'templates' ? 'active' : ''}`}
           onClick={() => setActiveTab('templates')}
         >
-          📋 Templates
+           Templates
         </button>
         <button
           className={`tab ${activeTab === 'automation' ? 'active' : ''}`}
           onClick={() => setActiveTab('automation')}
         >
-          ⚙️ Automation
+           Automation
         </button>
         <button
           className={`tab ${activeTab === 'analytics' ? 'active' : ''}`}
           onClick={() => setActiveTab('analytics')}
         >
-          📊 Analytics
+           Analytics
         </button>
       </div>
 
@@ -247,8 +247,8 @@ const WhatsApp = () => {
                       </div>
                     </div>
                     <div className="chat-header-actions">
-                      <button className="btn btn-sm btn-secondary">📋 View Lead</button>
-                      <button className="btn btn-sm btn-secondary">📄 Send Catalogue</button>
+                      <button className="btn btn-sm btn-secondary"> View Lead</button>
+                      <button className="btn btn-sm btn-secondary"> Send Catalogue</button>
                     </div>
                   </div>
 
@@ -267,8 +267,8 @@ const WhatsApp = () => {
                   </div>
 
                   <div className="chat-input-area">
-                    <button className="chat-attach-btn" title="Attach file">📎</button>
-                    <button className="chat-template-btn" title="Use template">📋</button>
+                    <button className="chat-attach-btn" title="Attach file">Attach</button>
+                    <button className="chat-template-btn" title="Use template">Templates</button>
                     <input
                       type="text"
                       className="chat-input"
@@ -284,7 +284,7 @@ const WhatsApp = () => {
                 </>
               ) : (
                 <div className="chat-empty-state">
-                  <div className="empty-icon">💬</div>
+
                   <h3>Select a conversation</h3>
                   <p>Choose a conversation from the list to start chatting</p>
                 </div>
@@ -313,9 +313,9 @@ const WhatsApp = () => {
                   <div className="template-category">{template.category}</div>
                   <div className="template-preview">{template.content}</div>
                   <div className="template-stats">
-                    <span>📤 Sent: {template.sentCount}</span>
-                    <span>📬 Delivered: {template.deliveredCount}</span>
-                    <span>👁️ Read: {template.readCount}</span>
+                    <span> Sent: {template.sentCount}</span>
+                    <span> Delivered: {template.deliveredCount}</span>
+                    <span> Read: {template.readCount}</span>
                   </div>
                   <div className="template-actions">
                     <button
@@ -345,7 +345,7 @@ const WhatsApp = () => {
               {automations.map((automation) => (
                 <div key={automation.id} className="automation-card">
                   <div className="automation-main">
-                    <div className="automation-icon">⚙️</div>
+
                     <div className="automation-info">
                       <h3>{automation.name}</h3>
                       <p>{automation.description}</p>
@@ -373,7 +373,7 @@ const WhatsApp = () => {
             </div>
 
             <div className="automation-info-box">
-              <h3>💡 Available Automations</h3>
+              <h3> Available Automations</h3>
               <ul>
                 <li>Welcome message when customer sends first message</li>
                 <li>Send catalogue when customer asks for products</li>
@@ -394,7 +394,7 @@ const WhatsApp = () => {
 
             <div className="analytics-grid">
               <div className="analytics-card">
-                <div className="analytics-icon">💬</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.totalConversations || 0}</div>
                   <div className="analytics-label">Total Conversations</div>
@@ -402,7 +402,7 @@ const WhatsApp = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">📤</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.messagesSent || 0}</div>
                   <div className="analytics-label">Messages Sent</div>
@@ -410,7 +410,7 @@ const WhatsApp = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">📥</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.messagesReceived || 0}</div>
                   <div className="analytics-label">Messages Received</div>
@@ -418,7 +418,7 @@ const WhatsApp = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">✅</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.deliveryRate || 0}%</div>
                   <div className="analytics-label">Delivery Rate</div>
@@ -426,7 +426,7 @@ const WhatsApp = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">👁️</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.readRate || 0}%</div>
                   <div className="analytics-label">Read Rate</div>
@@ -434,7 +434,7 @@ const WhatsApp = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">💰</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.leadsGenerated || 0}</div>
                   <div className="analytics-label">Leads Generated</div>
@@ -442,7 +442,7 @@ const WhatsApp = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">⚡</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.avgResponseTime || '0'}</div>
                   <div className="analytics-label">Avg Response Time</div>
@@ -450,7 +450,7 @@ const WhatsApp = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon">🤖</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.automatedMessages || 0}</div>
                   <div className="analytics-label">Automated Messages</div>
@@ -461,7 +461,7 @@ const WhatsApp = () => {
             <div className="analytics-chart-section">
               <h3>Message Trends (Last 30 Days)</h3>
               <div className="analytics-placeholder">
-                <p>📊 Chart visualization would appear here</p>
+                <p> Chart visualization would appear here</p>
                 <p className="text-muted">Showing daily message volume, delivery rates, and engagement metrics</p>
               </div>
             </div>

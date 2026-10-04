@@ -10,13 +10,13 @@ router.use(auth);
 router.get('/materials', inventoryController.getAllMaterials);
 router.get('/materials/low-stock', inventoryController.getLowStock);
 router.get('/materials/:id', inventoryController.getMaterialById);
-router.post('/materials', requireRole(['Admin', 'Purchase']), inventoryController.createMaterial);
-router.put('/materials/:id', requireRole(['Admin', 'Purchase']), inventoryController.updateMaterial);
-router.delete('/materials/:id', requireRole(['Admin']), inventoryController.deleteMaterial);
+router.post('/materials', requireRole(['ADMIN', 'PURCHASE']), inventoryController.createMaterial);
+router.put('/materials/:id', requireRole(['ADMIN', 'PURCHASE']), inventoryController.updateMaterial);
+router.delete('/materials/:id', requireRole(['ADMIN']), inventoryController.deleteMaterial);
 
 // Stock movement routes
 router.get('/stock-movements', inventoryController.getStockMovements);
-router.post('/stock-movements', requireRole(['Admin', 'Purchase', 'Production']), inventoryController.recordStockMovement);
+router.post('/stock-movements', requireRole(['ADMIN', 'PURCHASE', 'PRODUCTION']), inventoryController.recordStockMovement);
 
 // Summary/dashboard
 router.get('/summary', inventoryController.getInventorySummary);

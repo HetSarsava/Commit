@@ -194,3 +194,12 @@
   .settings-page .topbar-actions .btn {
     width: 100%;
   }}
+.settings-page .settings-content { max-width: 1120px; margin: 0 auto; padding: 24px; }
+.settings-page .settings-section { max-width: none; padding: 24px; }
+.settings-page .topbar { flex-wrap: wrap; gap: 16px; }
+.settings-page .topbar-actions { flex-wrap: wrap; align-items: center; }
+.settings-page > .tabs { overflow-x: auto; flex-wrap: nowrap; }
+.settings-page > .tabs .tab { white-space: nowrap; }
+.settings-page .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.settings-page .form-group input, .settings-page .form-group textarea { box-sizing: border-box; width: 100%; }
+@media(max-width: 700px) { .settings-page .form-grid { grid-template-columns: 1fr; } .settings-page .form-group.full-width { grid-column: auto; } .settings-page .settings-content { padding: 16px; } .settings-page .topbar { padding: 16px; } .settings-page .topbar-actions { flex-direction: row; } }

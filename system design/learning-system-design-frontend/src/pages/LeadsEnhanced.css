@@ -570,3 +570,9 @@
   .leads-container .funnel-summary {
     grid-template-columns: 1fr;
   }}
+
+.leads-container .filters-bar { margin-top: var(--space-group); align-items: flex-end; }
+.leads-container .filter-field { display: flex; flex-direction: column; gap: var(--space-label); }
+.leads-container .filters-bar .search-input { min-height: 44px; }
+.leads-container .leads-header { gap: var(--space-group); }
+@media (max-width: 768px) { .leads-container .filters-bar { align-items: stretch; } }

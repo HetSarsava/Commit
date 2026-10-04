@@ -5,7 +5,7 @@ exports.getMyNotifications = async (req, res, next) => {
   try {
     const { limit = 50, unreadOnly = false } = req.query;
 
-    const where = { userId: req.user.userId };
+    const where = { userId: req.user.id };
     if (unreadOnly === 'true') {
       where.isRead = false;
     }
@@ -18,7 +18,7 @@ exports.getMyNotifications = async (req, res, next) => {
 
     const unreadCount = await prisma.notification.count({
       where: {
-        userId: req.user.userId,
+        userId: req.user.id,
         isRead: false,
       },
     });
@@ -46,7 +46,7 @@ exports.markAsRead = async (req, res, next) => {
     }
 
     // Check ownership
-    if (notification.userId !== req.user.userId) {
+    if (notification.userId !== req.user.id) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -72,7 +72,7 @@ exports.markAllAsRead = async (req, res, next) => {
   try {
     const notifications = await prisma.notification.findMany({
       where: {
-        userId: req.user.userId,
+        userId: req.user.id,
         isRead: false,
       },
     });
@@ -110,7 +110,7 @@ exports.deleteNotification = async (req, res, next) => {
     }
 
     // Check ownership
-    if (notification.userId !== req.user.userId) {
+    if (notification.userId !== req.user.id) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -127,7 +127,7 @@ exports.clearRead = async (req, res, next) => {
   try {
     const notifications = await prisma.notification.findMany({
       where: {
-        userId: req.user.userId,
+        userId: req.user.id,
         isRead: true,
       },
     });
@@ -150,7 +150,7 @@ exports.getUnreadCount = async (req, res, next) => {
   try {
     const count = await prisma.notification.count({
       where: {
-        userId: req.user.userId,
+        userId: req.user.id,
         isRead: false,
       },
     });

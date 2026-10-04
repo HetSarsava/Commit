@@ -112,9 +112,9 @@ const LeadModal = ({ mode, lead, onClose, onSuccess }) => {
         {/* Modal Header */}
         <div className="modal-header">
           <h2>
-            {mode === 'create' && '➕ Create New Lead'}
-            {mode === 'edit' && '✏️ Edit Lead'}
-            {mode === 'view' && '👁️ Lead Details'}
+            {mode === 'create' && ' Create New Lead'}
+            {mode === 'edit' && ' Edit Lead'}
+            {mode === 'view' && ' Lead Details'}
           </h2>
           <button className="modal-close" onClick={onClose}>
             ✕
@@ -370,7 +370,7 @@ const LeadModal = ({ mode, lead, onClose, onSuccess }) => {
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">Medium</option>
                     <option value="HIGH">High</option>
-                    <option value="HOT">Hot 🔥</option>
+                    <option value="HOT">Hot </option>
                   </select>
                 </div>
 

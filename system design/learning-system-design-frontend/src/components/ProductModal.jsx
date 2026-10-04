@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { productsAPI } from '../api/products';
 import './ProductModal.css';
+import './LeadModal.css';
 
 const ProductModal = ({ mode, product, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
@@ -134,9 +135,9 @@ const ProductModal = ({ mode, product, onClose, onSuccess }) => {
         {/* Modal Header */}
         <div className="modal-header">
           <h2>
-            {mode === 'create' && '➕ Add New Product'}
-            {mode === 'edit' && '✏️ Edit Product'}
-            {mode === 'view' && '👁️ Product Details'}
+            {mode === 'create' && ' Add New Product'}
+            {mode === 'edit' && ' Edit Product'}
+            {mode === 'view' && ' Product Details'}
           </h2>
           <button className="modal-close" onClick={onClose}>
             ✕
@@ -363,7 +364,7 @@ const ProductModal = ({ mode, product, onClose, onSuccess }) => {
                     disabled={isViewMode}
                     placeholder="https://example.com/image.jpg"
                   />
-                  <small className="field-hint">For now, paste image URL. File upload coming soon!</small>
+                  <small className="field-hint">Use a public image link for the product thumbnail.</small>
                 </div>
               </div>
             </div>

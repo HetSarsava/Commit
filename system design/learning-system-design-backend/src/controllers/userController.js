@@ -180,7 +180,7 @@ exports.updatePassword = async (req, res, next) => {
     const { currentPassword, newPassword } = req.body;
 
     // Check if user is updating their own password or is admin
-    if (req.user.userId !== id && req.user.role !== 'ADMIN') {
+    if (req.user.id !== id && req.user.role !== 'ADMIN') {
       return res.status(403).json({
         error: 'You can only change your own password',
       });
@@ -199,7 +199,7 @@ exports.updatePassword = async (req, res, next) => {
     }
 
     // Verify current password (if user is changing their own)
-    if (req.user.userId === id) {
+    if (req.user.id === id) {
       const isMatch = await bcrypt.compare(currentPassword, user.password);
       if (!isMatch) {
         return res.status(400).json({ error: 'Current password is incorrect' });
@@ -236,7 +236,7 @@ exports.deleteUser = async (req, res, next) => {
     }
 
     // Prevent deleting yourself
-    if (req.user.userId === id) {
+    if (req.user.id === id) {
       return res.status(400).json({ error: 'You cannot delete your own account' });
     }
 
@@ -259,7 +259,7 @@ exports.deleteUser = async (req, res, next) => {
 exports.getProfile = async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: req.user.userId },
+      where: { id: req.user.id },
       select: {
         id: true,
         firstName: true,
@@ -290,7 +290,7 @@ exports.updateProfile = async (req, res, next) => {
     const { firstName, lastName, phone } = req.body;
 
     const updatedUser = await prisma.user.update({
-      where: { id: req.user.userId },
+      where: { id: req.user.id },
       data: {
         ...(firstName && { firstName }),
         ...(lastName && { lastName }),

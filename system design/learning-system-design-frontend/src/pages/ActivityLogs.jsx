@@ -20,11 +20,11 @@ const ActivityLogs = () => {
     loadData();
   }, []);
 
-  const loadData = async () => {
+  const loadData = async (query = filters) => {
     try {
       setLoading(true);
       const [logsData, usersData, statsData] = await Promise.all([
-        activityLogsAPI.getAllLogs(filters),
+        activityLogsAPI.getAllLogs(query),
         usersAPI.getAllUsers(),
         activityLogsAPI.getStats(),
       ]);
@@ -56,7 +56,7 @@ const ActivityLogs = () => {
       startDate: '',
       endDate: '',
     });
-    setTimeout(() => loadData(), 100);
+    loadData({userId:'',entityType:'',action:'',startDate:'',endDate:''});
   };
 
   const getActionBadgeClass = (action) => {
@@ -173,7 +173,7 @@ const ActivityLogs = () => {
             <label>Entity Type</label>
             <select name="entityType" value={filters.entityType} onChange={handleFilterChange}>
               <option value="">All Types</option>
-              <option value="LEAD">Lead</option>
+              <option value="CATALOGUE">Catalogue</option><option value="PRODUCT">Product</option><option value="CAMPAIGN">Marketing campaign</option><option value="WHATSAPP">WhatsApp</option><option value="SETTINGS">Settings</option><option value="LEAD">Lead</option>
               <option value="QUOTATION">Quotation</option>
               <option value="ORDER">Order</option>
               <option value="INVOICE">Invoice</option>
@@ -188,7 +188,7 @@ const ActivityLogs = () => {
             <label>Action</label>
             <select name="action" value={filters.action} onChange={handleFilterChange}>
               <option value="">All Actions</option>
-              <option value="CREATE">Create</option>
+              <option value="FAILED">Failed action</option><option value="CREATE">Create</option>
               <option value="UPDATE">Update</option>
               <option value="DELETE">Delete</option>
               <option value="VIEW">View</option>
@@ -266,7 +266,7 @@ const ActivityLogs = () => {
 
                       <div className="timeline-body">
                         <div className="timeline-user">
-                          <span className="user-icon">👤</span>
+                          <span className="user-icon"></span>
                           <span className="user-name">
                             {log.user
                               ? `${log.user.firstName} ${log.user.lastName}`

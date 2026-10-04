@@ -1,12 +1,18 @@
+import { useCompany } from '../context/CompanyData';
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useNavigationType } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
 import './Layout.css';
 
 const Layout = ({ children }) => {
+  const company = useCompany();
   const navigate = useNavigate();
   const location = useLocation();
+  const navigationType = useNavigationType();
+  const position = window.history.state?.idx || 0;
+  const [historyEnd, setHistoryEnd] = useState(position);
+  useEffect(() => { Promise.resolve().then(() => setHistoryEnd(end => navigationType === "PUSH" ? position : Math.max(end, position))); }, [location.key, navigationType, position]);
   const { logout, user } = useAuth();
 
   // ONE piece of navigation state: is the rail open?
@@ -35,7 +41,7 @@ const Layout = ({ children }) => {
     navigate('/login');
   };
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   const toggleLabel = isRailOpen ? 'Collapse sidebar' : 'Expand sidebar';
   const toggleIcon = isRailOpen ? '◀' : '▶';
@@ -104,8 +110,8 @@ const Layout = ({ children }) => {
         aria-label="Main navigation"
       >
         <div className="rail-header">
-          <div className="rail-mark" aria-hidden="true">AU</div>
-          <div className="rail-title">AMIT UNIFORM</div>
+          <div className="rail-mark" aria-hidden="true">{company.initials}</div>
+          <div className="rail-title">{company.name}</div>
           <button
             className="rail-toggle"
             onClick={toggleRail}
@@ -124,7 +130,7 @@ const Layout = ({ children }) => {
         </div>
 
         <div className="rail-footer">
-          {user?.role === 'ADMIN' && renderRailItem({ path: '/settings', icon: '⚙', label: 'Settings' })}
+          {user?.role === 'ADMIN' && renderRailItem({ path: '/settings', icon: 'S', label: 'Settings' })}
           <button
             className="rail-icon"
             onClick={handleLogout}
@@ -152,6 +158,7 @@ const Layout = ({ children }) => {
           >
             <span aria-hidden="true">☰</span>
           </button>
+          <div className="page-history" aria-label="Page history"><button type="button" className="btn btn-sm" onClick={() => navigate(-1)} disabled={position === 0} aria-label="Go back">← Back</button><button type="button" className="btn btn-sm" onClick={() => navigate(1)} disabled={position >= historyEnd} aria-label="Go forward">Forward →</button></div>
           <div className="topbar-spacer"></div>
           <div className="topbar-right">
             <NotificationBell />

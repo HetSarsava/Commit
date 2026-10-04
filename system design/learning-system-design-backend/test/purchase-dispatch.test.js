@@ -1,0 +1,27 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os');
+process.env.USE_MOCK_DB='true';process.env.JWT_SECRET=require('node:crypto').randomBytes(32).toString('hex');process.env.WHATSAPP_DB_PATH=path.join(fs.mkdtempSync(path.join(os.tmpdir(),'commit-purchase-')),'demo.sqlite');
+const {prisma}=require('../src/config/database');
+test('purchase saves, dispatch readiness, permissions and example guidelines',async t=>{
+ const app=require('express')();app.use(require('express').json());app.use('/api/purchase',require('../src/routes/purchaseRoutes'));app.use('/api/dispatch',require('../src/routes/dispatchRoutes'));app.use('/api/guidelines',require('../src/routes/whatsappGuidelines'));app.use(require('../src/middleware/errorHandler'));
+ const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>new Promise(r=>server.close(r)));
+ const send=async(method,p,body,role='ADMIN')=>{const u=(await prisma.user.findMany({})).find(x=>x.role===role);const token=require('jsonwebtoken').sign({userId:u.id},process.env.JWT_SECRET);const r=await fetch('http://127.0.0.1:'+server.address().port+p,{method,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});return {status:r.status,data:await r.json()};};
+ assert.equal((await send('POST','/api/purchase/suppliers',{name:'Test supplier',phone:'123'},'SALES')).status,403);
+ assert.equal((await send('POST','/api/purchase/suppliers',{name:'  ',phone:'123'})).status,400);
+ const supplier=await send('POST','/api/purchase/suppliers',{name:'Demo supplier test',phone:'07900000000'});assert.equal(supplier.status,201);
+ const material=(await prisma.material.findMany({}))[0];const po={supplierId:supplier.data.supplier.id,items:[{materialId:material.id,quantity:2,rate:10}]};
+ assert.equal((await send('POST','/api/purchase/purchase-orders',{...po,items:[null]})).status,400);
+ assert.equal((await send('POST','/api/purchase/purchase-orders',{...po,items:[{...po.items[0],quantity:-1}]})).status,400);
+ const saved=await send('POST','/api/purchase/purchase-orders',po);assert.equal(saved.status,201);assert.equal(saved.data.purchaseOrder.total,23.6);assert.equal(saved.data.purchaseOrder.items.length,1);
+ const order=await prisma.order.findUnique({where:{id:'order-demo-2'},include:{items:true}});const item=order.items[0];const tracking=(await prisma.productionTracking.findMany({where:{orderItemId:item.id}}))[0];
+ assert.ok(!(await send('GET','/api/dispatch/ready')).data.some(x=>x.id===order.id));
+ await prisma.productionTracking.update({where:{id:tracking.id},data:{stage:'DISPATCH'}});
+ const ready=await send('GET','/api/dispatch/ready');assert.equal(ready.status,200);assert.ok(ready.data.some(x=>x.id===order.id));assert.ok(!ready.data.some(x=>x.id==='order-demo-5'));
+ const dispatch={productionId:order.id,courierName:'Demo courier',trackingNumber:'DEMO-TEST',dispatchDate:'2026-10-04',expectedDeliveryDate:'2026-10-05',deliveryAddress:{street:'Demo',city:'Ahmedabad',state:'Gujarat',pincode:'380001'}};
+ assert.equal((await send('POST','/api/dispatch',{...dispatch,expectedDeliveryDate:'2026-10-03'})).status,400);
+ assert.equal((await send('POST','/api/dispatch',dispatch,'SALES')).status,403);
+ const attempts=await Promise.all([send('POST','/api/dispatch',dispatch),send('POST','/api/dispatch',dispatch)]);assert.equal(attempts.filter(r=>r.status===201).length,1);const shipped=attempts.find(r=>r.status===201);assert.equal(shipped.status,201);assert.equal(shipped.data.orderId,order.id);assert.notEqual(shipped.data.items[0].productName,'Product');assert.equal((await prisma.order.findUnique({where:{id:order.id}})).status,'DISPATCHED');
+ assert.ok(!(await send('GET','/api/dispatch/ready')).data.some(x=>x.id===order.id));assert.notEqual((await send('POST','/api/dispatch',dispatch)).status,201);
+ assert.match((await send('GET','/api/guidelines')).data.text,/EXAMPLE BUSINESS GUIDELINES/);
+ const child=require('node:child_process').execFileSync(process.execPath,['-e',"const {prisma}=require('./src/config/database');(async()=>{if(!(await prisma.supplier.findMany({})).some(s=>s.name==='Demo supplier test'))process.exit(1);if(!(await prisma.dispatch.findMany({})).some(d=>d.trackingNumber==='DEMO-TEST'))process.exit(2);if(!(await prisma.purchaseOrder.findMany({})).some(p=>p.supplierId==='"+supplier.data.supplier.id+"'))process.exit(3);})()"],{cwd:process.cwd(),env:process.env});assert.ok(child);
+});

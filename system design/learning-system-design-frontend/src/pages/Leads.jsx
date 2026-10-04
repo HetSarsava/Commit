@@ -1,3 +1,4 @@
+import { useCompany } from '../context/CompanyData';
 import { useState, useEffect } from 'react';
 import { leadsAPI } from '../api/leads';
 import { useAuth } from '../context/AuthContext';
@@ -5,6 +6,7 @@ import LeadModal from '../components/LeadModal';
 import './Leads.css';
 
 const Leads = () => {
+  const company = useCompany();
   const { user } = useAuth();
   const [leads, setLeads] = useState([]);
   const [stats, setStats] = useState(null);
@@ -121,7 +123,7 @@ const Leads = () => {
       {/* Pipeline Rail */}
       <div className="pipeline-rail">
         <div className="rail-brand">
-          <div className="mark">AMIT UNIFORM</div>
+          <div className="mark">{company.name}</div>
           <div className="name">Lead Pipeline</div>
         </div>
 
@@ -201,7 +203,7 @@ const Leads = () => {
             <div className="loading-state">Loading...</div>
           ) : leads.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">📋</div>
+
               <h3>No leads found</h3>
               <p>Create your first lead to get started</p>
               <button className="btn btn-primary" onClick={handleCreate}>+ New lead</button>
@@ -295,9 +297,9 @@ const Leads = () => {
           )}
 
           <div className="drawer-actions">
-            <button className="action-btn primary">💬 Send WhatsApp</button>
-            <button className="action-btn" onClick={handleEdit}>✏ Edit lead</button>
-            <button className="action-btn" onClick={handleDelete}>🗑 Delete lead</button>
+            <button className="action-btn primary"> Send WhatsApp</button>
+            <button className="action-btn" onClick={handleEdit}> Edit lead</button>
+            <button className="action-btn" onClick={handleDelete}> Delete lead</button>
           </div>
         </div>
       )}

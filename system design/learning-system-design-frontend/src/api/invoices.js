@@ -1,6 +1,7 @@
 import apiClient from './client';
 
 export const invoicesAPI = {
+  syncFromOrder: async id => (await apiClient.post('/invoices/' + id + '/sync-order')).data,
   getInvoices: async (params = {}) => {
     const response = await apiClient.get('/invoices', { params });
     return response.data;

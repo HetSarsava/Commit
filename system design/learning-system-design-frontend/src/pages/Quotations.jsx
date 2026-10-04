@@ -6,6 +6,7 @@ import './Quotations.css';
 
 const Quotations = () => {
   const navigate = useNavigate();
+  const [search, setSearch] = useState('');
   const [quotations, setQuotations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showBuilder, setShowBuilder] = useState(false);
@@ -78,26 +79,27 @@ const Quotations = () => {
           <div className="header-sub">Create and manage customer quotations</div>
         </div>
         <button className="btn-primary" onClick={handleCreate}>
-          ➕ Create Quotation
+           Create Quotation
         </button>
       </div>
 
+      <input className="quotation-search" aria-label="Search quotations" placeholder="Search quotation number or customer" value={search} onChange={e => setSearch(e.target.value)} />
       {loading ? (
         <div className="loading-state">
           <div className="spinner">Loading...</div>
         </div>
       ) : quotations.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon">💰</div>
+
           <h3>No quotations yet</h3>
           <p>Create your first quotation with products, pricing, and GST calculation.</p>
           <button className="btn-primary" onClick={handleCreate}>
-            ➕ Create First Quotation
+             Create First Quotation
           </button>
         </div>
       ) : (
         <div className="quotations-list">
-          {quotations.map(q => (
+          {quotations.filter(q => [q.quotationNumber,q.customer?.companyName].join(' ').toLowerCase().includes(search.toLowerCase())).map(q => (
             <div key={q.id} className="quotation-card">
               <div className="quotation-number">{q.quotationNumber}</div>
               <div className="quotation-customer">{q.customer?.companyName}</div>
@@ -107,13 +109,11 @@ const Quotations = () => {
               </div>
               <div className="quotation-actions">
                 <button className="btn-action" onClick={() => handleView(q)} title="View">
-                  👁️
+                  View
                 </button>
-                <button className="btn-action" onClick={() => handleEdit(q)} title="Edit">
-                  ✏️
-                </button>
+                <button className="btn-action" onClick={() => handleEdit(q)} title="Edit">Edit</button>
                 <button className="btn-action btn-danger" onClick={() => handleDelete(q)} title="Delete">
-                  🗑️
+                  Delete
                 </button>
               </div>
             </div>

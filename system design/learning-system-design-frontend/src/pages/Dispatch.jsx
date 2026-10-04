@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { dispatchAPI } from '../api/dispatch';
 import './Dispatch.css';
 
@@ -11,6 +11,7 @@ const Dispatch = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [readyOrders, setReadyOrders] = useState([]);
   const [selectedDispatch, setSelectedDispatch] = useState(null);
+  const [formError,setFormError]=useState(''),[readyLoading,setReadyLoading]=useState(false),[saving,setSaving]=useState(false);
 
   const [createForm, setCreateForm] = useState({
     productionId: '',
@@ -30,11 +31,7 @@ const Dispatch = () => {
     notes: '',
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [dispatchesData, summaryData] = await Promise.all([
@@ -48,20 +45,24 @@ const Dispatch = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const fetchReadyOrders = async () => {
+    setShowCreateModal(true);setFormError('');setReadyOrders([]);setReadyLoading(true);
     try {
       const data = await dispatchAPI.getReadyToDispatch();
       setReadyOrders(data);
       setShowCreateModal(true);
     } catch (error) {
-      console.error('Error fetching ready orders:', error);
-    }
+      setFormError(error.response?.data?.error || 'Could not load ready orders. Please retry.');
+    } finally {setReadyLoading(false);}
   };
 
   const handleCreateDispatch = async (e) => {
     e.preventDefault();
+    if(saving)return;setSaving(true);setFormError('');
     try {
       const selectedOrder = readyOrders.find(
         (o) => o.id === createForm.productionId
@@ -93,8 +94,8 @@ const Dispatch = () => {
       fetchData();
     } catch (error) {
       console.error('Error creating dispatch:', error);
-      alert(error.response?.data?.error || 'Failed to create dispatch');
-    }
+      setFormError(error.response?.data?.error || 'Failed to create dispatch');
+    } finally {setSaving(false); }
   };
 
   const handleUpdateStatus = async (e) => {
@@ -208,7 +209,7 @@ const Dispatch = () => {
           (status) => (
             <button
               key={status}
-              className={`filter-btn ${
+              className={`btn btn-secondary filter-btn ${
                 selectedStatus === status ? 'active' : ''
               }`}
               onClick={() => setSelectedStatus(status)}
@@ -321,7 +322,7 @@ const Dispatch = () => {
       {/* Create Dispatch Modal */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div role="dialog" aria-modal="true" aria-label="Create Dispatch" className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Create Dispatch</h2>
               <button
@@ -333,16 +334,18 @@ const Dispatch = () => {
             </div>
 
             <form onSubmit={handleCreateDispatch}>
+              {formError && <p role="alert" className="dispatch-form-notice">{formError} <button type="button" onClick={fetchReadyOrders}>Retry</button></p>}
+              {readyLoading ? <p className="dispatch-form-notice">Loading ready orders…</p> : !readyOrders.length && !formError && <p className="dispatch-form-notice">No orders are ready. Move every item in an order to Dispatch on the Production Board first. Orders already dispatched are not listed.</p>}
               <div className="form-group">
-                <label>Production Order *</label>
-                <select
+                <label htmlFor="dispatch-field-1">Ready order *</label>
+                <select id="dispatch-field-1"
                   value={createForm.productionId}
                   onChange={(e) =>
                     setCreateForm({ ...createForm, productionId: e.target.value })
                   }
                   required
                 >
-                  <option value="">Select Production Order</option>
+                  <option value="">Select ready order</option>
                   {readyOrders.map((order) => (
                     <option key={order.id} value={order.id}>
                       {order.productionNumber} - {order.order?.customer?.companyName} (
@@ -354,8 +357,8 @@ const Dispatch = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Courier Name *</label>
-                  <input
+                  <label htmlFor="dispatch-field-2">Courier Name *</label>
+                  <input id="dispatch-field-2"
                     type="text"
                     value={createForm.courierName}
                     onChange={(e) =>
@@ -367,8 +370,8 @@ const Dispatch = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Tracking Number *</label>
-                  <input
+                  <label htmlFor="dispatch-field-3">Tracking Number *</label>
+                  <input id="dispatch-field-3"
                     type="text"
                     value={createForm.trackingNumber}
                     onChange={(e) =>
@@ -385,8 +388,8 @@ const Dispatch = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Dispatch Date *</label>
-                  <input
+                  <label htmlFor="dispatch-field-4">Dispatch Date *</label>
+                  <input id="dispatch-field-4"
                     type="date"
                     value={createForm.dispatchDate}
                     onChange={(e) =>
@@ -397,8 +400,8 @@ const Dispatch = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Expected Delivery Date *</label>
-                  <input
+                  <label htmlFor="dispatch-field-5">Expected Delivery Date *</label>
+                  <input id="dispatch-field-5"
                     type="date"
                     value={createForm.expectedDeliveryDate}
                     onChange={(e) =>
@@ -414,8 +417,8 @@ const Dispatch = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Contact Person</label>
-                  <input
+                  <label htmlFor="dispatch-field-6">Contact Person</label>
+                  <input id="dispatch-field-6"
                     type="text"
                     value={createForm.contactPerson}
                     onChange={(e) =>
@@ -429,8 +432,8 @@ const Dispatch = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Contact Phone</label>
-                  <input
+                  <label htmlFor="dispatch-field-7">Contact Phone</label>
+                  <input id="dispatch-field-7"
                     type="tel"
                     value={createForm.contactPhone}
                     onChange={(e) =>
@@ -445,8 +448,8 @@ const Dispatch = () => {
               </div>
 
               <div className="form-group">
-                <label>Notes</label>
-                <textarea
+                <label htmlFor="dispatch-field-8">Notes</label>
+                <textarea id="dispatch-field-8"
                   value={createForm.notes}
                   onChange={(e) =>
                     setCreateForm({ ...createForm, notes: e.target.value })
@@ -464,8 +467,8 @@ const Dispatch = () => {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary">
-                  Create Dispatch
+                <button type="submit" className="btn-primary" disabled={saving || readyLoading || !readyOrders.length}>
+                  {saving ? 'Saving…' : 'Create Dispatch'}
                 </button>
               </div>
             </form>
@@ -489,8 +492,8 @@ const Dispatch = () => {
 
             <form onSubmit={handleUpdateStatus}>
               <div className="form-group">
-                <label>Status *</label>
-                <select
+                <label htmlFor="dispatch-field-9">Status *</label>
+                <select id="dispatch-field-9"
                   value={statusForm.status}
                   onChange={(e) =>
                     setStatusForm({ ...statusForm, status: e.target.value })
@@ -523,8 +526,8 @@ const Dispatch = () => {
               {statusForm.status === 'DELIVERED' && (
                 <>
                   <div className="form-group">
-                    <label>Delivery Date *</label>
-                    <input
+                    <label htmlFor="dispatch-field-10">Delivery Date *</label>
+                    <input id="dispatch-field-10"
                       type="date"
                       value={statusForm.actualDeliveryDate}
                       onChange={(e) =>
@@ -538,8 +541,8 @@ const Dispatch = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Received By</label>
-                    <input
+                    <label htmlFor="dispatch-field-11">Received By</label>
+                    <input id="dispatch-field-11"
                       type="text"
                       value={statusForm.podReceivedBy}
                       onChange={(e) =>
@@ -555,8 +558,8 @@ const Dispatch = () => {
               )}
 
               <div className="form-group">
-                <label>Notes</label>
-                <textarea
+                <label htmlFor="dispatch-field-12">Notes</label>
+                <textarea id="dispatch-field-12"
                   value={statusForm.notes}
                   onChange={(e) =>
                     setStatusForm({ ...statusForm, notes: e.target.value })

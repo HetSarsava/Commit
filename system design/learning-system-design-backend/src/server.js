@@ -41,6 +41,17 @@ connectDB();
 // Security middleware
 app.use(helmet());
 
+// Meta signs the original bytes. Mount before JSON parsing, auth, access logging,
+// and the CRM rate limiter (verification query strings contain a secret token).
+const { webhookRouter } = require('./routes/whatsappWebhook');
+const { service: whatsappService } = require('./services/whatsapp');
+app.use('/api/whatsapp/webhook', webhookRouter(whatsappService));
+// Optional persistent cloud inbox; no local CRM endpoints are exposed publicly.
+if (process.env.WHATSAPP_RELAY_URL) {
+  const { RelaySync } = require('./services/whatsapp/relaySync');
+  new RelaySync({ service: whatsappService }).start();
+}
+
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -74,6 +85,9 @@ app.get('/health', (req, res) => {
     uptime: process.uptime(),
   });
 });
+
+app.use(require('./middleware/mutationAudit').mutationAudit);
+app.use('/api/whatsapp/guidelines', require('./routes/whatsappGuidelines'));
 
 // API Routes
 app.use('/api/auth', authRoutes);

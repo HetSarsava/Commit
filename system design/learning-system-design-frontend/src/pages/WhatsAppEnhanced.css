@@ -444,6 +444,21 @@
   margin-left: auto;
 }
 
+.message-text {
+  white-space: pre-wrap;
+}
+
+.whatsapp-page-enhanced .chat-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.whatsapp-page-enhanced .chat-list-heading h3 { margin: 0; }
+.whatsapp-page-enhanced .chat-list-heading button { flex-shrink: 0; white-space: nowrap; }
+.whatsapp-page-enhanced .panel-header .search-input { width: 100%; box-sizing: border-box; }
+
 .message-bubble {
   background: white;
   padding: 0.6rem 0.85rem;
@@ -1237,3 +1252,13 @@ input:checked + .toggle-slider:before {
 
 /* Phone tab behaviour is handled by the shared .tabs class, which wraps
    instead of scrolling so no label is ever clipped. */
+
+.whatsapp-page-enhanced .business-guidelines { padding: var(--space-group) 24px; border-bottom: 1px solid var(--line); }
+.whatsapp-page-enhanced .business-guidelines summary { cursor: pointer; }
+.whatsapp-page-enhanced .business-guidelines > p { margin-top: var(--space-group); line-height: 1.6; }
+.whatsapp-page-enhanced .business-guidelines > label { display: flex; flex-direction: column; gap: var(--space-label); margin-top: var(--space-group); }
+.whatsapp-page-enhanced .business-guidelines > button { margin-top: var(--space-control); }
+@media (max-width: 650px) { .whatsapp-page-enhanced .business-guidelines { padding-inline: 16px; } }
+
+/* Plain-language composer actions replace decorative emoji. */
+.chat-attach-btn, .chat-template-btn { width: auto; min-width: 38px; padding: 0 12px; border-radius: 8px; font-size: 13px; }
