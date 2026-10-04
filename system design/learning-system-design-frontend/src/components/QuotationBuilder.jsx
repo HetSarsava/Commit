@@ -243,7 +243,8 @@ const QuotationBuilder = ({ quotation = null, mode = 'create', onClose, onSucces
           {/* Step 1: Select Customer */}
           {step === 1 && (
             <div className="step-content">
-              <h3>Select Customer</h3><input aria-label="Search quotation customers" placeholder="Search company, contact or phone" value={customerSearch} onChange={e => setCustomerSearch(e.target.value)} />
+              <h3>Select Customer</h3>
+              <input className="customer-search" aria-label="Search quotation customers" placeholder="Search company, contact or phone" value={customerSearch} onChange={e => setCustomerSearch(e.target.value)} />
               <div className="customer-list">
                 {[...customers.filter(c => c.id !== selectedCustomer?.id && [c.companyName,c.contactPerson,c.mobile].join(' ').toLowerCase().includes(customerSearch.toLowerCase())), ...(selectedCustomer ? [selectedCustomer] : [])].sort((a,b) => (b.id === selectedCustomer?.id ? 1 : 0) - (a.id === selectedCustomer?.id ? 1 : 0)).map((customer) => (
                   <div

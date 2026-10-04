@@ -171,7 +171,7 @@ const InvoiceDetail = () => {
         </div>
       </div>
 
-      {showShare && <section className="card" style={{padding:24,margin:24}}><h2>Share this invoice</h2><p>Save the invoice as a PDF, then attach it in WhatsApp or email. The CRM page address requires login and is not a public customer link.</p><button className="btn" onClick={handleDownloadPDF}>Save PDF to share</button><button className="btn" onClick={async()=>{try{await navigator.clipboard.writeText('Invoice '+invoice.invoiceNumber+' from '+company.name+' — total ₹'+Number(invoice.total).toLocaleString('en-IN')+', balance ₹'+Number(invoice.balanceDue).toLocaleString('en-IN'));alert('Invoice summary copied');}catch{alert('Could not copy. Please use Save PDF.');}}}>Copy invoice summary</button><button className="btn" onClick={()=>setShowShare(false)}>Close</button></section>}
+      {showShare && <section className="card invoice-share-panel"><h2>Share this invoice</h2><p>Save the invoice as a PDF, then attach it in WhatsApp or email. The CRM page address requires login and is not a public customer link.</p><button className="btn" onClick={handleDownloadPDF}>Save PDF to share</button><button className="btn" onClick={async()=>{try{await navigator.clipboard.writeText('Invoice '+invoice.invoiceNumber+' from '+company.name+' — total ₹'+Number(invoice.total).toLocaleString('en-IN')+', balance ₹'+Number(invoice.balanceDue).toLocaleString('en-IN'));alert('Invoice summary copied');}catch{alert('Could not copy. Please use Save PDF.');}}}>Copy invoice summary</button><button className="btn" onClick={()=>setShowShare(false)}>Close</button></section>}
       {/* Invoice Document */}
       <div className="invoice-document">
         <div className="invoice-paper">

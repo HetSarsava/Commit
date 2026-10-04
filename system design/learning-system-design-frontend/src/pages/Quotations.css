@@ -186,3 +186,6 @@
     border-top: 1px solid var(--canvas-2);
     padding-top: 8px;
   }}
+
+.quotations-page .quotation-search { display: block; margin-bottom: var(--space-group); }
+.quotations-page .quotations-header { gap: var(--space-group); flex-wrap: wrap; }

@@ -1252,3 +1252,10 @@ input:checked + .toggle-slider:before {
 
 /* Phone tab behaviour is handled by the shared .tabs class, which wraps
    instead of scrolling so no label is ever clipped. */
+
+.whatsapp-page-enhanced .business-guidelines { padding: var(--space-group) 24px; border-bottom: 1px solid var(--line); }
+.whatsapp-page-enhanced .business-guidelines summary { cursor: pointer; }
+.whatsapp-page-enhanced .business-guidelines > p { margin-top: var(--space-group); line-height: 1.6; }
+.whatsapp-page-enhanced .business-guidelines > label { display: flex; flex-direction: column; gap: var(--space-label); margin-top: var(--space-group); }
+.whatsapp-page-enhanced .business-guidelines > button { margin-top: var(--space-control); }
+@media (max-width: 650px) { .whatsapp-page-enhanced .business-guidelines { padding-inline: 16px; } }

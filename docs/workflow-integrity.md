@@ -50,3 +50,9 @@ Business guidelines are visible in a collapsible WhatsApp panel. Only ADMIN can 
 ## Verification
 
 Automated tests cover product validation/duplicates, catalogue creation/draft editing/status/expiry/analytics/privacy, duplicate invoice races, unchanged invoice identity on sync, preservation of paid invoices, marketing formulas, guidelines roles and recovery of product/catalogue/invoice/audit/guidelines in a separate process. Existing WhatsApp tests remain in the suite. Browser checks verified successful product/catalogue creation, catalogue recovery after restart, quotation customer placement/search and campaign record links. No additional WhatsApp messages or paid services were used.
+
+## Spacing review
+
+Shared spacing variables use 8px for labels, 12px for controls, 16px for groups and 24px for sections. Quotation customer search has a 16px gap before the list; customer cards have 12px separation and inset focus space. The quotation list search has the same gap. Catalogue search aligns with page content, and grid fields no longer combine row gaps with extra bottom margins. Leads filters have room below stage tabs, label gaps and aligned controls. Invoice sharing, campaign results and WhatsApp guidelines have separated text, fields and actions; sharing controls are omitted from printed invoices.
+
+Reviewed the main navigation pages and shared form styles visually and in source. Confirmed the quotation gap in the narrow preview and desktop layout, plus catalogue forms, Leads filters, campaign results, invoice sharing and guidelines with loaded data. Build passed; changed JSX lint passed with existing hook/declaration warnings. A demo backend restart restored requests after the existing development request limit was reached; rate limits and account security were not changed.

@@ -476,3 +476,13 @@
   }}
 
 .marketing-container > .tabs { margin-bottom: 24px; }
+
+.marketing-container .campaign-results-body { padding: var(--space-section); display: flex; flex-direction: column; align-items: stretch; gap: var(--space-group); }
+.marketing-container .campaign-results-body p { line-height: 1.6; }
+.marketing-container .campaign-results-body label { display: flex; flex-direction: column; gap: var(--space-label); }
+.marketing-container .campaign-results-body h3 { margin-top: var(--space-label); }
+.marketing-container .campaign-results-body button { white-space: normal; text-align: left; }
+.marketing-container .modal-header { gap: var(--space-group); }
+.marketing-container .modal-header button { flex-shrink: 0; }
+.marketing-container .modal-overlay { padding: var(--space-group); }
+@media (max-width: 650px) { .marketing-container .campaign-results-body { padding: var(--space-group); } }

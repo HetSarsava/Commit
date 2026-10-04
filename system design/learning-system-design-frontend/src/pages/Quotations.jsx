@@ -83,7 +83,7 @@ const Quotations = () => {
         </button>
       </div>
 
-      <input aria-label="Search quotations" placeholder="Search quotation number or customer" value={search} onChange={e => setSearch(e.target.value)} />
+      <input className="quotation-search" aria-label="Search quotations" placeholder="Search quotation number or customer" value={search} onChange={e => setSearch(e.target.value)} />
       {loading ? (
         <div className="loading-state">
           <div className="spinner">Loading...</div>

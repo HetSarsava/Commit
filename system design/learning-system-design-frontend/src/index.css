@@ -1,6 +1,10 @@
 /* Use local system fallbacks so the client demo remains fully usable offline. */
 
 :root {
+  --space-label: 8px;
+  --space-control: 12px;
+  --space-group: 16px;
+  --space-section: 24px;
   --navy: #1C2333;
   --navy-light: #2D3548;
   --canvas: #F7F5F0;

@@ -533,3 +533,9 @@
   .invoice-detail .payments-table td {
     padding: 8px;
   }}
+
+.invoice-detail .invoice-share-panel { padding: var(--space-section); margin: var(--space-section) 32px 0; display: flex; flex-wrap: wrap; gap: var(--space-control); }
+.invoice-detail .invoice-share-panel > h2, .invoice-detail .invoice-share-panel > p { flex-basis: 100%; }
+.invoice-detail .invoice-share-panel > p { line-height: 1.6; }
+@media (max-width: 768px) { .invoice-detail .invoice-share-panel { margin-inline: 16px; padding: var(--space-group); } }
+@media print { .invoice-detail .invoice-share-panel { display: none; } }

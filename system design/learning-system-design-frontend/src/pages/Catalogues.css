@@ -315,3 +315,11 @@
 .catalogues-page .form-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .catalogues-page .modal-close, .catalogues-page .btn-remove { padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
 @media(max-width: 650px) { .catalogues-page .form-grid { grid-template-columns: 1fr; } .catalogues-page .modal-overlay { padding: 8px; } }
+
+.catalogues-page .catalogue-search { display: block; width: calc(100% - 64px); margin: var(--space-group) 32px 0; }
+.catalogues-page > [role="alert"] { margin: var(--space-group) 32px; }
+.catalogues-page .form-grid .form-group { margin-bottom: 0; }
+.catalogues-page .form-grid { margin-bottom: var(--space-group); }
+.catalogues-page .modal-body > h3 { margin-bottom: var(--space-group); }
+.catalogues-page .form-section-header { gap: var(--space-group); flex-wrap: wrap; }
+@media (max-width: 650px) { .catalogues-page .catalogue-search { width: calc(100% - 32px); margin-inline: 16px; } .catalogues-page > [role="alert"] { margin-inline: 16px; } }
