@@ -1,6 +1,7 @@
 const { prisma } = require('../config/database');
 const { getCompany } = require('../services/companyProfile');
 const { cataloguePdf } = require('../services/cataloguePdf');
+const effectiveStatus = c => c.validUntil && new Date(c.validUntil) < new Date() ? 'EXPIRED' : c.status;
 exports.getContacts = async (req, res, next) => {
   try {
     const customers = await prisma.customer.findMany({});
@@ -26,7 +27,7 @@ exports.getAllCatalogues = async (req, res, next) => {
 
     const where = {};
     if (customerId) where.customerId = customerId;
-    if (status) where.status = status;
+
 
     const catalogues = await prisma.catalogue.findMany({
       where,
@@ -58,7 +59,7 @@ exports.getAllCatalogues = async (req, res, next) => {
       orderBy: { createdAt: 'desc' },
     });
 
-    res.json(catalogues);
+    res.json(catalogues.map(c=>({...c,status:effectiveStatus(c)})).filter(c=>!status || c.status===status));
   } catch (error) {
     next(error);
   }
@@ -134,12 +135,13 @@ exports.getCatalogueByLink = async (req, res, next) => {
     await prisma.catalogue.update({
       where: { id: catalogue.id },
       data: {
-        viewCount: catalogue.viewCount + 1,
+        viewCount: {increment:1},
+        ...(catalogue.status === 'SHARED' && {status:'VIEWED'}),
         lastViewedAt: new Date(),
       },
     });
 
-    res.json({ title: catalogue.title, description: catalogue.description, companyName: (await getCompany(prisma)).name, items: catalogue.items.map(item => ({ id: item.id, product: { name: item.product?.name, sku: item.product?.sku, basePrice: item.product?.basePrice } })) });
+    res.json({ title: catalogue.title, description: catalogue.description, companyName: (await getCompany(prisma)).name, companyEmail:(await getCompany(prisma)).email, items: catalogue.items.map(item => ({ id: item.id, product: { id:item.productId, name: item.product?.name, sku: item.product?.sku, basePrice: item.product?.basePrice } })) });
   } catch (error) {
     next(error);
   }
@@ -164,11 +166,13 @@ exports.createCatalogue = async (req, res, next) => {
       });
     }
 
+    if ([description,notes].some(value=>value !== undefined && value !== null && (typeof value !== 'string' || value.length>10000))) return res.status(400).json({error:'Description and notes must be text, up to 10,000 characters'});
     if (!await prisma.customer.findUnique({ where: { id: customerId } })) return res.status(400).json({ error: 'Choose an existing customer.' });
     for (const item of products) {
-      if (typeof item.productId !== 'string' || !await prisma.product.findUnique({ where: { id: item.productId } })) return res.status(400).json({ error: 'Choose valid products for the catalogue.' });
+      if (!item || typeof item.productId !== 'string' || !await prisma.product.findUnique({ where: { id: item.productId } })) return res.status(400).json({ error: 'Choose valid products for the catalogue.' });
     }
-    if (validUntil && !Number.isFinite(new Date(validUntil).getTime())) return res.status(400).json({ error: 'Choose a valid expiry date.' });
+    if (new Set(products.map(item=>item.productId)).size !== products.length) return res.status(400).json({error:'Each product can appear only once.'});
+    if (validUntil && (!Number.isFinite(new Date(validUntil).getTime()) || new Date(validUntil+'T23:59:59') < new Date())) return res.status(400).json({ error: 'Choose a valid expiry date.' });
 
     // Generate unique share link
     const shareLink = `CAT-${require('node:crypto').randomUUID()}`;
@@ -180,7 +184,7 @@ exports.createCatalogue = async (req, res, next) => {
         title,
         description: description || null,
         shareLink,
-        validUntil: validUntil ? new Date(validUntil) : null,
+        validUntil: validUntil ? new Date(validUntil + 'T23:59:59.999') : null,
         notes: notes || null,
         status: 'DRAFT',
         viewCount: 0,
@@ -260,7 +264,11 @@ exports.updateCatalogueStatus = async (req, res, next) => {
 // Track product click in catalogue
 exports.trackProductClick = async (req, res, next) => {
   try {
-    const { catalogueId, productId } = req.body;
+    const { shareLink, productId } = req.body;
+    const catalogue = await prisma.catalogue.findUnique({where:{shareLink},include:{items:true}});
+    if (!catalogue || catalogue.status === 'EXPIRED' || (catalogue.validUntil && new Date(catalogue.validUntil) < new Date())) return res.status(404).json({error:'Catalogue unavailable'});
+    const catalogueId = catalogue.id;
+    if (!catalogue.items.some(item=>item.productId === productId)) return res.status(400).json({error:'Product is not in this catalogue'});
 
     if (!catalogueId || !productId) {
       return res.status(400).json({
@@ -288,7 +296,9 @@ exports.trackProductClick = async (req, res, next) => {
 // Track enquiry click in catalogue
 exports.trackEnquiryClick = async (req, res, next) => {
   try {
-    const { catalogueId } = req.body;
+    const catalogue = await prisma.catalogue.findUnique({where:{shareLink:req.body.shareLink}});
+    if (!catalogue || catalogue.status === 'EXPIRED' || (catalogue.validUntil && new Date(catalogue.validUntil) < new Date())) return res.status(404).json({error:'Catalogue unavailable'});
+    const catalogueId=catalogue.id;
 
     if (!catalogueId) {
       return res.status(400).json({
@@ -381,7 +391,7 @@ exports.deleteCatalogue = async (req, res, next) => {
 // Get catalogue summary
 exports.getCatalogueSummary = async (req, res, next) => {
   try {
-    const catalogues = await prisma.catalogue.findMany({});
+    const catalogues = (await prisma.catalogue.findMany({})).map(c=>({...c,status:effectiveStatus(c)}));
 
     const summary = {
       totalCatalogues: catalogues.length,
@@ -405,4 +415,19 @@ exports.getCatalogueSummary = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+exports.updateCatalogue = async (req,res,next) => {
+ try {
+  const catalogue=await prisma.catalogue.findUnique({where:{id:req.params.id}});
+  if(!catalogue) return res.status(404).json({error:'Catalogue not found'});
+  if(catalogue.status !== 'DRAFT') return res.status(409).json({error:'Only draft catalogues can be edited. Create a new catalogue for changes after sharing.'});
+  const {title,customerId,products,description,notes,validUntil}=req.body;
+  if(typeof title!=='string'||!title.trim()||title.length>200||!Array.isArray(products)||!products.length||products.length>100||!await prisma.customer.findUnique({where:{id:customerId}})) return res.status(400).json({error:'Choose a customer, title and products'});
+  if(new Set(products.map(p=>p?.productId)).size!==products.length) return res.status(400).json({error:'Each product can appear only once'});
+  for(const p of products) if(!p||typeof p.productId!=='string'||!await prisma.product.findUnique({where:{id:p.productId}})) return res.status(400).json({error:'Choose valid products'});
+  if(validUntil && (!Number.isFinite(new Date(validUntil).getTime())||new Date(validUntil+'T23:59:59') < new Date())) return res.status(400).json({error:'Choose a future expiry date'});
+  const updated=await prisma.catalogue.update({where:{id:catalogue.id},data:{title:title.trim(),customerId,description:description||'',notes:notes||'',validUntil:validUntil?new Date(validUntil + 'T23:59:59.999'):null,items:{deleteMany:{},create:products.map(p=>({productId:p.productId,notes:p.notes||''}))}}});
+  res.json({catalogue:updated});
+ }catch(e){next(e);}
 };

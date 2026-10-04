@@ -452,6 +452,7 @@ const mockPrisma = {
     },
 
     create: async ({ data }) => {
+      if (data.leadId && mockData.customers.some(row=>row.leadId === data.leadId)) throw Object.assign(new Error('This source already has a linked customer'),{code:'P2002'});
       const newCustomer = {
         id: generateId('cust'),
         ...data,
@@ -754,6 +755,7 @@ const mockPrisma = {
     },
 
     create: async ({ data, include }) => {
+      if (data.quotationId && mockData.orders.some(row=>row.quotationId === data.quotationId)) throw Object.assign(new Error('This source already has a linked order'),{code:'P2002'});
       const newOrder = {
         id: generateId('order'),
         ...data,
@@ -1014,6 +1016,7 @@ const mockPrisma = {
     },
 
     create: async ({ data, include }) => {
+      if (mockData.invoices.some(i => i.orderId === data.orderId)) throw Object.assign(new Error('Invoice already exists'), {code:'P2002',status:409});
       const newInvoice = {
         id: generateId('inv'),
         ...data,
@@ -1043,6 +1046,8 @@ const mockPrisma = {
       const index = mockData.invoices.findIndex(i => i.id === where.id);
       if (index === -1) throw new Error('Invoice not found');
 
+      if (data.items?.deleteMany) mockData.invoiceItems = mockData.invoiceItems.filter(item => item.invoiceId !== where.id);
+      if (data.items?.create) for (const item of data.items.create) mockData.invoiceItems.push({id:generateId('invitem'),invoiceId:where.id,...item});
       mockData.invoices[index] = {
         ...mockData.invoices[index],
         ...data,
@@ -1433,6 +1438,7 @@ const mockPrisma = {
   activityLog: {
     findMany: async ({ where = {}, include, orderBy, skip = 0, take = 1000 }) => {
       let logs = [...mockData.activityLogs];
+      if(where.createdAt) logs=logs.filter(l=>(!where.createdAt.gte || new Date(l.createdAt)>=where.createdAt.gte)&&(!where.createdAt.lte || new Date(l.createdAt)<=where.createdAt.lte));
 
       // Apply filters
       if (where.userId) logs = logs.filter(l => l.userId === where.userId);
@@ -1515,6 +1521,7 @@ const mockPrisma = {
 
     count: async ({ where = {} }) => {
       let logs = [...mockData.activityLogs];
+      if(where.createdAt) logs=logs.filter(l=>(!where.createdAt.gte || new Date(l.createdAt)>=where.createdAt.gte)&&(!where.createdAt.lte || new Date(l.createdAt)<=where.createdAt.lte));
 
       if (where.userId) logs = logs.filter(l => l.userId === where.userId);
       if (where.entityType) logs = logs.filter(l => l.entityType === where.entityType);
@@ -2131,9 +2138,12 @@ const mockPrisma = {
       const index = mockData.catalogues.findIndex(c => c.id === where.id);
       if (index === -1) throw new Error('Catalogue not found');
 
+      if (data.items?.deleteMany) mockData.catalogueItems = mockData.catalogueItems.filter(item=>item.catalogueId !== where.id);
+      if (data.items?.create) for(const item of data.items.create) mockData.catalogueItems.push({id:generateId('catitem'),catalogueId:where.id,...item});
       mockData.catalogues[index] = {
         ...mockData.catalogues[index],
         ...data,
+        ...(data.viewCount && typeof data.viewCount === 'object' ? {viewCount:Number(mockData.catalogues[index].viewCount||0)+Number(data.viewCount.increment||0)} : {}),
       };
 
       return mockData.catalogues[index];
@@ -2318,6 +2328,7 @@ const mockPrisma = {
     },
 
     create: async ({ data }) => {
+      if (data.quotationId && mockData.proformaInvoices.some(row=>row.quotationId === data.quotationId)) throw Object.assign(new Error('This source already has a linked proformaInvoice'),{code:'P2002'});
       const newProforma = {
         id: generateId('pi'),
         ...data,

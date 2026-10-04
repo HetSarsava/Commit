@@ -86,6 +86,9 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.use(require('./middleware/mutationAudit').mutationAudit);
+app.use('/api/whatsapp/guidelines', require('./routes/whatsappGuidelines'));
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

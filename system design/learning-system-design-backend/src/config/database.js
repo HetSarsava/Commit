@@ -11,6 +11,8 @@ if (USE_MOCK_DB) {
   const { mockPrisma } = require('../data/mockDatabase');
   prisma = mockPrisma;
   require('../services/demoCompanyPersistence').persistDemoCompany(prisma);
+  require('../services/demoAuditPersistence').persistDemoAudit(prisma);
+  require('../services/demoWorkflowPersistence').persistDemoWorkflows(prisma);
 
   connectDB = async () => {
     try {

@@ -21,6 +21,7 @@ router.get('/contacts', catalogueController.getContacts);
 router.get('/:id', catalogueController.getCatalogueById);
 router.get('/:id/analytics', catalogueController.getCatalogueAnalytics);
 router.post('/', requireRole(['ADMIN', 'SALES']), catalogueController.createCatalogue);
+router.put('/:id', requireRole(['ADMIN','SALES']), catalogueController.updateCatalogue);
 router.patch('/:id/status', requireRole(['ADMIN', 'SALES']), catalogueController.updateCatalogueStatus);
 router.delete('/:id', requireRole(['ADMIN']), catalogueController.deleteCatalogue);
 

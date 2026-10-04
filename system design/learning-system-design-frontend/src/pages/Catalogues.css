@@ -301,3 +301,17 @@
   .catalogues-page .link-box button {
     width: 100%;
   }}
+.catalogues-page .modal-overlay { position: fixed; inset: 0; background: #0008; z-index: 1100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.catalogues-page .modal-content { background: var(--white); border-radius: 12px; width: min(900px, 100%); max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px #0004; }
+.catalogues-page .modal-header, .catalogues-page .modal-footer { display: flex; justify-content: space-between; gap: 12px; padding: 20px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+.catalogues-page .modal-content > form { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.catalogues-page .modal-body { padding: 20px; overflow-y: auto; min-height: 0; }
+.catalogues-page .modal-footer { border-top: 1px solid var(--line); justify-content: flex-end; }
+.catalogues-page .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+.catalogues-page .full-width { grid-column: 1 / -1; }
+.catalogues-page .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.catalogues-page input, .catalogues-page select, .catalogues-page textarea { padding: 12px; border: 1px solid var(--line); border-radius: 6px; width: 100%; box-sizing: border-box; }
+.catalogues-page .product-form { padding: 16px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; }
+.catalogues-page .form-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.catalogues-page .modal-close, .catalogues-page .btn-remove { padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+@media(max-width: 650px) { .catalogues-page .form-grid { grid-template-columns: 1fr; } .catalogues-page .modal-overlay { padding: 8px; } }

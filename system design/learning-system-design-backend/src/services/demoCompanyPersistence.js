@@ -17,7 +17,7 @@ function persistDemoCompany(prisma) {
     const original = prisma.settings[method].bind(prisma.settings);
     prisma.settings[method] = async args => {
       const key = args.where?.key || args.data.key;
-      if (key.startsWith('company.')) db.prepare('INSERT INTO company_settings VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').run(key, args.data.value);
+      if (key.startsWith('company.') || key === 'whatsapp.guidelines') db.prepare('INSERT INTO company_settings VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').run(key, args.data.value);
       return original(args);
     };
   }

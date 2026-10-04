@@ -1,4 +1,8 @@
 /* Extend LeadModal styles for larger modal */
+.product-modal .modal-container { overflow: hidden; }
+.product-modal .modal-container > form { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.product-modal .modal-body { min-height: 0; overflow-y: auto; }
+.product-modal .modal-header, .product-modal .modal-footer { flex-shrink: 0; }
 .product-modal .modal-large {
   max-width: 1000px;
 }

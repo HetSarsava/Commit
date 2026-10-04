@@ -1,4 +1,7 @@
 const { prisma } = require('../config/database');
+const { attribution } = require('../services/marketingMetrics');
+async function dataRows() { return Promise.all([prisma.lead.findMany({}), (prisma.order || prisma.salesOrder).findMany({}), prisma.customer.findMany({}), prisma.quotation.findMany({})]); }
+
 
 // Create marketing campaign
 exports.createCampaign = async (req, res, next) => {
@@ -15,6 +18,7 @@ exports.createCampaign = async (req, res, next) => {
       status,
     } = req.body;
 
+    if (typeof name !== 'string' || !name.trim() || !Number.isFinite(Number(budget)) || Number(budget) < 0 || !Number.isFinite(new Date(startDate).getTime())) return res.status(400).json({error:'Enter a campaign name, valid budget and start date'});
     // Generate campaign code
     const year = new Date().getFullYear();
     const month = (new Date().getMonth() + 1).toString().padStart(2, '0');
@@ -50,69 +54,7 @@ exports.createCampaign = async (req, res, next) => {
 };
 
 // Get all campaigns
-exports.getAllCampaigns = async (req, res, next) => {
-  try {
-    const { status, platform, type } = req.query;
-
-    const where = {};
-    if (status) where.status = status;
-    if (platform) where.platform = platform;
-    if (type) where.type = type;
-
-    const campaigns = await prisma.campaign.findMany({
-      where,
-      include: {
-        createdByUser: {
-          select: { id: true, firstName: true, lastName: true },
-        },
-        _count: {
-          select: { leads: true },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    // Calculate metrics for each campaign
-    const campaignsWithMetrics = await Promise.all(
-      campaigns.map(async (campaign) => {
-        const leads = await prisma.lead.findMany({
-          where: { campaignId: campaign.id },
-        });
-
-        const totalLeads = leads.length;
-        const quotations = leads.filter((l) => ['QUOTATION', 'NEGOTIATION', 'SAMPLE', 'ORDER', 'PRODUCTION', 'DISPATCH', 'COMPLETED'].includes(l.status)).length;
-        const orders = leads.filter((l) => ['ORDER', 'PRODUCTION', 'DISPATCH', 'COMPLETED'].includes(l.status)).length;
-        const completed = leads.filter((l) => l.status === 'COMPLETED').length;
-
-        const revenue = leads
-          .filter((l) => l.status === 'COMPLETED')
-          .reduce((sum, l) => sum + (l.budget || 0), 0);
-
-        const cpl = totalLeads > 0 ? campaign.spent / totalLeads : 0;
-        const roi = campaign.spent > 0 ? ((revenue - campaign.spent) / campaign.spent) * 100 : 0;
-        const conversionRate = totalLeads > 0 ? (completed / totalLeads) * 100 : 0;
-
-        return {
-          ...campaign,
-          metrics: {
-            totalLeads,
-            quotations,
-            orders,
-            completed,
-            revenue,
-            cpl: Math.round(cpl),
-            roi: Math.round(roi * 10) / 10,
-            conversionRate: Math.round(conversionRate * 10) / 10,
-          },
-        };
-      })
-    );
-
-    res.json(campaignsWithMetrics);
-  } catch (error) {
-    next(error);
-  }
-};
+exports.getAllCampaigns = async (req,res,next) => { try { const where = {}; for(const key of ['status','platform','type']) if(req.query[key]) where[key]=req.query[key]; const [campaigns, rows] = await Promise.all([prisma.campaign.findMany({where}),dataRows()]); res.json(campaigns.map(c=>({...c,metrics:attribution(c,...rows).metrics}))); } catch(e){next(e);} };
 
 // Get campaign by ID
 exports.getCampaignById = async (req, res, next) => {
@@ -139,7 +81,7 @@ exports.getCampaignById = async (req, res, next) => {
       return res.status(404).json({ error: 'Campaign not found' });
     }
 
-    res.json(campaign);
+    res.json({...campaign,...attribution(campaign,...await dataRows())});
   } catch (error) {
     next(error);
   }
@@ -149,7 +91,8 @@ exports.getCampaignById = async (req, res, next) => {
 exports.updateCampaign = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const updateData = Object.fromEntries(Object.entries(req.body).filter(([key])=>['name','type','platform','budget','startDate','endDate','targetAudience','description','status'].includes(key)));
+    if (updateData.budget !== undefined && (!Number.isFinite(Number(updateData.budget)) || Number(updateData.budget) < 0)) return res.status(400).json({error:'Budget must be a non-negative amount'});
 
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -223,123 +166,14 @@ exports.deleteCampaign = async (req, res, next) => {
 };
 
 // Get marketing dashboard/summary
-exports.getMarketingDashboard = async (req, res, next) => {
-  try {
-    const { startDate, endDate } = req.query;
-
-    const where = {};
-    if (startDate && endDate) {
-      where.createdAt = {
-        gte: new Date(startDate),
-        lte: new Date(endDate),
-      };
-    }
-
-    const [
-      totalCampaigns,
-      activeCampaigns,
-      campaigns,
-      allLeads,
-    ] = await Promise.all([
-      prisma.campaign.count(),
-      prisma.campaign.count({ where: { status: 'ACTIVE' } }),
-      prisma.campaign.findMany({
-        include: {
-          leads: true,
-        },
-      }),
-      prisma.lead.findMany({
-        where: { campaignId: { not: null } },
-      }),
-    ]);
-
-    // Calculate overall metrics
-    const totalBudget = campaigns.reduce((sum, c) => sum + c.budget, 0);
-    const totalSpent = campaigns.reduce((sum, c) => sum + c.spent, 0);
-    const totalLeads = allLeads.length;
-    const completedLeads = allLeads.filter((l) => l.status === 'COMPLETED').length;
-    const totalRevenue = allLeads
-      .filter((l) => l.status === 'COMPLETED')
-      .reduce((sum, l) => sum + (l.budget || 0), 0);
-
-    const overallCPL = totalLeads > 0 ? totalSpent / totalLeads : 0;
-    const overallROI = totalSpent > 0 ? ((totalRevenue - totalSpent) / totalSpent) * 100 : 0;
-    const overallConversion = totalLeads > 0 ? (completedLeads / totalLeads) * 100 : 0;
-
-    // Platform breakdown
-    const platformBreakdown = campaigns.reduce((acc, campaign) => {
-      if (!acc[campaign.platform]) {
-        acc[campaign.platform] = {
-          platform: campaign.platform,
-          campaigns: 0,
-          spent: 0,
-          leads: 0,
-          revenue: 0,
-        };
-      }
-
-      acc[campaign.platform].campaigns++;
-      acc[campaign.platform].spent += campaign.spent;
-
-      const campaignLeads = allLeads.filter((l) => l.campaignId === campaign.id);
-      acc[campaign.platform].leads += campaignLeads.length;
-      acc[campaign.platform].revenue += campaignLeads
-        .filter((l) => l.status === 'COMPLETED')
-        .reduce((sum, l) => sum + (l.budget || 0), 0);
-
-      return acc;
-    }, {});
-
-    const platformStats = Object.values(platformBreakdown).map((p) => ({
-      ...p,
-      cpl: p.leads > 0 ? Math.round(p.spent / p.leads) : 0,
-      roi: p.spent > 0 ? Math.round(((p.revenue - p.spent) / p.spent) * 100 * 10) / 10 : 0,
-    }));
-
-    // Best performing campaigns (top 5 by ROI)
-    const campaignsWithROI = campaigns.map((c) => {
-      const campaignLeads = allLeads.filter((l) => l.campaignId === c.id);
-      const revenue = campaignLeads
-        .filter((l) => l.status === 'COMPLETED')
-        .reduce((sum, l) => sum + (l.budget || 0), 0);
-      const roi = c.spent > 0 ? ((revenue - c.spent) / c.spent) * 100 : 0;
-
-      return {
-        id: c.id,
-        name: c.name,
-        platform: c.platform,
-        spent: c.spent,
-        leads: campaignLeads.length,
-        revenue,
-        roi: Math.round(roi * 10) / 10,
-      };
-    });
-
-    const topCampaigns = campaignsWithROI
-      .sort((a, b) => b.roi - a.roi)
-      .slice(0, 5);
-
-    res.json({
-      summary: {
-        totalCampaigns,
-        activeCampaigns,
-        totalBudget: Math.round(totalBudget),
-        totalSpent: Math.round(totalSpent),
-        budgetUtilization: totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0,
-        totalLeads,
-        completedLeads,
-        totalRevenue: Math.round(totalRevenue),
-        overallCPL: Math.round(overallCPL),
-        overallROI: Math.round(overallROI * 10) / 10,
-        overallConversion: Math.round(overallConversion * 10) / 10,
-      },
-      platformStats,
-      topCampaigns,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+exports.getMarketingDashboard = async (req,res,next) => { try {
+ const [campaigns,rows] = await Promise.all([prisma.campaign.findMany({}),dataRows()]);
+ const results = campaigns.map(c=>({...c,...attribution(c,...rows)}));
+ const totalBudget=results.reduce((s,c)=>s+Number(c.budget||0),0), totalSpent=results.reduce((s,c)=>s+Number(c.spent||0),0), totalRevenue=results.reduce((s,c)=>s+c.metrics.revenue,0), totalLeads=results.reduce((s,c)=>s+c.metrics.totalLeads,0), completedLeads=results.reduce((s,c)=>s+c.metrics.completed,0);
+ const platforms={}; for(const c of results) { const p=platforms[c.platform] ||= {platform:c.platform,campaigns:0,spent:0,leads:0,revenue:0}; p.campaigns++;p.spent+=Number(c.spent||0);p.leads+=c.metrics.totalLeads;p.revenue+=c.metrics.revenue; }
+ const platformStats=Object.values(platforms).map(p=>({...p,cpl:p.leads?Math.round(p.spent/p.leads):0,roi:p.spent?Math.round((p.revenue-p.spent)/p.spent*1000)/10:null}));
+ res.json({summary:{totalCampaigns:results.length,activeCampaigns:results.filter(c=>c.status==='ACTIVE').length,totalBudget,totalSpent,totalRevenue,totalLeads,completedLeads,budgetUtilization:totalBudget?Math.round(totalSpent/totalBudget*100):0,overallCPL:totalLeads?Math.round(totalSpent/totalLeads):0,overallROI:totalSpent?Math.round((totalRevenue-totalSpent)/totalSpent*1000)/10:null,overallConversion:totalLeads?Math.round(completedLeads/totalLeads*1000)/10:0},platformStats,topCampaigns:results.map(c=>({id:c.id,name:c.name,platform:c.platform,spent:c.spent,leads:c.metrics.totalLeads,revenue:c.metrics.revenue,roi:c.metrics.roi})).sort((a,b)=>(b.roi||0)-(a.roi||0)).slice(0,5)});
+ } catch(e){next(e);} };
 
 // Record campaign spend
 exports.recordSpend = async (req, res, next) => {
@@ -355,6 +189,7 @@ exports.recordSpend = async (req, res, next) => {
       return res.status(404).json({ error: 'Campaign not found' });
     }
 
+    if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) return res.status(400).json({error:'Enter a positive spend amount.'});
     // Update campaign spent
     const updatedCampaign = await prisma.campaign.update({
       where: { id },

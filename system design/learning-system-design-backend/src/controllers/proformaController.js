@@ -98,6 +98,8 @@ exports.createFromQuotation = async (req, res, next) => {
       return res.status(404).json({ error: 'Quotation not found' });
     }
 
+    const existing = (await prisma.proformaInvoice.findMany({})).find(p=>p.quotationId === quotationId);
+    if (existing) return res.json({message:'Existing proforma returned',proforma:existing});
     // Generate proforma number
     const count = await prisma.proformaInvoice.count({});
     const proformaNumber = `PI-${new Date().getFullYear()}${(new Date().getMonth() + 1)
@@ -323,6 +325,7 @@ exports.convertToOrder = async (req, res, next) => {
       return res.status(400).json({ error: 'Proforma already converted to order' });
     }
 
+    if (proforma.quotationId) { const existingOrder = await prisma.order.findFirst({where:{quotationId:proforma.quotationId}}); if (existingOrder) return res.json({order:existingOrder,message:'Existing order returned'}); }
     // Generate order number
     const orderCount = await prisma.order.count({});
     const orderNumber = `ORD-${new Date().getFullYear()}${(new Date().getMonth() + 1)

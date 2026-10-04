@@ -116,6 +116,7 @@ exports.getInvoice = async (req, res, next) => {
 exports.createInvoiceFromOrder = async (req, res, next) => {
   try {
     const { orderId } = req.body;
+    if (typeof orderId !== 'string' || !orderId) return res.status(400).json({error:'Choose an existing order'});
 
     // Get order with items
     const order = await prisma.order.findUnique({
@@ -134,13 +135,14 @@ exports.createInvoiceFromOrder = async (req, res, next) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
+    if (req.user.role === 'SALES' && order.salesPersonId !== req.user.id) return res.status(403).json({error:'Access denied'});
     // Check if invoice already exists for this order
     const existingInvoice = await prisma.invoice.findFirst({
       where: { orderId },
     });
 
     if (existingInvoice) {
-      return res.status(400).json({ error: 'Invoice already exists for this order' });
+      return res.json({message:'Existing invoice returned', invoice: existingInvoice});
     }
 
     // Generate invoice number
@@ -203,6 +205,7 @@ exports.createInvoiceFromOrder = async (req, res, next) => {
       invoice,
     });
   } catch (error) {
+    if (error.code === 'P2002') { const existing = await prisma.invoice.findFirst({where:{orderId:req.body.orderId}}); if (existing) return res.json({message:'Existing invoice returned',invoice:existing}); }
     next(error);
   }
 };
@@ -297,4 +300,17 @@ exports.deleteInvoice = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+exports.syncFromOrder = async (req,res,next) => {
+  try {
+    const invoice = await prisma.invoice.findUnique({where:{id:req.params.id},include:{items:true}});
+    if (!invoice) return res.status(404).json({error:'Invoice not found'});
+    if (req.user.role === 'SALES' && invoice.salesPersonId !== req.user.id) return res.status(403).json({error:'Access denied'});
+    if (Number(invoice.amountPaid || 0) > 0 || invoice.status === 'PAID') return res.status(409).json({error:'This invoice has payments. Review a correction with your accountant instead of replacing it.'});
+    const order = await prisma.order.findUnique({where:{id:invoice.orderId},include:{items:true}});
+    if (!order) return res.status(404).json({error:'Order not found'});
+    const updated = await prisma.invoice.update({where:{id:invoice.id},data:require('../services/invoiceSnapshot').invoiceData(order,invoice),include:{items:{include:{product:true}}}});
+    res.json({invoice:updated,message:'Invoice updated from order'});
+  } catch(e) { next(e); }
 };

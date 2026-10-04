@@ -14,6 +14,13 @@ exports.getAllLogs = async (req, res, next) => {
     } = req.query;
 
     const where = {};
+    if (!Number.isInteger(Number(limit)) || Number(limit)<1 || Number(limit)>200 || !Number.isInteger(Number(offset)) || Number(offset)<0) return res.status(400).json({error:'Invalid page size'});
+    if (startDate || endDate) {
+      where.createdAt={};
+      if(startDate) where.createdAt.gte=new Date(startDate);
+      if(endDate) where.createdAt.lte=new Date(endDate+'T23:59:59.999');
+      if(Object.values(where.createdAt).some(date=>!Number.isFinite(date.getTime()))) return res.status(400).json({error:'Invalid date filter'});
+    }
 
     // Apply filters
     if (userId) where.userId = userId;
@@ -38,16 +45,7 @@ exports.getAllLogs = async (req, res, next) => {
       skip: parseInt(offset),
     });
 
-    // Filter by date if provided
-    let filteredLogs = logs;
-    if (startDate || endDate) {
-      filteredLogs = logs.filter((log) => {
-        const logDate = new Date(log.createdAt);
-        if (startDate && logDate < new Date(startDate)) return false;
-        if (endDate && logDate > new Date(endDate)) return false;
-        return true;
-      });
-    }
+    const filteredLogs = logs;
 
     const total = await prisma.activityLog.count({ where });
 

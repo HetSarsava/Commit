@@ -1,3 +1,4 @@
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/client';
 import { useCompany } from '../context/CompanyData';
@@ -17,6 +18,13 @@ const messageError = text => {
 
 const WhatsAppEnhanced = () => {
   const company = useCompany();
+  const { user } = useAuth();
+  const [guidelines, setGuidelines] = useState('');
+  const [guidelineDraft, setGuidelineDraft] = useState('');
+  const [guidelineError, setGuidelineError] = useState('');
+  const [guidelineSaving, setGuidelineSaving] = useState(false);
+  useEffect(() => { apiClient.get('/whatsapp/guidelines').then(({data})=>{setGuidelines(data.text);setGuidelineDraft(data.text);}).catch(()=>setGuidelineError('Could not load business guidelines.')); }, []);
+  const saveGuidelines = async () => { setGuidelineSaving(true); try { const {data}=await apiClient.put('/whatsapp/guidelines',{text:guidelineDraft});setGuidelines(data.text);setGuidelineError(''); } catch(e){setGuidelineError(e.response?.data?.error || 'Could not save guidelines.');} finally {setGuidelineSaving(false);} };
   const navigate = useNavigate();
   const [crmContext, setCrmContext] = useState(null);
   const [contextError, setContextError] = useState("");
@@ -340,6 +348,7 @@ const WhatsAppEnhanced = () => {
       </div>
       {loadError && <div role="alert">{loadError}</div>}
 
+      <details className="business-guidelines" style={{padding:'16px 24px',borderBottom:'1px solid var(--line)'}}><summary>Business guidelines</summary><p style={{whiteSpace:'pre-wrap'}}>{guidelines || 'Your admin has not added guidelines yet.'}</p>{user?.role === 'ADMIN' && <><label>Guidelines for your team<textarea aria-label="Business guidelines text" rows={5} maxLength={12000} value={guidelineDraft} onChange={e=>setGuidelineDraft(e.target.value)} style={{width:'100%',boxSizing:'border-box'}} /></label><button className="btn" disabled={guidelineSaving} onClick={saveGuidelines}>{guidelineSaving?'Saving…':'Save guidelines'}</button></>}{guidelineError && <p role="alert">{guidelineError}</p>}</details>
       {/* Tabs */}
       <div className="whatsapp-tabs tabs" role="tablist" aria-label="WhatsApp sections">
         {tabs.map((tab) => (

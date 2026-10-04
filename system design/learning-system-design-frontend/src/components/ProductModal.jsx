@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { productsAPI } from '../api/products';
 import './ProductModal.css';
+import './LeadModal.css';
 
 const ProductModal = ({ mode, product, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
@@ -363,7 +364,7 @@ const ProductModal = ({ mode, product, onClose, onSuccess }) => {
                     disabled={isViewMode}
                     placeholder="https://example.com/image.jpg"
                   />
-                  <small className="field-hint">For now, paste image URL. File upload coming soon!</small>
+                  <small className="field-hint">Use a public image link for the product thumbnail.</small>
                 </div>
               </div>
             </div>

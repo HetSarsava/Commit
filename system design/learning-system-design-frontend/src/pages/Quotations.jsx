@@ -6,6 +6,7 @@ import './Quotations.css';
 
 const Quotations = () => {
   const navigate = useNavigate();
+  const [search, setSearch] = useState('');
   const [quotations, setQuotations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showBuilder, setShowBuilder] = useState(false);
@@ -82,6 +83,7 @@ const Quotations = () => {
         </button>
       </div>
 
+      <input aria-label="Search quotations" placeholder="Search quotation number or customer" value={search} onChange={e => setSearch(e.target.value)} />
       {loading ? (
         <div className="loading-state">
           <div className="spinner">Loading...</div>
@@ -97,7 +99,7 @@ const Quotations = () => {
         </div>
       ) : (
         <div className="quotations-list">
-          {quotations.map(q => (
+          {quotations.filter(q => [q.quotationNumber,q.customer?.companyName].join(' ').toLowerCase().includes(search.toLowerCase())).map(q => (
             <div key={q.id} className="quotation-card">
               <div className="quotation-number">{q.quotationNumber}</div>
               <div className="quotation-customer">{q.customer?.companyName}</div>

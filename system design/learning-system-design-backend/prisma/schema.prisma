@@ -446,7 +446,7 @@ model SalesOrder {
 
   // Relations
   items           OrderItem[]
-  invoices        Invoice[]
+  invoice         Invoice?
   production      Production?
 
   @@map("sales_orders")
@@ -498,7 +498,7 @@ model Invoice {
   customer        Customer      @relation(fields: [customerId], references: [id])
 
   // Order Reference
-  orderId         String
+  orderId         String        @unique
   order           SalesOrder    @relation(fields: [orderId], references: [id])
 
   // Type

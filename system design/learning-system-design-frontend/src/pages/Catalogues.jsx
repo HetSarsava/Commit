@@ -3,10 +3,15 @@ import { cataloguesAPI } from '../api/catalogues';
 import apiClient from '../api/client';
 import { productsAPI } from '../api/products';
 import './Catalogues.css';
+import { useAuth } from '../context/AuthContext';
 import { useLocation } from 'react-router-dom';
 
 const Catalogues = () => {
   const location = useLocation();
+  const {user}=useAuth();
+  const [editingId,setEditingId]=useState(null),[search,setSearch]=useState(''),[pageError,setPageError]=useState(''),[saving,setSaving]=useState(false);
+  const editCatalogue=c=>{setEditingId(c.id);setFormData({customerId:c.customerId,title:c.title,description:c.description||'',notes:c.notes||'',validUntil:c.validUntil?.slice?.(0,10)||'',products:c.items.map(i=>({productId:i.productId,notes:i.notes||''}))});setShowModal(true);};
+  const downloadPdf=async c=>{try{const {data}=await apiClient.post('/catalogues/pdf',{productIds:c.items.map(i=>i.productId)},{responseType:'blob'});const url=URL.createObjectURL(data),a=document.createElement('a');a.href=url;a.download='catalogue.pdf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);}catch{setPageError('Could not download catalogue PDF');}};
   const [catalogues, setCatalogues] = useState([]);
   const [leads, setLeads] = useState([]);
   const [products, setProducts] = useState([]);
@@ -36,25 +41,26 @@ const Catalogues = () => {
       setLoading(true);
       const params = filter !== 'all' ? { status: filter } : {};
 
+      setPageError('');
       // Load data with individual error handling
-      const cataloguesData = await cataloguesAPI.getAllCatalogues(params).catch(err => {
-        console.error('Failed to load catalogues:', err);
+      const cataloguesData = await cataloguesAPI.getAllCatalogues(params).catch(_err => {
+        setPageError('Could not load catalogues. Please retry.');
         return [];
       });
 
-      const leadsDataResponse = await apiClient.get("/catalogues/contacts").then(response => ({ leads: response.data })).catch(err => {
-        console.error('Failed to load leads:', err);
+      const leadsDataResponse = await apiClient.get("/catalogues/contacts").then(response => ({ leads: response.data })).catch(_err => {
+        setPageError('Could not load customers. Retry before saving.');
         return { leads: [] };
       });
       const leadsData = leadsDataResponse.leads || leadsDataResponse;
 
-      const productsData = await productsAPI.getAllProducts().catch(err => {
-        console.error('Failed to load products:', err);
+      const productsData = await productsAPI.getAllProducts().catch(_err => {
+        setPageError('Could not load products. Retry before saving.');
         return [];
       });
 
-      const summaryData = await cataloguesAPI.getCatalogueSummary().catch(err => {
-        console.error('Failed to load summary:', err);
+      const summaryData = await cataloguesAPI.getCatalogueSummary().catch(_err => {
+        console.error('Failed to load summary:', _err);
         return { totalCatalogues: 0, totalViews: 0, totalEnquiries: 0 };
       });
 
@@ -71,15 +77,17 @@ const Catalogues = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if(saving) return;
+    setSaving(true);
     try {
-      await cataloguesAPI.createCatalogue(formData);
-      alert('Catalogue created successfully');
+      if(editingId) await apiClient.put('/catalogues/'+editingId,formData); else await cataloguesAPI.createCatalogue(formData);
+      setPageError('');
       closeModal();
       loadData();
     } catch (error) {
       console.error('Failed to create catalogue:', error);
-      alert(error.response?.data?.error || 'Failed to create catalogue');
-    }
+      setPageError(error.response?.data?.error || 'Failed to save catalogue');
+    } finally {setSaving(false);}
   };
 
   const handleStatusChange = async (catalogueId, newStatus) => {
@@ -125,6 +133,7 @@ const Catalogues = () => {
   };
 
   const openModal = () => {
+    setEditingId(null);setPageError('');
     setFormData({
       customerId: '',
       title: '',
@@ -236,6 +245,8 @@ const Catalogues = () => {
         ))}
       </div>
 
+      <input className="catalogue-search" aria-label="Search catalogues" placeholder="Search catalogue or customer" value={search} onChange={e=>setSearch(e.target.value)}/>
+      {pageError && <p role="alert">{pageError} <button className="btn-small" onClick={loadData}>Retry</button></p>}
       {/* Content */}
       <div className="content">
         {loading ? (
@@ -246,7 +257,7 @@ const Catalogues = () => {
           </div>
         ) : (
           <div className="catalogue-list">
-            {catalogues.map((catalogue) => (
+            {catalogues.filter(c=>[c.title,c.customer?.companyName].join(' ').toLowerCase().includes(search.toLowerCase())).map((catalogue) => (
               <div key={catalogue.id} className="catalogue-card">
                 <div className="catalogue-header">
                   <div>
@@ -305,30 +316,19 @@ const Catalogues = () => {
                 </div>
 
                 <div className="catalogue-footer">
+                  <button className="btn-small" onClick={()=>window.open('/catalogue/'+catalogue.shareLink,'_blank','noopener,noreferrer')}>Preview</button>
+                  <button className="btn-small" onClick={()=>downloadPdf(catalogue)}>Download PDF</button>
+                  <button className="btn-small" onClick={()=>handleCopyLink(catalogue.shareLink)}>Copy viewing link</button>
+                  <button className="btn-small" onClick={()=>handleViewAnalytics(catalogue)}>Analytics</button>
+                  {catalogue.status==='DRAFT' && <button className="btn-small" onClick={()=>editCatalogue(catalogue)}>Edit draft</button>}
+                  {catalogue.status!=='EXPIRED' && <button className="btn-small" onClick={()=>handleStatusChange(catalogue.id,'EXPIRED')}>Expire link</button>}
                   {catalogue.status === 'DRAFT' && (
                     <button
                       className="btn-small"
                       onClick={() => handleStatusChange(catalogue.id, 'SHARED')}
                     >
-                      Share Catalogue
+                      Mark as shared
                     </button>
-                  )}
-
-                  {(catalogue.status === 'SHARED' || catalogue.status === 'VIEWED') && (
-                    <>
-                      <button
-                        className="btn-small btn-copy"
-                        onClick={() => handleCopyLink(catalogue.shareLink)}
-                      >
-                        Copy Link
-                      </button>
-                      <button
-                        className="btn-small"
-                        onClick={() => handleViewAnalytics(catalogue)}
-                      >
-                        View Analytics
-                      </button>
-                    </>
                   )}
 
                   {catalogue.status === 'VIEWED' && (
@@ -340,12 +340,12 @@ const Catalogues = () => {
                     </button>
                   )}
 
-                  <button
+                  {user?.role === 'ADMIN' && <button
                     className="btn-small btn-danger"
                     onClick={() => handleDelete(catalogue.id)}
                   >
                     Delete
-                  </button>
+                  </button>}
                 </div>
               </div>
             ))}
@@ -358,9 +358,10 @@ const Catalogues = () => {
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Create New Catalogue</h2>
+              <h2>{editingId ? "Edit Catalogue" : "Create New Catalogue"}</h2>
               <button className="modal-close" onClick={closeModal}>×</button>
             </div>
+            {pageError && <p role="alert" style={{padding:16}}>{pageError}</p>}
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
                 <div className="form-grid">
@@ -394,7 +395,7 @@ const Catalogues = () => {
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       required
-                      placeholder="e.g., Hospital Uniform Catalogue - October 2024"
+                      placeholder="e.g., Hospital Uniform Catalogue"
                     />
                   </div>
                   <div className="form-group full-width">
@@ -470,8 +471,8 @@ const Catalogues = () => {
                 <button type="button" className="btn btn-secondary" onClick={closeModal}>
                   Cancel
                 </button>
-                <button type="submit" className="btn">
-                  Create Catalogue
+                <button type="submit" className="btn" disabled={saving}>
+                  {saving ? "Saving…" : editingId ? "Save Catalogue" : "Create Catalogue"}
                 </button>
               </div>
             </form>

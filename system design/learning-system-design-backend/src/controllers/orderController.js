@@ -110,7 +110,8 @@ exports.getOrder = async (req, res, next) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    res.json({ order });
+    const invoice = await prisma.invoice.findFirst({where:{orderId:id}, include:{items:true}});
+    res.json({ order: {...order, invoice: invoice ? {id:invoice.id, invoiceNumber:invoice.invoiceNumber, status:invoice.status, hasPayments:Number(invoice.amountPaid || 0)>0, needsUpdate:require('../services/invoiceSnapshot').snapshot(order) !== require('../services/invoiceSnapshot').snapshot(invoice)} : null} });
   } catch (error) {
     next(error);
   }
