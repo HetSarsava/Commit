@@ -130,7 +130,7 @@ const Layout = ({ children }) => {
         </div>
 
         <div className="rail-footer">
-          {user?.role === 'ADMIN' && renderRailItem({ path: '/settings', icon: '⚙', label: 'Settings' })}
+          {user?.role === 'ADMIN' && renderRailItem({ path: '/settings', icon: 'S', label: 'Settings' })}
           <button
             className="rail-icon"
             onClick={handleLogout}

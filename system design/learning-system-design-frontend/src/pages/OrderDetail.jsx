@@ -160,7 +160,7 @@ const OrderDetail = () => {
           <button className="btn" onClick={handleEditSourceQuotation} disabled={!order.quotation?.id}>Edit source quotation</button>
           {order.customer?.whatsapp && (
             <button className="btn btn-whatsapp" onClick={handleSendWhatsApp}>
-              📱 Send Update
+               Send Update
             </button>
           )}
           {order.invoice ? <><button className="btn" onClick={() => navigate('/invoices/' + order.invoice.id)}>View Invoice</button>{order.invoice.needsUpdate && <button className="btn" disabled={order.invoice.hasPayments} title={order.invoice.hasPayments ? "An invoice with payments needs an accountant-reviewed correction" : "Update the existing unpaid invoice"} onClick={handleUpdateInvoice}>Update Invoice from Order</button>}</> : <button className="btn btn-convert" onClick={handleGenerateInvoice}>Generate Tax Invoice</button>}

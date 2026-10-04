@@ -1259,3 +1259,6 @@ input:checked + .toggle-slider:before {
 .whatsapp-page-enhanced .business-guidelines > label { display: flex; flex-direction: column; gap: var(--space-label); margin-top: var(--space-group); }
 .whatsapp-page-enhanced .business-guidelines > button { margin-top: var(--space-control); }
 @media (max-width: 650px) { .whatsapp-page-enhanced .business-guidelines { padding-inline: 16px; } }
+
+/* Plain-language composer actions replace decorative emoji. */
+.chat-attach-btn, .chat-template-btn { width: auto; min-width: 38px; padding: 0 12px; border-radius: 8px; font-size: 13px; }

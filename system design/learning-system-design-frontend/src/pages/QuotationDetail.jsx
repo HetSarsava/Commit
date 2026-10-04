@@ -132,7 +132,7 @@ const QuotationDetail = () => {
           <button className="btn" onClick={handleEdit}>Edit</button>
           {quotation.customer?.whatsapp && (
             <button className="btn btn-whatsapp" onClick={handleSendWhatsApp}>
-              📱 Send via WhatsApp
+               Send via WhatsApp
             </button>
           )}
           <button className="btn btn-convert" onClick={handleConvertToOrder}>
@@ -316,11 +316,11 @@ const QuotationDetail = () => {
           <div className="card side-card">
             <h3>Actions</h3>
             <div className="action-list">
-              <button type="button" className="action-btn wa" onClick={handleSendWhatsApp}>💬 Send on WhatsApp</button>
-              <button type="button" className="action-btn" disabled title="Email delivery is not configured">✉ Email PDF</button>
-              <button type="button" className="action-btn" disabled title="Follow-up reminders are not configured">🔁 Set follow-up reminder</button>
-              <button type="button" className="action-btn" onClick={handleEdit}>✏ Edit quotation</button>
-              <button type="button" className="action-btn danger" onClick={handleDelete}>🗑 Delete quotation</button>
+              <button type="button" className="action-btn wa" onClick={handleSendWhatsApp}> Send on WhatsApp</button>
+              <button type="button" className="action-btn" disabled title="Email delivery is not configured"> Email PDF</button>
+              <button type="button" className="action-btn" disabled title="Follow-up reminders are not configured"> Set follow-up reminder</button>
+              <button type="button" className="action-btn" onClick={handleEdit}> Edit quotation</button>
+              <button type="button" className="action-btn danger" onClick={handleDelete}> Delete quotation</button>
             </div>
           </div>
         </div>

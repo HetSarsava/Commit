@@ -203,7 +203,7 @@ const Leads = () => {
             <div className="loading-state">Loading...</div>
           ) : leads.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">📋</div>
+
               <h3>No leads found</h3>
               <p>Create your first lead to get started</p>
               <button className="btn btn-primary" onClick={handleCreate}>+ New lead</button>
@@ -297,9 +297,9 @@ const Leads = () => {
           )}
 
           <div className="drawer-actions">
-            <button className="action-btn primary">💬 Send WhatsApp</button>
-            <button className="action-btn" onClick={handleEdit}>✏ Edit lead</button>
-            <button className="action-btn" onClick={handleDelete}>🗑 Delete lead</button>
+            <button className="action-btn primary"> Send WhatsApp</button>
+            <button className="action-btn" onClick={handleEdit}> Edit lead</button>
+            <button className="action-btn" onClick={handleDelete}> Delete lead</button>
           </div>
         </div>
       )}

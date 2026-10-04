@@ -158,7 +158,7 @@ const InvoiceDetail = () => {
           )}
           {invoice.customer?.whatsapp && invoice.balanceDue > 0 && (
             <button className="btn btn-whatsapp" onClick={handleSendPaymentReminder}>
-              📱 Send Reminder
+               Send Reminder
             </button>
           )}
           <button className="btn" onClick={()=>setShowShare(true)}>Share Invoice</button>

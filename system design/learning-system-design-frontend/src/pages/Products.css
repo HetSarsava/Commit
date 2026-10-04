@@ -531,3 +531,6 @@
     padding-right: 16px;
   }
 }
+
+/* Text placeholders replace decorative product emoji. */
+.products-page .p-img { font-size: 16px; font-weight: 600; }

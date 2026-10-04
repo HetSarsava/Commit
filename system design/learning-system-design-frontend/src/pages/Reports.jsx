@@ -227,19 +227,19 @@ const Reports = () => {
                         className="btn btn-success"
                         onClick={() => handleExport('sales', 'excel')}
                       >
-                        📊 Excel
+                         Excel
                       </button>
                       <button
                         className="btn btn-secondary"
                         onClick={() => handleExport('sales', 'csv')}
                       >
-                        📄 CSV
+                         CSV
                       </button>
                       <button
                         className="btn btn-danger"
                         onClick={() => handleExport('sales', 'pdf')}
                       >
-                        📕 PDF
+                         PDF
                       </button>
                     </div>
                   </div>

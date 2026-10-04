@@ -7,114 +7,114 @@ const { parseHistoryQuery } = require('../services/whatsapp/validation');
 // Message templates
 const templates = {
   quotation: (data) => `
-🏭 *${data.company.name}*
+*${data.company.name}*
 
 Dear ${data.customerName},
 
 Thank you for your interest! We're pleased to share our quotation:
 
-📋 *Quotation: ${data.quotationNumber}*
-📅 Valid until: ${data.validUntil}
+*Quotation: ${data.quotationNumber}*
+Valid until: ${data.validUntil}
 
-💰 *Amount: ₹${data.total.toLocaleString('en-IN')}*
+*Amount: ₹${data.total.toLocaleString('en-IN')}*
 (Including GST)
 
-📦 *Items:*
+*Items:*
 ${data.items.map((item, i) => `${i + 1}. ${item.name} - ${item.quantity} units @ ₹${item.price}`).join('\n')}
 
-✅ To proceed with the order, please reply to this message or call us.
+To proceed with the order, please reply to this message or call us.
 
-📞 Contact: ${data.company.phone}
-📧 Email: ${data.company.email}
+Contact: ${data.company.phone}
+Email: ${data.company.email}
 
 _This is an automated message from ${data.company.name}._
   `.trim(),
 
   orderConfirmation: (data) => `
-🏭 *${data.company.name}*
+*${data.company.name}*
 
 Dear ${data.customerName},
 
-✅ Your order has been confirmed!
+Your order has been confirmed!
 
-📋 *Order Number: ${data.orderNumber}*
-📅 Order Date: ${data.orderDate}
-📦 Delivery Date: ${data.deliveryDate}
+*Order Number: ${data.orderNumber}*
+Order Date: ${data.orderDate}
+Delivery Date: ${data.deliveryDate}
 
-💰 *Total Amount: ₹${data.total.toLocaleString('en-IN')}*
+*Total Amount: ₹${data.total.toLocaleString('en-IN')}*
 
-${data.advancePaid ? `✅ Advance Received: ₹${data.advancePaid.toLocaleString('en-IN')}` : ''}
-${data.balanceDue ? `⏳ Balance Due: ₹${data.balanceDue.toLocaleString('en-IN')}` : ''}
+${data.advancePaid ? ` Advance Received: ₹${data.advancePaid.toLocaleString('en-IN')}` : ''}
+${data.balanceDue ? ` Balance Due: ₹${data.balanceDue.toLocaleString('en-IN')}` : ''}
 
-📦 *Items:*
+*Items:*
 ${data.items.map((item, i) => `${i + 1}. ${item.name} - ${item.quantity} units`).join('\n')}
 
 Your order is now in production. We'll keep you updated on the progress!
 
-📞 For queries: ${data.company.phone}
+For queries: ${data.company.phone}
 
 _This is an automated message from ${data.company.name}._
   `.trim(),
 
   productionUpdate: (data) => `
-🏭 *${data.company.name}* - Production Update
+*${data.company.name}* - Production Update
 
 Dear ${data.customerName},
 
-📋 Order: *${data.orderNumber}*
+Order: *${data.orderNumber}*
 
-${data.stage === 'IN_PRODUCTION' ? '⚙️ Your order is now in production!' : ''}
-${data.stage === 'QC' ? '🔍 Quality check in progress' : ''}
-${data.stage === 'PACKING' ? '📦 Your order is being packed' : ''}
-${data.stage === 'DISPATCH' ? '🚚 Your order has been dispatched!' : ''}
+${data.stage === 'IN_PRODUCTION' ? ' Your order is now in production!' : ''}
+${data.stage === 'QC' ? ' Quality check in progress' : ''}
+${data.stage === 'PACKING' ? ' Your order is being packed' : ''}
+${data.stage === 'DISPATCH' ? ' Your order has been dispatched!' : ''}
 
-${data.estimatedCompletion ? `📅 Expected completion: ${data.estimatedCompletion}` : ''}
+${data.estimatedCompletion ? ` Expected completion: ${data.estimatedCompletion}` : ''}
 
 We'll notify you once ready for delivery.
 
-📞 Contact: ${data.company.phone}
+Contact: ${data.company.phone}
 
 _This is an automated message from ${data.company.name}._
   `.trim(),
 
   paymentReminder: (data) => `
-🏭 *${data.company.name}* - Payment Reminder
+*${data.company.name}* - Payment Reminder
 
 Dear ${data.customerName},
 
-📋 *Invoice: ${data.invoiceNumber}*
-📅 Due Date: ${data.dueDate}
+*Invoice: ${data.invoiceNumber}*
+Due Date: ${data.dueDate}
 
-💰 *Amount Due: ₹${data.balanceDue.toLocaleString('en-IN')}*
+*Amount Due: ₹${data.balanceDue.toLocaleString('en-IN')}*
 
-${data.isOverdue ? '⚠️ This payment is overdue. Please settle at the earliest.' : 'Kindly arrange payment by the due date.'}
+${data.isOverdue ? ' This payment is overdue. Please settle at the earliest.' : 'Kindly arrange payment by the due date.'}
 
 Please share payment confirmation once done.
 
-📞 For queries: ${data.company.phone}
+For queries: ${data.company.phone}
 
 _This is an automated message from ${data.company.name}._
   `.trim(),
 
   paymentReceived: (data) => `
-🏭 *${data.company.name}* - Payment Confirmation
+*${data.company.name}* - Payment Confirmation
 
 Dear ${data.customerName},
 
-✅ Payment received successfully!
+Payment received successfully!
 
-📋 *Invoice: ${data.invoiceNumber}*
-💰 *Amount Received: ₹${data.amount.toLocaleString('en-IN')}*
-📅 Payment Date: ${data.paymentDate}
-🔖 Reference: ${data.referenceNumber}
+*Invoice: ${data.invoiceNumber}*
+*Amount Received: ₹${data.amount.toLocaleString('en-IN')}*
+Payment Date: ${data.paymentDate}
+Reference: ${data.referenceNumber}
 
 ${data.balanceRemaining > 0
-  ? `⏳ Balance Due: ₹${data.balanceRemaining.toLocaleString('en-IN')}`
-  : '✅ Invoice fully paid. Thank you!'}
+  ? ` Balance Due: ₹${data.balanceRemaining.toLocaleString('en-IN')}`
+  : ' Invoice fully paid. Thank you!'}
 
 Thank you for your payment!
 
-📞 Contact: ${data.company.phone}
+Contact: ${data.company.phone}
 
 _This is an automated message from ${data.company.name}._
   `.trim(),

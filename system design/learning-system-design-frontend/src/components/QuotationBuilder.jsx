@@ -212,7 +212,7 @@ const QuotationBuilder = ({ quotation = null, mode = 'create', onClose, onSucces
         {/* Header */}
         <div className="builder-header">
           <h2>
-            💰 {isViewMode ? 'View Quotation' : isEditMode ? 'Edit Quotation' : 'Create Quotation'}
+             {isViewMode ? 'View Quotation' : isEditMode ? 'Edit Quotation' : 'Create Quotation'}
             {quotation && <span style={{ fontSize: '16px', color: 'var(--thread)', marginLeft: '12px' }}>{quotation.quotationNumber}</span>}
           </h2>
           <button className="modal-close" onClick={onClose}>✕</button>
@@ -315,7 +315,7 @@ const QuotationBuilder = ({ quotation = null, mode = 'create', onClose, onSucces
                         </span>
                         {!isViewMode && (
                           <button className="btn-remove" onClick={() => removeProduct(item.productId)}>
-                            🗑️
+                            Delete
                           </button>
                         )}
                       </div>

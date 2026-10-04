@@ -748,3 +748,6 @@ input:checked + .toggle-slider:before {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 }
+
+/* Plain-language composer actions replace decorative emoji. */
+.chat-attach-btn, .chat-template-btn { width: auto; min-width: 38px; padding: 0 12px; border-radius: 8px; font-size: 13px; }

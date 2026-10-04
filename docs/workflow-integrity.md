@@ -68,3 +68,7 @@ Suppliers, purchase orders/items, dispatches and production tracking now join th
 When no guidelines have been saved, WhatsApp shows labelled examples covering customer requirements, quotations, delivery promises, payment checks, privacy, respectful follow-ups and CRM handover. Existing saved guidelines are preserved. Only admins can edit; examples do not trigger automatic replies or invent company-specific commitments.
 
 Validation: live browser creation of a demo supplier and draft purchase order; isolated API tests for permissions, invalid items/dates, readiness, successful dispatch, concurrent duplicate protection and separate-process persistence. The demo draft was not sent to a supplier. Backend suite: 37 passed, one PostgreSQL test skipped. Frontend build and targeted lint passed with warnings for loading state in effects and existing bundle size.
+
+## Plain interface labels
+
+Removed decorative emoji from frontend labels, actions, empty states and product placeholders. Emoji-only controls use visible text, with adjusted widths; small selected-product placeholders use category initials. Application-authored quotation/order/payment/production message copy no longer adds decorative emoji. Historical customer messages, stored messages and approved Meta templates are preserved verbatim. Build and the existing backend suite passed (37 passed, one PostgreSQL check skipped). Live visual recheck was unavailable because the browser connection had closed.

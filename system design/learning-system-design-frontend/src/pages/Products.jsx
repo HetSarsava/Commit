@@ -102,16 +102,16 @@ const Products = () => {
     setSelectedForCatalogue([]);
   };
 
-  const getProductEmoji = (category) => {
-    const emojiMap = {
-      'SHIRTS': '👕',
-      'PANTS': '👖',
-      'JACKETS': '🧥',
-      'SCRUBS': '🥼',
-      'CAPS': '🧢',
-      'ACCESSORIES': '🎽',
+  const getProductPlaceholder = (category) => {
+    const categoryLabels = {
+      'SHIRTS': 'Shirts',
+      'PANTS': 'Pants',
+      'JACKETS': 'Jackets',
+      'SCRUBS': 'Scrubs',
+      'CAPS': 'Caps',
+      'ACCESSORIES': 'Accessories',
     };
-    return emojiMap[category] || '👔';
+    return categoryLabels[category] || 'Product';
   };
 
   return (
@@ -154,7 +154,7 @@ const Products = () => {
             <div className="loading-state">Loading...</div>
           ) : products.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">📦</div>
+
               <h3>No products found</h3>
               <p>Add your first product to get started</p>
               <button className="btn btn-primary" onClick={handleCreate}>+ Add product</button>
@@ -170,7 +170,7 @@ const Products = () => {
                     onClick={() => toggleCatalogueSelection(product)}
                   >
                     <div className="p-img">
-                      {getProductEmoji(product.category)}
+                      {getProductPlaceholder(product.category)}
                       {product.stockQuantity < 20 && (
                         <div className="low-stock">Low stock</div>
                       )}
@@ -198,10 +198,7 @@ const Products = () => {
                           e.stopPropagation();
                           handleEdit(product);
                         }}
-                        title="Edit"
-                      >
-                        ✏
-                      </button>
+                        title="Edit">Edit</button>
                       <button
                         className="p-action-btn"
                         onClick={(e) => {
@@ -210,7 +207,7 @@ const Products = () => {
                         }}
                         title="Delete"
                       >
-                        🗑
+                        Delete
                       </button>
                     </div>
                   </div>
@@ -250,7 +247,7 @@ const Products = () => {
             <div className="selected-list">
               {selectedForCatalogue.map((product) => (
                 <div key={product.id} className="sel-item">
-                  <div className="sel-thumb">{getProductEmoji(product.category)}</div>
+                  <div className="sel-thumb">{getProductPlaceholder(product.category).slice(0, 2).toUpperCase()}</div>
                   <div className="sel-name">{product.name}</div>
                   <button
                     type="button"

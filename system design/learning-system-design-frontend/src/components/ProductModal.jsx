@@ -135,9 +135,9 @@ const ProductModal = ({ mode, product, onClose, onSuccess }) => {
         {/* Modal Header */}
         <div className="modal-header">
           <h2>
-            {mode === 'create' && '➕ Add New Product'}
-            {mode === 'edit' && '✏️ Edit Product'}
-            {mode === 'view' && '👁️ Product Details'}
+            {mode === 'create' && ' Add New Product'}
+            {mode === 'edit' && ' Edit Product'}
+            {mode === 'view' && ' Product Details'}
           </h2>
           <button className="modal-close" onClick={onClose}>
             ✕

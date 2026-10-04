@@ -266,7 +266,7 @@ const ActivityLogs = () => {
 
                       <div className="timeline-body">
                         <div className="timeline-user">
-                          <span className="user-icon">👤</span>
+                          <span className="user-icon"></span>
                           <span className="user-name">
                             {log.user
                               ? `${log.user.firstName} ${log.user.lastName}`

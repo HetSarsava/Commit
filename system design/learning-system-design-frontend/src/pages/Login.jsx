@@ -67,10 +67,10 @@ const Login = () => {
               <span className="feature-dot">✓</span> Lead to dispatch, tracked end to end
             </div>
             <div className="feature-item">
-              <span className="feature-dot">💬</span> WhatsApp automation with AI assistance
+              <span className="feature-dot"></span> WhatsApp automation with AI assistance
             </div>
             <div className="feature-item">
-              <span className="feature-dot">🔒</span> Role-based access with 2FA and audit logs
+              <span className="feature-dot"></span> Role-based access with 2FA and audit logs
             </div>
           </div>
         </div>
@@ -140,7 +140,7 @@ const Login = () => {
             <span>OR</span>
           </div>
 
-          <button type="button" className="otp-btn" disabled title="OTP sign-in is not enabled in this demo">📱 Sign in with OTP (unavailable)</button>
+          <button type="button" className="otp-btn" disabled title="OTP sign-in is not enabled in this demo"> Sign in with OTP (unavailable)</button>
 
           <div className="role-note">
             Signing in as <b>Sales</b>, <b>Accounts</b>, or <b>Production</b>? Your access

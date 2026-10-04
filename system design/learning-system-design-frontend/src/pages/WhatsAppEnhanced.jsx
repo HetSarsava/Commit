@@ -331,10 +331,10 @@ const WhatsAppEnhanced = () => {
   });
 
   const tabs = [
-    { id: 'inbox', label: '💬 Chats' },
-    { id: 'templates', label: '📋 Templates' },
-    { id: 'automation', label: '⚙️ Automatic messages' },
-    { id: 'analytics', label: '📊 Message report' },
+    { id: 'inbox', label: 'Chats' },
+    { id: 'templates', label: 'Templates' },
+    { id: 'automation', label: 'Automatic messages' },
+    { id: 'analytics', label: 'Message report' },
   ];
 
   return (
@@ -549,7 +549,7 @@ const WhatsAppEnhanced = () => {
                           {/* Sender Tag */}
                           {msg.direction === 'OUTGOING' && (
                             <div className={`sender-tag ${msg.isAutomated ? 'automated' : 'manual'}`}>
-                              {msg.isAutomated ? '⚙ Automatic message' : 'You'}
+                              {msg.isAutomated ? 'Automatic message' : 'You'}
                             </div>
                           )}
 
@@ -569,8 +569,8 @@ const WhatsAppEnhanced = () => {
                   </div>
 
                   <form className="chat-input-area" onSubmit={handleSendMessage}>
-                    <button type="button" className="chat-attach-btn" disabled title="Sending photos and files is not available yet" aria-label="Sending photos and files is not available yet">📎</button>
-                    <button type="button" className="chat-template-btn" onClick={() => setActiveTab('templates')} title="Choose a message template" aria-label="Choose a message template">📋</button>
+                    <button type="button" className="chat-attach-btn" disabled title="Sending photos and files is not available yet" aria-label="Sending photos and files is not available yet">Attach</button>
+                    <button type="button" className="chat-template-btn" onClick={() => setActiveTab('templates')} title="Choose a message template" aria-label="Choose a message template">Templates</button>
                     <input
                       type="text"
                       className="chat-input"
@@ -593,7 +593,7 @@ const WhatsAppEnhanced = () => {
                 </>
               ) : (
                 <div className="chat-empty-state">
-                  <div className="empty-icon" aria-hidden="true">💬</div>
+
                   <h3>Select a chat</h3>
                   <p>Choose a customer from the list to read and reply</p>
                 </div>
@@ -671,16 +671,16 @@ const WhatsAppEnhanced = () => {
                   {crmContext?.orders.map(order => <button key={order.id} className="info-action-btn" onClick={() => navigate('/orders/' + order.id)}>Order {order.number}</button>)}
                   {crmContext?.invoices.map(invoice => <button key={invoice.id} className="info-action-btn" onClick={() => navigate('/invoices/' + invoice.id)}>Invoice {invoice.number}</button>)}
                   <button type="button" className="info-action-btn primary" disabled={!crmContext?.quotations.length} title={crmContext?.quotations.length ? "Open the latest quotation" : "No quotation for this contact. Link a customer or create a quotation first."} onClick={() => navigate("/quotations/" + crmContext.quotations[0].id)}>
-                    📄 Open Quotation
+                     Open Quotation
                   </button>
                   <button type="button" className="info-action-btn" disabled={!crmContext?.lead} title={crmContext?.lead ? "Open this lead" : "No linked lead"} onClick={() => navigate("/leads?leadId=" + encodeURIComponent(crmContext.lead.id))}>
-                    📋 View Full Lead
+                     View Full Lead
                   </button>
                   <button type="button" className="info-action-btn" onClick={() => navigate("/catalogues", { state: { customerId: crmContext?.customer?.id || crmContext?.lead?.id } })}>
-                    📦 Choose Catalogue
+                     Choose Catalogue
                   </button>
                   <button type="button" className="info-action-btn" disabled title="Automatic replies have not been set up yet">
-                    ⚙️ Resume Automation
+                     Resume Automation
                   </button>
                 </div>
               </aside>
@@ -730,9 +730,9 @@ const WhatsAppEnhanced = () => {
                   <div className="template-category">{template.category}</div>
                   <div className="template-preview">{template.content}</div>
                   <div className="template-stats">
-                    <span>📤 Sent: {template.sentCount}</span>
-                    <span>📬 Delivered: {template.deliveredCount}</span>
-                    <span>👁️ Read: {template.readCount}</span>
+                    <span> Sent: {template.sentCount}</span>
+                    <span> Delivered: {template.deliveredCount}</span>
+                    <span> Read: {template.readCount}</span>
                   </div>
                   <div className="template-actions">
                     <button
@@ -770,7 +770,7 @@ const WhatsAppEnhanced = () => {
               {automations.map((automation) => (
                 <div key={automation.id} className="automation-card">
                   <div className="automation-main">
-                    <div className="automation-icon" aria-hidden="true">⚙️</div>
+
                     <div className="automation-info">
                       <h3>{automation.name}</h3>
                       <p>{automation.description}</p>
@@ -799,7 +799,7 @@ const WhatsAppEnhanced = () => {
             </div>
 
             <div className="automation-info-box">
-              <h3>💡 Ideas for automatic messages (not set up yet)</h3>
+              <h3> Ideas for automatic messages (not set up yet)</h3>
               <ul>
                 <li>Welcome message when customer sends first message</li>
                 <li>Send catalogue when customer asks for products</li>
@@ -825,7 +825,7 @@ const WhatsAppEnhanced = () => {
 
             <div className="analytics-grid">
               <div className="analytics-card">
-                <div className="analytics-icon" aria-hidden="true">💬</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.totalConversations || 0}</div>
                   <div className="analytics-label">Total Conversations</div>
@@ -833,7 +833,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon" aria-hidden="true">📤</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.messagesSent || 0}</div>
                   <div className="analytics-label">Messages Sent</div>
@@ -841,7 +841,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon" aria-hidden="true">📥</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.messagesReceived || 0}</div>
                   <div className="analytics-label">Messages Received</div>
@@ -849,7 +849,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon" aria-hidden="true">✅</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.deliveryRate || 0}%</div>
                   <div className="analytics-label">Delivery Rate</div>
@@ -857,7 +857,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon" aria-hidden="true">👁️</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.readRate || 0}%</div>
                   <div className="analytics-label">Read Rate</div>
@@ -865,7 +865,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon" aria-hidden="true">💰</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.leadsGenerated || 0}</div>
                   <div className="analytics-label">Leads Generated</div>
@@ -873,7 +873,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon" aria-hidden="true">⚡</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.avgResponseTime || '0'}</div>
                   <div className="analytics-label">Avg Response Time</div>
@@ -881,7 +881,7 @@ const WhatsAppEnhanced = () => {
               </div>
 
               <div className="analytics-card">
-                <div className="analytics-icon" aria-hidden="true">🤖</div>
+
                 <div className="analytics-data">
                   <div className="analytics-value">{analytics.automatedMessages || 0}</div>
                   <div className="analytics-label">Automated Messages</div>
@@ -892,7 +892,7 @@ const WhatsAppEnhanced = () => {
             <div className="analytics-chart-section">
               <h3>Message Trends (Last 30 Days)</h3>
               <div className="analytics-placeholder">
-                <p>📊 Chart visualization would appear here</p>
+                <p> Chart visualization would appear here</p>
                 <p className="text-muted">Showing daily message volume, delivery rates, and engagement metrics</p>
               </div>
             </div>
