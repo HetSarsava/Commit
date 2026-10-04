@@ -2586,6 +2586,7 @@ const mockPrisma = {
     },
 
     create: async ({ data }) => {
+      if (mockData.dispatches.some(d=>d.productionId===data.productionId)) throw Object.assign(new Error('Dispatch already exists for this ready order'),{code:'P2002'});
       const newDispatch = {
         id: generateId('dispatch'),
         ...data,

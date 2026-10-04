@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { auth, requireRole } = require('../middleware/auth');
 const { prisma } = require('../config/database');
 router.use(auth);
-router.get('/', async (req,res,next) => { try { const row = await prisma.settings.findUnique({where:{key:'whatsapp.guidelines'}}); res.json({text: row ? JSON.parse(row.value) : ''}); } catch(e) { next(e); } });
+router.get('/', async (req,res,next) => { try { const row = await prisma.settings.findUnique({where:{key:'whatsapp.guidelines'}}); res.json({text: row ? JSON.parse(row.value) : require('../services/exampleWhatsAppGuidelines')}); } catch(e) { next(e); } });
 router.put('/', requireRole(['ADMIN']), async (req,res,next) => {
   try {
     if (typeof req.body.text !== 'string' || req.body.text.length > 12000) return res.status(400).json({error:'Guidelines must be text, up to 12,000 characters.'});

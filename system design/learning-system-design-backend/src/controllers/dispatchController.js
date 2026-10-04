@@ -1,4 +1,5 @@
 const { prisma } = require('../config/database');
+const dispatchProduction=require('../services/dispatchProduction');
 
 // Get all dispatches with filters
 exports.getAllDispatches = async (req, res) => {
@@ -85,11 +86,10 @@ exports.createDispatch = async (req, res) => {
       notes,
     } = req.body;
 
+    if(typeof productionId!=='string'||typeof courierName!=='string'||!courierName.trim()||typeof trackingNumber!=='string'||!trackingNumber.trim()) return res.status(400).json({error:'Choose a ready order and enter courier and tracking details.'});
+    if(!dispatchDate||!expectedDeliveryDate||!Number.isFinite(Date.parse(dispatchDate))||!Number.isFinite(Date.parse(expectedDeliveryDate))||new Date(expectedDeliveryDate)<new Date(dispatchDate)) return res.status(400).json({error:'Delivery date must be on or after a valid dispatch date.'});
     // Validate production order exists and is in PACKED status
-    const production = await prisma.production.findUnique({
-      where: { id: productionId },
-      include: { order: { include: { customer: true, items: true } } },
-    });
+    const production = await dispatchProduction.find(productionId);
 
     if (!production) {
       return res.status(404).json({ error: 'Production order not found' });
@@ -123,7 +123,7 @@ exports.createDispatch = async (req, res) => {
     // Prepare dispatch items from order items
     const items = production.order.items.map((item) => ({
       productId: item.productId,
-      productName: item.productName,
+      productName: item.productName || item.product?.name || 'Product',
       quantity: item.quantity,
       packedQuantity: item.quantity,
     }));
@@ -151,10 +151,7 @@ exports.createDispatch = async (req, res) => {
     });
 
     // Update production status to DISPATCHED
-    await prisma.production.update({
-      where: { id: productionId },
-      data: { status: 'DISPATCHED' },
-    });
+    await dispatchProduction.markDispatched(production);
 
     // Fetch complete dispatch with relations
     const completeDispatch = await prisma.dispatch.findUnique({
@@ -327,17 +324,7 @@ exports.getDispatchSummary = async (req, res) => {
 exports.getReadyToDispatch = async (req, res) => {
   try {
     // Get all PACKED production orders
-    const productions = await prisma.production.findMany({
-      where: { status: 'PACKED' },
-      include: {
-        order: {
-          include: {
-            customer: true,
-            items: true,
-          },
-        },
-      },
-    });
+    const productions = await dispatchProduction.candidates();
 
     // Filter out those that already have dispatch
     const dispatches = await prisma.dispatch.findMany({});

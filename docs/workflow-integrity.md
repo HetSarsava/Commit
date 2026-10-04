@@ -56,3 +56,15 @@ Automated tests cover product validation/duplicates, catalogue creation/draft ed
 Shared spacing variables use 8px for labels, 12px for controls, 16px for groups and 24px for sections. Quotation customer search has a 16px gap before the list; customer cards have 12px separation and inset focus space. The quotation list search has the same gap. Catalogue search aligns with page content, and grid fields no longer combine row gaps with extra bottom margins. Leads filters have room below stage tabs, label gaps and aligned controls. Invoice sharing, campaign results and WhatsApp guidelines have separated text, fields and actions; sharing controls are omitted from printed invoices.
 
 Reviewed the main navigation pages and shared form styles visually and in source. Confirmed the quotation gap in the narrow preview and desktop layout, plus catalogue forms, Leads filters, campaign results, invoice sharing and guidelines with loaded data. Build passed; changed JSX lint passed with existing hook/declaration warnings. A demo backend restart restored requests after the existing development request limit was reached; rate limits and account security were not changed.
+
+## Purchase and dispatch repairs
+
+Purchase forms now use scoped, scrollable dialogs with visible validation and save states. Supplier name/phone and positive quantities/rates are validated on the server; unknown or repeated materials are rejected before creating a purchase header.
+
+Dispatch uses the existing production records. In the demo every order line must reach Dispatch on the Production Board and the order must be confirmed, in production or ready. Cancelled/incomplete and already-dispatched orders are excluded. Creating a dispatch marks the same order dispatched; concurrent duplicate creation is rejected. This flow ships whole orders, not partial quantities. The production-header adapter remains available for Prisma but was not exercised against PostgreSQL in this repair.
+
+Suppliers, purchase orders/items, dispatches and production tracking now join the private SQLite demo snapshot and recover after a restart. No destructive migration was needed.
+
+When no guidelines have been saved, WhatsApp shows labelled examples covering customer requirements, quotations, delivery promises, payment checks, privacy, respectful follow-ups and CRM handover. Existing saved guidelines are preserved. Only admins can edit; examples do not trigger automatic replies or invent company-specific commitments.
+
+Validation: live browser creation of a demo supplier and draft purchase order; isolated API tests for permissions, invalid items/dates, readiness, successful dispatch, concurrent duplicate protection and separate-process persistence. The demo draft was not sent to a supplier. Backend suite: 37 passed, one PostgreSQL test skipped. Frontend build and targeted lint passed with warnings for loading state in effects and existing bundle size.

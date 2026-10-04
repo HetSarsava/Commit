@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { purchaseAPI } from '../api/purchase';
 import { inventoryAPI } from '../api/inventory';
 import './PurchaseOrders.css';
@@ -15,6 +15,7 @@ const PurchaseOrders = () => {
   const [selectedPO, setSelectedPO] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [saving,setSaving]=useState(false),[formError,setFormError]=useState('');
 
   const [supplierFormData, setSupplierFormData] = useState({
     name: '',
@@ -42,11 +43,7 @@ const PurchaseOrders = () => {
     receivedDate: '',
   });
 
-  useEffect(() => {
-    loadData();
-  }, [filter]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const params = filter !== 'all' ? { status: filter } : {};
@@ -66,32 +63,38 @@ const PurchaseOrders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   const handleCreateSupplier = async (e) => {
     e.preventDefault();
+    if(saving)return;
+    setSaving(true);setFormError('');
     try {
       await purchaseAPI.createSupplier(supplierFormData);
-      alert('Supplier created successfully');
+
       closeSupplierModal();
       loadData();
     } catch (error) {
       console.error('Failed to create supplier:', error);
-      alert(error.response?.data?.error || 'Failed to create supplier');
-    }
+      setFormError(error.response?.data?.error || 'Failed to create supplier');
+    } finally {setSaving(false); }
   };
 
   const handleCreatePO = async (e) => {
     e.preventDefault();
+    if(saving)return;
+    setSaving(true);setFormError('');
     try {
       await purchaseAPI.createPurchaseOrder(poFormData);
-      alert('Purchase order created successfully');
+
       closePOModal();
       loadData();
     } catch (error) {
       console.error('Failed to create PO:', error);
-      alert(error.response?.data?.error || 'Failed to create PO');
-    }
+      setFormError(error.response?.data?.error || 'Failed to create PO');
+    } finally {setSaving(false); }
   };
 
   const handleReceiveMaterial = async (e) => {
@@ -119,6 +122,7 @@ const PurchaseOrders = () => {
   };
 
   const openPOModal = () => {
+    setFormError('');
     setPOFormData({
       supplierId: '',
       expectedDeliveryDate: '',
@@ -133,6 +137,7 @@ const PurchaseOrders = () => {
   };
 
   const openSupplierModal = () => {
+    setFormError('');
     setSupplierFormData({
       name: '',
       contactPerson: '',
@@ -414,17 +419,18 @@ const PurchaseOrders = () => {
       {/* Create PO Modal */}
       {showPOModal && (
         <div className="modal-overlay" onClick={closePOModal}>
-          <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
+          <div role="dialog" aria-modal="true" aria-label="Create Purchase Order" className="modal-content large" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Create Purchase Order</h2>
               <button className="modal-close" onClick={closePOModal}>×</button>
             </div>
             <form onSubmit={handleCreatePO}>
+              {formError && <p className="form-error" role="alert">{formError}</p>}
               <div className="modal-body">
                 <div className="form-grid">
                   <div className="form-group">
-                    <label>Supplier *</label>
-                    <select
+                    <label htmlFor="purchase-field-1">Supplier *</label>
+                    <select id="purchase-field-1"
                       value={poFormData.supplierId}
                       onChange={(e) => setPOFormData({ ...poFormData, supplierId: e.target.value })}
                       required
@@ -438,8 +444,8 @@ const PurchaseOrders = () => {
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Expected Delivery Date</label>
-                    <input
+                    <label htmlFor="purchase-field-2">Expected Delivery Date</label>
+                    <input id="purchase-field-2"
                       type="date"
                       value={poFormData.expectedDeliveryDate}
                       onChange={(e) =>
@@ -460,8 +466,8 @@ const PurchaseOrders = () => {
                     <div key={index} className="po-item-form">
                       <div className="form-grid">
                         <div className="form-group">
-                          <label>Material *</label>
-                          <select
+                          <label htmlFor="purchase-field-3">Material *</label>
+                          <select id="purchase-field-3"
                             value={item.materialId}
                             onChange={(e) => updatePOItem(index, 'materialId', e.target.value)}
                             required
@@ -475,8 +481,8 @@ const PurchaseOrders = () => {
                           </select>
                         </div>
                         <div className="form-group">
-                          <label>Quantity *</label>
-                          <input
+                          <label htmlFor="purchase-field-4">Quantity *</label>
+                          <input id="purchase-field-4"
                             type="number"
                             step="0.01"
                             value={item.quantity}
@@ -485,8 +491,8 @@ const PurchaseOrders = () => {
                           />
                         </div>
                         <div className="form-group">
-                          <label>Rate *</label>
-                          <input
+                          <label htmlFor="purchase-field-5">Rate *</label>
+                          <input id="purchase-field-5"
                             type="number"
                             step="0.01"
                             value={item.rate}
@@ -509,8 +515,8 @@ const PurchaseOrders = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Notes</label>
-                  <textarea
+                  <label htmlFor="purchase-field-6">Notes</label>
+                  <textarea id="purchase-field-6"
                     value={poFormData.notes}
                     onChange={(e) => setPOFormData({ ...poFormData, notes: e.target.value })}
                     rows={3}
@@ -521,7 +527,7 @@ const PurchaseOrders = () => {
                 <button type="button" className="btn btn-secondary" onClick={closePOModal}>
                   Cancel
                 </button>
-                <button type="submit" className="btn">
+                <button type="submit" className="btn" disabled={saving}>
                   Create PO
                 </button>
               </div>
@@ -533,17 +539,18 @@ const PurchaseOrders = () => {
       {/* Create Supplier Modal */}
       {showSupplierModal && (
         <div className="modal-overlay" onClick={closeSupplierModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div role="dialog" aria-modal="true" aria-label="Add Supplier" className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Add New Supplier</h2>
               <button className="modal-close" onClick={closeSupplierModal}>×</button>
             </div>
             <form onSubmit={handleCreateSupplier}>
+              {formError && <p className="form-error" role="alert">{formError}</p>}
               <div className="modal-body">
                 <div className="form-grid">
                   <div className="form-group">
-                    <label>Supplier Name *</label>
-                    <input
+                    <label htmlFor="purchase-field-7">Supplier Name *</label>
+                    <input id="purchase-field-7"
                       type="text"
                       value={supplierFormData.name}
                       onChange={(e) =>
@@ -553,8 +560,8 @@ const PurchaseOrders = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Contact Person</label>
-                    <input
+                    <label htmlFor="purchase-field-8">Contact Person</label>
+                    <input id="purchase-field-8"
                       type="text"
                       value={supplierFormData.contactPerson}
                       onChange={(e) =>
@@ -563,8 +570,8 @@ const PurchaseOrders = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Phone *</label>
-                    <input
+                    <label htmlFor="purchase-field-9">Phone *</label>
+                    <input id="purchase-field-9"
                       type="tel"
                       value={supplierFormData.phone}
                       onChange={(e) =>
@@ -574,8 +581,8 @@ const PurchaseOrders = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Email</label>
-                    <input
+                    <label htmlFor="purchase-field-10">Email</label>
+                    <input id="purchase-field-10"
                       type="email"
                       value={supplierFormData.email}
                       onChange={(e) =>
@@ -584,8 +591,8 @@ const PurchaseOrders = () => {
                     />
                   </div>
                   <div className="form-group full-width">
-                    <label>Address</label>
-                    <input
+                    <label htmlFor="purchase-field-11">Address</label>
+                    <input id="purchase-field-11"
                       type="text"
                       value={supplierFormData.address}
                       onChange={(e) =>
@@ -594,8 +601,8 @@ const PurchaseOrders = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>City</label>
-                    <input
+                    <label htmlFor="purchase-field-12">City</label>
+                    <input id="purchase-field-12"
                       type="text"
                       value={supplierFormData.city}
                       onChange={(e) =>
@@ -604,8 +611,8 @@ const PurchaseOrders = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>State</label>
-                    <input
+                    <label htmlFor="purchase-field-13">State</label>
+                    <input id="purchase-field-13"
                       type="text"
                       value={supplierFormData.state}
                       onChange={(e) =>
@@ -614,8 +621,8 @@ const PurchaseOrders = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>GSTIN</label>
-                    <input
+                    <label htmlFor="purchase-field-14">GSTIN</label>
+                    <input id="purchase-field-14"
                       type="text"
                       value={supplierFormData.gstin}
                       onChange={(e) =>
@@ -624,8 +631,8 @@ const PurchaseOrders = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Payment Terms</label>
-                    <select
+                    <label htmlFor="purchase-field-15">Payment Terms</label>
+                    <select id="purchase-field-15"
                       value={supplierFormData.paymentTerms}
                       onChange={(e) =>
                         setSupplierFormData({ ...supplierFormData, paymentTerms: e.target.value })
@@ -639,8 +646,8 @@ const PurchaseOrders = () => {
                     </select>
                   </div>
                   <div className="form-group full-width">
-                    <label>Notes</label>
-                    <textarea
+                    <label htmlFor="purchase-field-16">Notes</label>
+                    <textarea id="purchase-field-16"
                       value={supplierFormData.notes}
                       onChange={(e) =>
                         setSupplierFormData({ ...supplierFormData, notes: e.target.value })
@@ -654,7 +661,7 @@ const PurchaseOrders = () => {
                 <button type="button" className="btn btn-secondary" onClick={closeSupplierModal}>
                   Cancel
                 </button>
-                <button type="submit" className="btn">
+                <button type="submit" className="btn" disabled={saving}>
                   Add Supplier
                 </button>
               </div>
@@ -672,11 +679,12 @@ const PurchaseOrders = () => {
               <button className="modal-close" onClick={closeReceiveModal}>×</button>
             </div>
             <form onSubmit={handleReceiveMaterial}>
+              {formError && <p className="form-error" role="alert">{formError}</p>}
               <div className="modal-body">
                 <div className="form-grid">
                   <div className="form-group full-width">
-                    <label>Item *</label>
-                    <select
+                    <label htmlFor="purchase-field-17">Item *</label>
+                    <select id="purchase-field-17"
                       value={receiveFormData.itemId}
                       onChange={(e) =>
                         setReceiveFormData({ ...receiveFormData, itemId: e.target.value })
@@ -692,8 +700,8 @@ const PurchaseOrders = () => {
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Received Quantity *</label>
-                    <input
+                    <label htmlFor="purchase-field-18">Received Quantity *</label>
+                    <input id="purchase-field-18"
                       type="number"
                       step="0.01"
                       value={receiveFormData.receivedQuantity}
@@ -704,8 +712,8 @@ const PurchaseOrders = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Received Date</label>
-                    <input
+                    <label htmlFor="purchase-field-19">Received Date</label>
+                    <input id="purchase-field-19"
                       type="date"
                       value={receiveFormData.receivedDate}
                       onChange={(e) =>
@@ -719,7 +727,7 @@ const PurchaseOrders = () => {
                 <button type="button" className="btn btn-secondary" onClick={closeReceiveModal}>
                   Cancel
                 </button>
-                <button type="submit" className="btn">
+                <button type="submit" className="btn" disabled={saving}>
                   Record Receipt
                 </button>
               </div>
