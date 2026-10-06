@@ -12,25 +12,15 @@ const errorHandler = require('./middleware/errorHandler');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const leadRoutes = require('./routes/leadRoutes');
-const productRoutes = require('./routes/productRoutes');
 const quotationRoutes = require('./routes/quotationRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
-const productionRoutes = require('./routes/productionRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const whatsappRoutes = require('./routes/whatsappRoutes');
-const reportsRoutes = require('./routes/reportsRoutes');
-const activityLogRoutes = require('./routes/activityLogRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
-const inventoryRoutes = require('./routes/inventoryRoutes');
-const purchaseRoutes = require('./routes/purchaseRoutes');
-const catalogueRoutes = require('./routes/catalogueRoutes');
 const proformaRoutes = require('./routes/proformaRoutes');
-const productionStageRoutes = require('./routes/productionStageRoutes');
-const dispatchRoutes = require('./routes/dispatchRoutes');
-const marketingRoutes = require('./routes/marketingRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -89,29 +79,20 @@ app.get('/health', (req, res) => {
 app.use(require('./middleware/mutationAudit').mutationAudit);
 app.use('/api/whatsapp/guidelines', require('./routes/whatsappGuidelines'));
 
+app.use('/api/manual', require('./routes/manualCRM'));
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/leads', leadRoutes);
-app.use('/api/products', productRoutes);
 app.use('/api/quotations', quotationRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/invoices', invoiceRoutes);
-app.use('/api/production', productionRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
-app.use('/api/reports', reportsRoutes);
-app.use('/api/activity-logs', activityLogRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/inventory', inventoryRoutes);
-app.use('/api/purchase', purchaseRoutes);
-app.use('/api/catalogues', catalogueRoutes);
 app.use('/api/proformas', proformaRoutes);
-app.use('/api/production-stages', productionStageRoutes);
-app.use('/api/dispatches', dispatchRoutes);
-app.use('/api/marketing', marketingRoutes);
 
 // Root route
 app.get('/', (req, res) => {

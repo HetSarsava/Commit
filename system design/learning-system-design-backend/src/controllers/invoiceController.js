@@ -179,6 +179,7 @@ exports.createInvoiceFromOrder = async (req, res, next) => {
         items: {
           create: order.items.map((item) => ({
             productId: item.productId,
+            description: item.description,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             discount: item.discount || 0,

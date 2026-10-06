@@ -13,7 +13,7 @@ test('quotation, order, payment and production controllers use the same real ser
     customer: { findMany: async () => [customer] },
     quotation: { findUnique: async () => ({ id: 'quote-1', quotationNumber: 'QT-1', customer, items, total: 1000, createdAt: new Date(), validUntil: new Date(Date.now()+86400000) }) },
     salesOrder: { findUnique: async () => ({ id: 'order-1', orderNumber: 'SO-1', customer, items, total: 1000, createdAt: new Date(), expectedDelivery: new Date(Date.now()+86400000) }) },
-    invoice: { findUnique: async () => ({ id: 'invoice-1', invoiceNumber: 'INV-1', customer, balanceDue: 1000, dueDate: new Date() }) },
+    invoice: { findUnique: async () => ({ id: 'invoice-1', invoiceNumber: 'INV-1', customer, balanceDue: 1000, dueDate: new Date('2025-01-01T00:00:00Z') }) },
   };
   let sends = 0;
   const service = new WhatsAppService({ store, crm, env: { WHATSAPP_DEFAULT_COUNTRY: 'IN' }, provider: { send: async () => ({ messageId: `wamid.business.${++sends}`, timestamp: new Date().toISOString() }) } });

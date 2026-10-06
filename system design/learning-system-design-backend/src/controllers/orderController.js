@@ -169,6 +169,7 @@ exports.createOrderFromQuotation = async (req, res, next) => {
         items: {
           create: quotation.items.map(item => ({
             productId: item.productId,
+            description: item.description,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             discount: item.discount,
@@ -257,6 +258,7 @@ exports.createOrder = async (req, res, next) => {
         items: {
           create: items.map(item => ({
             productId: item.productId,
+            description: item.description,
             quantity: parseInt(item.quantity),
             unitPrice: parseFloat(item.unitPrice),
             discount: item.discount ? parseFloat(item.discount) : null,
