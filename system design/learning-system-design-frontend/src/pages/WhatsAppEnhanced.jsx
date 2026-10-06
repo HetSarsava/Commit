@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import CustomerDirectory from '../components/CustomerDirectory';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '../api/client';
 import { useCompany } from '../context/CompanyData';
 import { useEffect, useRef, useState } from 'react';
@@ -29,7 +30,8 @@ const WhatsAppEnhanced = () => {
   const [crmContext, setCrmContext] = useState(null);
   const [contextError, setContextError] = useState("");
   const [linkingContact, setLinkingContact] = useState(false);
-  const [activeTab, setActiveTab] = useState('inbox');
+  const [customerSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(customerSearchParams.get('tab') === 'customers' ? 'customers' : 'inbox');
   const [conversationFilter, setConversationFilter] = useState('all'); // all, needs-human, bot-handling
   const [searchQuery, setSearchQuery] = useState('');
   const [conversations, setConversations] = useState([]);
@@ -332,6 +334,7 @@ const WhatsAppEnhanced = () => {
 
   const tabs = [
     { id: 'inbox', label: 'Chats' },
+    { id: 'customers', label: 'Customers' },
     { id: 'templates', label: 'Templates' },
     { id: 'automation', label: 'Automatic messages' },
     { id: 'analytics', label: 'Message report' },
@@ -370,6 +373,7 @@ const WhatsAppEnhanced = () => {
 
       {/* Content */}
       <div className="whatsapp-content">
+        {activeTab === 'customers' && <CustomerDirectory />}
         {/* ==================== INBOX TAB (3 columns, explicit pane state) ==================== */}
         {activeTab === 'inbox' && (
           <div

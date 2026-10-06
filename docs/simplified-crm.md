@@ -23,7 +23,7 @@ Order/quotation writes: Admin and Sales, with Sales ownership restrictions. Disp
 
 ## Storage and running both variants
 
-The manual pilot requires `USE_MOCK_DB=true`. Its existing demo workflow store persists orders, quotations, items, dispatches, invoices and campaigns in the local SQLite file identified by `WHATSAPP_DB_PATH`. Despite the historic mock-mode name, these entries persist across backend restarts. Initial example records are seeded. Customer management and other retained features retain the full branch's existing storage limitations. Back up the local SQLite file before replacing a demo environment.
+The manual pilot requires `USE_MOCK_DB=true`. Its existing demo workflow store persists orders, quotations, items, dispatches, invoices and campaigns in the local SQLite file identified by `WHATSAPP_DB_PATH`. Despite the historic mock-mode name, these entries persist across backend restarts. Initial example records are seeded. Customers and leads now persist in the same local store. Other retained features keep their existing storage limitations. Back up the local SQLite file before replacing a demo environment.
 
 The existing PostgreSQL schema requires product relationships and has not been migrated to accept manual items. Manual routes return 503 when `USE_MOCK_DB=false`, rather than pretending PostgreSQL support works. Production use needs a reviewed schema migration, transactional document/dispatch updates, deployment and access-policy review.
 
@@ -41,8 +41,18 @@ The order list, dashboard counts and dispatch order picker currently load the la
 
 ## Validation
 
-`npm test` in the backend: 38 passed, 1 PostgreSQL integration test skipped (no PostgreSQL test database configured). The new manual-workflow test checks roles, ownership rules, server totals, discounts, malformed dates/items, freeform descriptions, quotation/proforma/order/invoice links, duplicate dispatch races, delivery updates, marketing values and persistence in a fresh process. A time-dependent overdue-date fixture in the existing WhatsApp business-flow test was made deterministic.
+`npm test` in the backend: 39 passed, 1 PostgreSQL integration test skipped (no PostgreSQL test database configured). The new manual-workflow test checks roles, ownership rules, server totals, discounts, malformed dates/items, freeform descriptions, quotation/proforma/order/invoice links, duplicate dispatch races, delivery updates, marketing values and persistence in a fresh process. A time-dependent overdue-date fixture in the existing WhatsApp business-flow test was made deterministic.
 
 Frontend `npm run build`: passed. Targeted lint: no errors; React effect warnings and legacy-file warnings are documented in the pull request.
 
 Browser preview verified login and simplified navigation, creating a typed order, creating its manual dispatch, creating/editing a freeform quotation with an item discount, generating its related invoice and entering campaign totals. The example campaign with spend INR100 and order value INR450 correctly displays 350% sales return. No messages, ad purchases, courier bookings or customer payments were performed during these checks.
+
+## Customers and lead conversion
+
+Admin and Sales can add a customer from WhatsApp > Customers or directly from a quotation/order form. Company name, contact name and a valid phone number are required. WhatsApp defaults to that phone if blank. Phone numbers are normalized; duplicate phone entries are refused. Sales can convert only accessible leads and cannot take over another salesperson's customer.
+
+In Leads, select a lead and choose **Turn into customer**. Review the prefilled details and save. Conversion keeps the source lead, sets its completed/converted marker and links one customer. Repeat or concurrent conversions reuse the same customer. A matching existing customer can be linked if it has no other source lead; its details are preserved. Existing documents that refer to the source lead remain visible through that relationship; no historical invoice amounts are rewritten.
+
+WhatsApp > Customers lists customers with document counts, search, a filter for recorded document sends, and a per-customer panel for quotations/orders/invoices and WhatsApp history. Document buttons open their existing screens. Saving a document is separate from submitting or delivering a message. The filter checks up to 1,000 recent CRM messages; history loads up to 500 messages per linked chat. Downloads, copied summaries, external WhatsApp sends and manual PDF sharing are not automatically tracked. Current preview relay isolation still applies.
+
+Customer writes and lead conversion use the authenticated manual API and the existing local workflow snapshot. Customer/lead data survive backend restart. New tests cover validation, permissions, duplicate conversion, source-document preservation, honest send-history flags, sanitized message responses and restart recovery. Browser checks created Demo Uniform Buyer, saved its draft quotation and converted Demo Converted Buyer, without sending messages.

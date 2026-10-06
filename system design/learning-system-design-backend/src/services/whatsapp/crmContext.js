@@ -8,9 +8,9 @@ async function crmContext(service, conversationId) {
   }
   const rows = async model => service.crm[model]?.findMany ? service.crm[model].findMany({}) : [];
   const [customers, leads, quotations, orders, invoices] = await Promise.all(['customer','lead','quotation','salesOrder','invoice'].map(rows));
-  const customer = customers.find(c => c.id === conversation.customerId);
+  const customer = customers.find(c => c.id === conversation.customerId || (conversation.leadId && c.leadId === conversation.leadId));
   const lead = leads.find(l => l.id === conversation.leadId);
-  const related = row => Boolean((conversation.customerId && row.customerId === conversation.customerId) || (conversation.leadId && (row.leadId === conversation.leadId || row.customerId === conversation.leadId)));
+  const related = row => Boolean((customer && (row.customerId === customer.id || (customer.leadId && row.customerId === customer.leadId))) || (conversation.customerId && row.customerId === conversation.customerId) || (conversation.leadId && (row.leadId === conversation.leadId || row.customerId === conversation.leadId)));
   const summaries = (items, number) => items.filter(related).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map(row => ({ id: row.id, number: row[number], status: row.status }));
   return { conversationId, customer: customer ? { id: customer.id, name: customer.companyName } : null,
     lead: lead ? { id: lead.id, name: lead.companyName, status: lead.status, productInterest: lead.productInterest, quantity: lead.quantity, budget: lead.budget } : null,

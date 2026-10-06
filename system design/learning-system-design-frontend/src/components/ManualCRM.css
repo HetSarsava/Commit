@@ -191,3 +191,11 @@
 .manual-card p { margin: 12px 0; line-height: 1.5; }
 .manual-page .btn-primary, .manual-dialog .btn-primary { background: var(--gold, #b78538); color: #fff; border-color: var(--gold, #b78538); }
 @media print { .manual-page button, .manual-toolbar { display:none !important; } .manual-card { break-inside: avoid; } }
+.customer-directory { width:100%; box-sizing:border-box; overflow:auto; }
+.customer-columns { display:grid; grid-template-columns:minmax(260px,1fr) minmax(300px,1.5fr); gap:24px; align-items:start; }
+.customer-document { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:12px 0; }
+.customer-message { padding:16px; margin:12px 0; border:1px solid var(--line,#ddd); border-radius:8px; }
+.customer-message p { white-space:pre-wrap; overflow-wrap:anywhere; }
+@media (max-width:800px) { .customer-columns { grid-template-columns:1fr; } }
+.customer-columns:not(.has-history) { grid-template-columns:1fr; }
+.customer-columns:not(.has-history) .manual-list { grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); }

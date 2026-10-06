@@ -451,6 +451,12 @@ const mockPrisma = {
              null;
     },
 
+    update: async ({where,data}) => {
+      const current=mockData.customers.find(c=>c.id===where.id);
+      if(!current)throw new Error('Customer not found');
+      if(data.leadId && mockData.customers.some(c=>c.id!==where.id&&c.leadId===data.leadId))throw Object.assign(new Error('Lead already linked'),{code:'P2002'});
+      Object.assign(current,data,{updatedAt:new Date()});return {...current};
+    },
     create: async ({ data }) => {
       if (data.leadId && mockData.customers.some(row=>row.leadId === data.leadId)) throw Object.assign(new Error('This source already has a linked customer'),{code:'P2002'});
       const newCustomer = {

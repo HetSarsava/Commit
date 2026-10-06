@@ -147,7 +147,7 @@ async function document(body, user, kind) {
 }
 router.get(
   "/customers",
-  requireRole(["ADMIN", "SALES", "ACCOUNTANT"]),
+  requireRole(["ADMIN", "SALES", "ACCOUNTANT", "MARKETING"]),
   wrap(async (req, res) => {
     const rows = await prisma.customer.findMany({});
     res.json(
@@ -387,4 +387,5 @@ for (const method of ["post", "put"])
       res.status(method === "post" ? 201 : 200).json(saved);
     }),
   );
+router.use(require("./manualCustomers"));
 module.exports = router;

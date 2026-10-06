@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { leadsAPI } from '../api/leads';
 import { useAuth } from '../context/AuthContext';
+import CustomerForm from '../components/CustomerForm';
 import LeadModal from '../components/LeadModal';
 import './LeadsEnhanced.css';
 
@@ -14,6 +15,8 @@ const LeadsEnhanced = () => {
   const [funnelData, setFunnelData] = useState(null);
   const [sourcePerformance, setSourcePerformance] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [convertingLead, setConvertingLead] = useState(false);
+  const [conversionNotice, setConversionNotice] = useState('');
   const [selectedLead, setSelectedLead] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('create');
@@ -98,6 +101,7 @@ const LeadsEnhanced = () => {
   };
 
   const handleLeadClick = (lead) => {
+    setConversionNotice('');
     setSelectedLead(lead);
   };
 
@@ -321,6 +325,7 @@ const LeadsEnhanced = () => {
                 <div className="detail-panel-header">
                   <h2>{selectedLead.companyName}</h2>
                   <div className="detail-actions">
+                    {['ADMIN','SALES'].includes(user?.role) && <button className="btn-secondary" onClick={()=>setConvertingLead(true)}>Turn into customer</button>}
                     <button className="btn-secondary" onClick={handleEdit}>
                       Edit
                     </button>
@@ -333,6 +338,7 @@ const LeadsEnhanced = () => {
                 </div>
 
                 <div className="detail-panel-body">
+                  {conversionNotice && <p role="status">{conversionNotice}</p>}
                   <div className="detail-section">
                     <h3>Contact Information</h3>
                     <div className="detail-row">
@@ -529,6 +535,7 @@ const LeadsEnhanced = () => {
       )}
 
       {/* Lead Modal */}
+      {convertingLead && selectedLead && <CustomerForm lead={selectedLead} onClose={()=>setConvertingLead(false)} onSuccess={c=>{setConvertingLead(false);setSelectedLead(l=>({...l,status:'COMPLETED'}));setConversionNotice(c.companyName+' is now available in quotation and order customer lists.');void fetchData();}}/>}
       {showModal && (
         <LeadModal
           mode={modalMode}
