@@ -676,9 +676,6 @@ const WhatsAppEnhanced = () => {
                   <button type="button" className="info-action-btn" disabled={!crmContext?.lead} title={crmContext?.lead ? "Open this lead" : "No linked lead"} onClick={() => navigate("/leads?leadId=" + encodeURIComponent(crmContext.lead.id))}>
                      View Full Lead
                   </button>
-                  <button type="button" className="info-action-btn" onClick={() => navigate("/catalogues", { state: { customerId: crmContext?.customer?.id || crmContext?.lead?.id } })}>
-                     Choose Catalogue
-                  </button>
                   <button type="button" className="info-action-btn" disabled title="Automatic replies have not been set up yet">
                      Resume Automation
                   </button>
@@ -802,7 +799,7 @@ const WhatsAppEnhanced = () => {
               <h3> Ideas for automatic messages (not set up yet)</h3>
               <ul>
                 <li>Welcome message when customer sends first message</li>
-                <li>Send catalogue when customer asks for products</li>
+                <li>Ask for requirements and prepare a quotation</li>
                 <li>Auto-respond to common questions (price, MOQ, delivery time)</li>
                 <li>Follow-up reminders after quotation sent</li>
                 <li>Payment reminder messages for due invoices</li>

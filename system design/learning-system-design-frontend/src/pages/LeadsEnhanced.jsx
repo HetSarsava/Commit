@@ -29,7 +29,7 @@ const LeadsEnhanced = () => {
     { key: 'NEW', label: 'New', icon: '◆', color: '#94a3b8' },
     { key: 'CONTACTED', label: 'Contacted', icon: '◇', color: '#64748b' },
     { key: 'REQUIREMENT', label: 'Requirement', icon: '◈', color: '#475569' },
-    { key: 'CATALOGUE', label: 'Catalogue', icon: '◪', color: '#0ea5e9' },
+    { key: 'CATALOGUE', label: 'In discussion', icon: '◪', color: '#0ea5e9' },
     { key: 'QUOTATION', label: 'Quotation', icon: '◫', color: '#3b82f6' },
     { key: 'NEGOTIATION', label: 'Negotiation', icon: '◬', color: '#8b5cf6' },
     { key: 'SAMPLE', label: 'Sample', icon: '◭', color: '#a855f7' },

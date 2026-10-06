@@ -157,7 +157,7 @@ const QuotationDetail = () => {
         </div>
         <div className="step">
           <div className="step-num">4</div>
-          Production
+          Dispatch
         </div>
         <div className="step">
           <div className="step-num">5</div>
@@ -209,9 +209,9 @@ const QuotationDetail = () => {
                 {quotation.items?.map((item) => (
                   <tr key={item.id}>
                     <td>
-                      <div className="item-name">{item.product?.name}</div>
+                      <div className="item-name">{item.description || item.product?.name}</div>
                       <div className="item-sub">
-                        SKU: {item.product?.sku}
+                        {item.product?.sku && `SKU: ${item.product.sku}`}
                         {item.customization && ` · ${item.customization}`}
                       </div>
                     </td>

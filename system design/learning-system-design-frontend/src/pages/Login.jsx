@@ -56,10 +56,10 @@ const Login = () => {
         </div>
 
         <div className="brand-mid">
-          <h1>One platform for leads, catalogue, billing and dispatch.</h1>
+          <h1>Customers, quotations, orders and delivery.</h1>
           <p>
             Sign in to manage your pipeline, WhatsApp conversations, quotations,
-            production and payments — all in one place.
+            orders and payments — all in one place.
           </p>
 
           <div className="feature-list">
@@ -67,10 +67,10 @@ const Login = () => {
               <span className="feature-dot">✓</span> Lead to dispatch, tracked end to end
             </div>
             <div className="feature-item">
-              <span className="feature-dot"></span> WhatsApp automation with AI assistance
+              <span className="feature-dot"></span> WhatsApp conversations linked to your customers
             </div>
             <div className="feature-item">
-              <span className="feature-dot"></span> Role-based access with 2FA and audit logs
+              <span className="feature-dot"></span> Role-based access and company guidelines
             </div>
           </div>
         </div>

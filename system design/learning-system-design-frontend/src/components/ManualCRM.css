@@ -1,0 +1,193 @@
+.manual-page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: auto;
+  color: var(--ink, #182235);
+}
+.manual-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.manual-top h1 {
+  margin: 0 0 8px;
+}
+.manual-top p {
+  margin: 0;
+  color: var(--slate, #64748b);
+}
+.manual-toolbar {
+  display: flex;
+  gap: 12px;
+  margin: 0 0 24px;
+  flex-wrap: wrap;
+}
+.manual-toolbar input {
+  flex: 1;
+  min-width: 200px;
+}
+.manual-list {
+  display: grid;
+  gap: 16px;
+}
+.manual-card {
+  background: var(--paper, #fff);
+  border: 1px solid var(--line, #dedad1);
+  border-radius: 12px;
+  padding: 20px;
+}
+.manual-card h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+.manual-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.manual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.manual-page input,
+.manual-page select,
+.manual-page textarea,
+.manual-dialog input,
+.manual-dialog select,
+.manual-dialog textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line, #dedad1);
+  border-radius: 8px;
+  background: var(--paper, #fff);
+  color: inherit;
+  font: inherit;
+}
+.manual-dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.manual-overlay {
+  position: fixed;
+  inset: 0;
+  background: #10182780;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.manual-dialog {
+  width: min(900px, 100%);
+  max-height: 92dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper, #fff);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.manual-dialog header,
+.manual-dialog footer {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--line, #ddd);
+  flex-shrink: 0;
+}
+.manual-dialog header h2 {
+  margin: 0;
+}
+.manual-dialog footer {
+  border-bottom: 0;
+  border-top: 1px solid var(--line, #ddd);
+}
+.manual-dialog form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.manual-body {
+  padding: 20px;
+  overflow: auto;
+  min-height: 0;
+}
+.manual-dialog fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.manual-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line, #ddd);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  align-items: end;
+}
+.manual-full {
+  grid-column: 1/-1;
+}
+.manual-section {
+  margin-top: 24px;
+}
+.manual-error {
+  padding: 12px;
+  background: #fff1f0;
+  color: #9a2525;
+  border-radius: 8px;
+}
+.manual-status {
+  font-size: 13px;
+  color: #64748b;
+}
+.manual-empty {
+  padding: 40px;
+  text-align: center;
+  border: 1px dashed #ccc;
+  border-radius: 12px;
+}
+.manual-page .btn,
+.manual-dialog .btn {
+  padding: 10px 16px;
+  min-height: 40px;
+  cursor: pointer;
+}
+.manual-dialog .btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+@media (max-width: 700px) {
+  .manual-page {
+    padding: 16px;
+  }
+  .manual-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .manual-grid,
+  .manual-item {
+    grid-template-columns: 1fr;
+  }
+  .manual-dialog header,
+  .manual-dialog footer {
+    padding: 16px;
+  }
+  .manual-body {
+    padding: 16px;
+  }
+}
+.manual-card p { margin: 12px 0; line-height: 1.5; }
+.manual-page .btn-primary, .manual-dialog .btn-primary { background: var(--gold, #b78538); color: #fff; border-color: var(--gold, #b78538); }
+@media print { .manual-page button, .manual-toolbar { display:none !important; } .manual-card { break-inside: avoid; } }

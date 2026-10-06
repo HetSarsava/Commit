@@ -92,7 +92,7 @@ const Quotations = () => {
         <div className="empty-state">
 
           <h3>No quotations yet</h3>
-          <p>Create your first quotation with products, pricing, and GST calculation.</p>
+          <p>Create your first quotation with typed items, prices, and GST calculation.</p>
           <button className="btn-primary" onClick={handleCreate}>
              Create First Quotation
           </button>
