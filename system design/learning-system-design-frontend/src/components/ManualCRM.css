@@ -199,3 +199,44 @@
 @media (max-width:800px) { .customer-columns { grid-template-columns:1fr; } }
 .customer-columns:not(.has-history) { grid-template-columns:1fr; }
 .customer-columns:not(.has-history) .manual-list { grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); }
+.business-flow { margin:24px; padding:20px; background:#fff; border:1px solid var(--line,#ded9cc); border-radius:16px; }
+.manual-page .business-flow { margin:0 0 24px; }
+.flow-links { display:flex; align-items:stretch; gap:12px; flex-wrap:wrap; }
+.flow-links { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.flow-links > .btn { grid-column:1/-1; text-align:left; }
+.flow-step { flex:1; min-width:130px; display:flex; flex-direction:column; gap:8px; padding:14px 18px; text-align:left; border:1px solid var(--line,#ded9cc); border-radius:12px; background:#faf9f6; color:var(--ink,#1c2333); cursor:pointer; }
+.flow-step small { overflow-wrap:anywhere; color:#64748b; }
+.flow-step.current { background:#f5ecd9; border-color:#b78538; }
+.flow-step:disabled { cursor:default; opacity:.65; }
+.money-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:20px; }
+.money-summary > div { padding:18px; border-radius:12px; background:#f7f6f2; display:flex; flex-direction:column; gap:8px; }
+.money-summary small { color:#64748b; }
+.money-summary strong { font-size:clamp(18px,2vw,26px); overflow-wrap:anywhere; color:#1c2333; }
+.money-summary > div:last-child { background:#f5ecd9; }
+.workflow-notice { padding:16px 24px; margin:16px 24px; border-radius:12px; background:#edf5ef; }
+.workflow-details { margin-top:20px; border:1px solid var(--line,#ded9cc); border-radius:12px; padding:14px 16px; }
+.workflow-details summary { cursor:pointer; font-weight:600; }
+.workflow-details[open] summary { margin-bottom:20px; }
+.payment-dialog { max-width:640px; }
+.selected-customer { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px; border-radius:12px; background:#f5ecd9; margin-bottom:16px; }
+.payment-dialog header p { margin:6px 0 0; color:#64748b; }
+.payment-dialog .money-summary { margin:0 0 20px; }
+.manual-body > p { margin:16px 0 24px; }
+.manual-body fieldset > h3 { margin:24px 0 8px; }
+.manual-body fieldset > p { margin:0 0 16px; }
+.document-value { margin:12px 0 0; font-size:18px; font-weight:600; }
+.payment-history-summary { margin:0 24px 24px; padding:20px; border:1px solid var(--line,#ddd); border-radius:16px; background:#fff; }
+.payment-history-summary p { margin:12px 0; }
+.flow-links .btn { white-space:normal; }
+@media(max-width:650px) {
+  .business-flow { margin:16px; padding:16px; }
+  .flow-step { min-width:0; padding:12px; }
+  .money-summary { gap:8px; }
+  .money-summary > div { padding:12px 8px; }
+  .quotation-detail .topbar .topbar-actions, .invoice-detail .topbar .topbar-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; gap:12px; }
+  .quotation-detail .topbar-actions .btn, .invoice-detail .topbar-actions .btn { min-height:42px; padding:10px; white-space:normal; }
+}
+.manual-dialog header .btn { width:auto; flex:none; }
+.invoice-detail .manual-dialog header .btn { width:auto; flex:none; }
+@media print { .business-flow, .workflow-notice { display:none!important; } }
+@media print { .invoice-detail .invoice-document {display:flex!important;} .quotation-detail .content-layout {display:flex!important;} .payment-history-summary, .document-value {display:none!important;} }

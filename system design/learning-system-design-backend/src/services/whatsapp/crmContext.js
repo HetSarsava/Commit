@@ -13,7 +13,7 @@ async function crmContext(service, conversationId) {
   const related = row => Boolean((customer && (row.customerId === customer.id || (customer.leadId && row.customerId === customer.leadId))) || (conversation.customerId && row.customerId === conversation.customerId) || (conversation.leadId && (row.leadId === conversation.leadId || row.customerId === conversation.leadId)));
   const summaries = (items, number) => items.filter(related).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map(row => ({ id: row.id, number: row[number], status: row.status }));
   return { conversationId, customer: customer ? { id: customer.id, name: customer.companyName } : null,
-    lead: lead ? { id: lead.id, name: lead.companyName, status: lead.status, productInterest: lead.productInterest, quantity: lead.quantity, budget: lead.budget } : null,
+    lead: lead ? { id: lead.id, name: lead.companyName, contactPerson: lead.contactPerson, status: lead.status, productInterest: lead.productInterest, quantity: lead.quantity, budget: lead.budget } : null,
     quotations: summaries(quotations, 'quotationNumber'), orders: summaries(orders, 'orderNumber'), invoices: summaries(invoices, 'invoiceNumber'),
     contacts: [...customers.map(c => ({ id: `customer:${c.id}`, name: c.companyName || c.contactPerson })), ...leads.map(l => ({ id: `lead:${l.id}`, name: l.companyName || l.contactPerson }))] };
 }

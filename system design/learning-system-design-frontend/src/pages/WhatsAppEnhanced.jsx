@@ -1,5 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 import CustomerDirectory from '../components/CustomerDirectory';
+import CustomerForm from '../components/CustomerForm';
+import ManualDocument from '../components/ManualDocument';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '../api/client';
 import { useCompany } from '../context/CompanyData';
@@ -30,6 +32,9 @@ const WhatsAppEnhanced = () => {
   const [crmContext, setCrmContext] = useState(null);
   const [contextError, setContextError] = useState("");
   const [linkingContact, setLinkingContact] = useState(false);
+  const [customerPopup, setCustomerPopup] = useState(null);
+  const [newChat, setNewChat] = useState(false), [newPhone, setNewPhone] = useState(''), [newChatBusy, setNewChatBusy] = useState(false), [newChatError, setNewChatError] = useState('');
+  const [quotationCustomer, setQuotationCustomer] = useState(null);
   const [customerSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(customerSearchParams.get('tab') === 'customers' ? 'customers' : 'inbox');
   const [conversationFilter, setConversationFilter] = useState('all'); // all, needs-human, bot-handling
@@ -45,7 +50,7 @@ const WhatsAppEnhanced = () => {
   const [templates, setTemplates] = useState([]);
   const [automations, setAutomations] = useState([]);
   const [analytics, setAnalytics] = useState({});
-  const [showInfoPanel, setShowInfoPanel] = useState(true);
+  const [showInfoPanel, setShowInfoPanel] = useState(() => window.innerWidth > 1100);
   // Compact viewports show either the list or the chat — never a squashed triple column.
   const [mobilePane, setMobilePane] = useState('list');
 
@@ -137,10 +142,12 @@ const WhatsAppEnhanced = () => {
       setSelectedConversation(current => data.find(chat => chat.id === current?.id) || current);
       // Open the most recent conversation by default so the inbox is useful on first load.
       if (!selectedIdRef.current && data.length > 0) {
-        selectedIdRef.current = data[0].id;
-        setSelectedConversation(data[0]);
-        loadMessages(data[0].id);
-        whatsappAPI.markAsRead(data[0].id).catch(() => {});
+        const first = data.find(c => c.id === customerSearchParams.get('chatId')) || data[0];
+        selectedIdRef.current = first.id;
+        setSelectedConversation(first);
+        loadMessages(first.id);
+        if (customerSearchParams.get('chatId')) setMobilePane('chat');
+        whatsappAPI.markAsRead(first.id).catch(() => {});
       }
     } catch (error) {
       console.error('Failed to load conversations:', error);
@@ -200,6 +207,7 @@ const WhatsAppEnhanced = () => {
   };
 
   const handleSelectConversation = (conversation) => {
+    if (window.innerWidth <= 1100) setShowInfoPanel(false);
     selectedIdRef.current = conversation.id;
     setMessages([]);
     setSendError('');
@@ -342,6 +350,15 @@ const WhatsAppEnhanced = () => {
 
   return (
     <div className="whatsapp-page-enhanced page-fill">
+      {newChat && <div className="manual-overlay"><section className="manual-dialog payment-dialog" role="dialog" aria-modal="true" aria-label="New chat"><header><h2>New chat</h2><button className="btn" disabled={newChatBusy} onClick={() => setNewChat(false)}>Close</button></header><form onSubmit={async e => {e.preventDefault(); if(newChatBusy)return;setNewChatBusy(true);setNewChatError('');try{const conversation=await whatsappAPI.createConversation({phoneNumber:newPhone});handleSelectConversation(conversation);setNewChat(false);await loadConversations();}catch(error){setNewChatError(error.response?.data?.error || 'Could not open chat.');}finally{setNewChatBusy(false);}}}><div className="manual-body"><label>WhatsApp number<input autoFocus required type="tel" value={newPhone} onChange={e => setNewPhone(e.target.value)} placeholder="+91" /></label><p>Include the country code. Opening a chat does not send a message.</p>{newChatError && <p role="alert" className="manual-error">{newChatError}</p>}</div><footer><button className="btn btn-primary" disabled={newChatBusy} type="submit">{newChatBusy?'Opening...':'Open chat'}</button></footer></form></section></div>}
+
+      {customerPopup && <CustomerForm conversationId={customerPopup.id} contact={customerPopup.contact} onClose={() => setCustomerPopup(null)} onSuccess={async () => {
+        const chatId = customerPopup.id;
+        setCustomerPopup(null);
+        try { const {data} = await apiClient.get('/whatsapp/conversations/' + chatId + '/context'); if (selectedIdRef.current === chatId) setCrmContext(data); await loadConversations(); }
+        catch { setContextError('Customer saved. Reopen this chat to refresh the details.'); }
+      }} />}
+      {quotationCustomer && <ManualDocument kind="quotations" initialCustomerId={quotationCustomer} onClose={() => setQuotationCustomer(null)} onSuccess={r => navigate('/quotations/' + r.quotation.id)} />}
       {/* Top Bar */}
       <div className="topbar">
         <div className="topbar-text">
@@ -373,7 +390,7 @@ const WhatsAppEnhanced = () => {
 
       {/* Content */}
       <div className="whatsapp-content">
-        {activeTab === 'customers' && <CustomerDirectory />}
+        {activeTab === 'customers' && <CustomerDirectory onOpenChat={chat => { const conversation = chat.conversation || chat; handleSelectConversation(conversation); setActiveTab('inbox'); navigate('/whatsapp?chatId=' + conversation.id); }} />}
         {/* ==================== INBOX TAB (3 columns, explicit pane state) ==================== */}
         {activeTab === 'inbox' && (
           <div
@@ -388,15 +405,7 @@ const WhatsAppEnhanced = () => {
             <div className="conversations-panel-enhanced">
               <div className="panel-header">
                 <div className="chat-list-heading"><h3>Chats</h3>
-                <button type="button" className="btn btn-sm btn-primary" onClick={async () => {
-                  const phoneNumber = window.prompt('WhatsApp number, including country code:');
-                  if (!phoneNumber) return;
-                  try {
-                    const conversation = await whatsappAPI.createConversation({ phoneNumber });
-                    handleSelectConversation(conversation);
-                    loadConversations();
-                  } catch (error) { alert(error.response?.data?.error || 'Could not start conversation.'); }
-                }}>New chat</button></div>
+                <button type="button" className="btn btn-sm btn-primary" onClick={() => {setNewChat(true);setNewChatError('');}}>New chat</button></div>
                 <input
                   type="text"
                   className="search-input"
@@ -508,7 +517,7 @@ const WhatsAppEnhanced = () => {
                         </h3>
                         <div className="chat-header-meta">
                           {selectedConversation.leadStage && (
-                            <span>Lead: {selectedConversation.leadStage}</span>
+                            <span>{crmContext?.customer ? 'Customer' : 'Lead: ' + selectedConversation.leadStage}</span>
                           )}
                           {selectedConversation.salesperson && (
                             <span> · Assigned to {selectedConversation.salesperson}</span>
@@ -518,6 +527,8 @@ const WhatsAppEnhanced = () => {
                     </div>
 
                     <div className="chat-header-actions">
+                  {crmContext?.customer && ['ADMIN', 'SALES'].includes(user.role) && <button className="btn btn-primary" onClick={() => setQuotationCustomer(crmContext.customer.id)}>Create quotation</button>}
+                  {crmContext && ['ADMIN', 'SALES'].includes(user.role) && !crmContext.customer && <button className="btn btn-primary" onClick={() => setCustomerPopup({id: selectedConversation.id, contact: { contactPerson: crmContext.lead?.contactPerson || '', companyName: crmContext.lead?.name || (/^Unknown contact/i.test(selectedConversation.customerName) ? '' : selectedConversation.customerName), mobile: '+' + selectedConversation.phoneNumber.replace(/^\+/, '') }})}>Save as customer</button>}
                       {/* Automation Status Indicator */}
                       <div
                         className={`automation-status ${selectedConversation.automationStatus === 'PAUSED' ? 'paused' : 'active'}`}
@@ -626,6 +637,7 @@ const WhatsAppEnhanced = () => {
 
                 <div className="info-section">
                   <h4>Contact details</h4>
+
                   {contextError && <p role="alert">{contextError}</p>}
                   {crmContext && <label>Linked customer or lead
                     <select aria-label="Linked customer or lead" disabled={linkingContact} value={crmContext.customer ? 'customer:' + crmContext.customer.id : crmContext.lead ? 'lead:' + crmContext.lead.id : ''} onChange={linkCustomer}>
@@ -640,7 +652,7 @@ const WhatsAppEnhanced = () => {
                   <div className="info-row">
                     <span className="info-label">Stage</span>
                     <span className="info-value">
-                      <span className="stage-pill">{selectedConversation.leadStage || 'New'}</span>
+                      <span className="stage-pill">{crmContext?.customer ? 'Customer' : selectedConversation.leadStage || 'New'}</span>
                     </span>
                   </div>
                   <div className="info-row">
@@ -671,6 +683,8 @@ const WhatsAppEnhanced = () => {
 
                 <div className="info-section">
                   <h4>Quick Actions</h4>
+
+                  {crmContext?.customer && <button className="info-action-btn" onClick={() => { navigate('/whatsapp?tab=customers&customerId=' + crmContext.customer.id); setActiveTab('customers'); }} >Customer documents</button>}
                   {crmContext && !crmContext.quotations.length && <p>No quotation for this contact yet.</p>}
                   {crmContext?.orders.map(order => <button key={order.id} className="info-action-btn" onClick={() => navigate('/orders/' + order.id)}>Order {order.number}</button>)}
                   {crmContext?.invoices.map(invoice => <button key={invoice.id} className="info-action-btn" onClick={() => navigate('/invoices/' + invoice.id)}>Invoice {invoice.number}</button>)}
@@ -679,9 +693,6 @@ const WhatsAppEnhanced = () => {
                   </button>
                   <button type="button" className="info-action-btn" disabled={!crmContext?.lead} title={crmContext?.lead ? "Open this lead" : "No linked lead"} onClick={() => navigate("/leads?leadId=" + encodeURIComponent(crmContext.lead.id))}>
                      View Full Lead
-                  </button>
-                  <button type="button" className="info-action-btn" disabled title="Automatic replies have not been set up yet">
-                     Resume Automation
                   </button>
                 </div>
               </aside>

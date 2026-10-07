@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import "./ManualCRM.css";
 const today = () => new Date().toISOString().slice(0, 10);
 const configs = {
@@ -40,6 +41,8 @@ const configs = {
   },
 };
 export default function ManualRegister({ kind }) {
+  const [params] = useSearchParams(), navigate = useNavigate();
+  const orderId = kind === 'dispatches' ? params.get('orderId') : null;
   const c = configs[kind],
     { user } = useAuth();
   const [rows, setRows] = useState([]),
@@ -94,7 +97,7 @@ export default function ManualRegister({ kind }) {
           }
         : kind === "dispatches"
           ? {
-              orderId: "",
+              orderId: orderId || "",
               courierName: "",
               trackingNumber: "",
               address: "",
@@ -147,12 +150,13 @@ export default function ManualRegister({ kind }) {
   );
   return (
     <main className="manual-page">
+      {orderId && <div className="manual-card"><p>Delivery for {orders.find(o => o.id === orderId)?.orderNumber || 'this order'}</p><div className="manual-actions"><button className="btn" onClick={() => navigate('/orders/' + orderId)}>Back to order</button><button className="btn" onClick={() => navigate('/dispatch')}>All deliveries</button>{canEdit && !loading && <button className="btn btn-primary" onClick={() => open(rows.find(r => r.orderId === orderId) || null)}>{rows.some(r => r.orderId === orderId) ? 'Update delivery' : 'Record dispatch'}</button>}</div></div>}
       <div className="manual-top">
         <div>
           <h1>{c.title}</h1>
           <p>{c.subtitle}</p>
         </div>
-        {canEdit && (
+        {canEdit && !orderId && (
           <button className="btn btn-primary" onClick={() => open()}>
             {c.create}
           </button>
@@ -183,6 +187,7 @@ export default function ManualRegister({ kind }) {
       ) : (
         <div className="manual-list">
           {rows
+            .filter(r => !orderId || r.orderId === orderId)
             .filter((r) =>
               (kind === "marketing"
                 ? r.name + " " + r.platform
@@ -253,6 +258,7 @@ export default function ManualRegister({ kind }) {
                     <p>{r.notes}</p>
                   </>
                 )}
+                {kind === "dispatches" && <button className="btn" onClick={() => navigate("/orders/" + r.orderId)}>View order</button>}
                 {canEdit && (
                   <button className="btn" onClick={() => open(r)}>
                     Edit {kind === "marketing" ? "campaign" : "dispatch"}

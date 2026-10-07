@@ -295,6 +295,9 @@ exports.deletePayment = async (req, res, next) => {
 exports.getInvoicePayments = async (req, res, next) => {
   try {
     const { invoiceId } = req.params;
+    const invoice = await prisma.invoice.findUnique({where: {id: invoiceId}});
+    if (!invoice) return res.status(404).json({error: 'Invoice not found'});
+    if (!['ADMIN', 'SALES', 'ACCOUNTANT'].includes(req.user.role) || (req.user.role === 'SALES' && invoice.salesPersonId !== req.user.id)) return res.status(403).json({error: 'Access denied'});
 
     const payments = await prisma.payment.findMany({
       where: { invoiceId },

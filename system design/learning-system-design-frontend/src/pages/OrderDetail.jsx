@@ -5,6 +5,7 @@ import { invoicesAPI } from "../api/invoices";
 import { whatsappAPI } from "../api/whatsapp";
 import { useAuth } from "../context/AuthContext";
 import ManualDocument from "../components/ManualDocument";
+import BusinessFlow from '../components/BusinessFlow';
 import "../components/ManualCRM.css";
 export default function OrderDetail() {
   const { id } = useParams(),
@@ -80,6 +81,7 @@ export default function OrderDetail() {
               Back to orders
             </button>
           </div>
+          <BusinessFlow kind="orders" id={id} revision={order.updatedAt} />
           <article className="manual-card">
             <p>
               Delivery:{" "}
@@ -112,10 +114,12 @@ export default function OrderDetail() {
                   Edit order
                 </button>
               )}
+              {order.status === 'PENDING' && ['ADMIN', 'SALES'].includes(user.role) && <button className="btn btn-primary" disabled={busy} onClick={async () => { setBusy(true); try { await ordersAPI.updateOrder(id, {status: 'CONFIRMED', confirmedAt: true}); await load(); setNotice('Order confirmed. You can now create its invoice or dispatch.'); } catch(e) { setError(e.response?.data?.error || 'Could not confirm order.'); } finally { setBusy(false); } }}>Confirm order</button>}
+              {['CONFIRMED', 'IN_PRODUCTION', 'READY', 'DISPATCHED', 'COMPLETED'].includes(order.status) && ['ADMIN', 'SALES', 'PRODUCTION'].includes(user.role) && <button className="btn" onClick={() => navigate('/dispatch?orderId=' + id)}>Dispatch / delivery</button>}
               {order.invoice ? (
                 <>
                   <button
-                    className="btn"
+                    className="btn btn-primary"
                     onClick={() => navigate("/invoices/" + order.invoice.id)}
                   >
                     View invoice
@@ -133,7 +137,7 @@ export default function OrderDetail() {
               ) : (
                 ["ADMIN", "SALES", "ACCOUNTANT"].includes(user.role) && (
                   <button
-                    className="btn"
+                    className="btn btn-primary"
                     disabled={
                       busy || ["PENDING", "CANCELLED"].includes(order.status)
                     }

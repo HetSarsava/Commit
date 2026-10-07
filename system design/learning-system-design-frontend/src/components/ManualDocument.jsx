@@ -5,17 +5,19 @@ import "./ManualCRM.css";
 export default function ManualDocument({
   kind = "orders",
   record = null,
+  initialCustomerId = '',
   readOnly = false,
   onClose,
   onSuccess,
 }) {
   const [addingCustomer, setAddingCustomer] = useState(false);
+  const [chooseCustomer, setChooseCustomer] = useState(!initialCustomerId);
   const [customers, setCustomers] = useState([]),
     [search, setSearch] = useState(""),
     [error, setError] = useState(""),
     [saving, setSaving] = useState(false);
   const [form, setForm] = useState(() => ({
-    customerId: record?.customerId || "",
+    customerId: record?.customerId || initialCustomerId || "",
     status:
       record?.status === "DELIVERED"
         ? "COMPLETED"
@@ -127,7 +129,7 @@ export default function ManualDocument({
               )}
               <fieldset disabled={saving || readOnly}>
                 <div className="manual-grid">
-                  <label>
+{chooseCustomer ? <>                  <label>
                     Find customer
                     <input
                       value={search}
@@ -163,6 +165,7 @@ export default function ManualDocument({
                         ))}
                     </select>
                   </label>
+</> : <div className="manual-full selected-customer"><strong>{customers.find(c => c.id === form.customerId)?.companyName || 'Loading customer...'}</strong><button className="btn" type="button" onClick={() => setChooseCustomer(true)}>Change customer</button></div>}
                   {kind === "orders" ? (
                     <>
                       <label>
@@ -227,7 +230,7 @@ export default function ManualDocument({
                     </label>
                   )}
                 </div>
-                {!readOnly && (
+                {!readOnly && chooseCustomer && (
                   <button
                     className="btn"
                     type="button"
@@ -305,7 +308,7 @@ export default function ManualDocument({
                     >
                       Remove item {index + 1}
                     </button>
-                    <label className="manual-full">
+<details className="workflow-details manual-full"><summary>Item note (optional)</summary>                    <label className="manual-full">
                       Item notes
                       <input
                         value={i.customization}
@@ -313,7 +316,7 @@ export default function ManualDocument({
                           itemChange(index, "customization", e.target.value)
                         }
                       />
-                    </label>
+                    </label></details>
                   </div>
                 ))}
                 <button
@@ -356,7 +359,7 @@ export default function ManualDocument({
                       onChange={(e) => change("taxPercent", e.target.value)}
                     />
                   </label>
-                  <label>
+</div><details className="workflow-details"><summary>Notes and terms (optional)</summary><div className="manual-grid">                  <label>
                     Notes
                     <textarea
                       value={form.notes}
@@ -372,7 +375,7 @@ export default function ManualDocument({
                       }
                     />
                   </label>
-                </div>
+</div></details>
               </fieldset>
             </div>
             <footer>

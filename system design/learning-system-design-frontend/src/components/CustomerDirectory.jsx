@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/client";
 import CustomerForm from "./CustomerForm";
+import ManualDocument from './ManualDocument';
+import { MoneySummary } from './BusinessFlow';
 import "./ManualCRM.css";
 const statusLabel = (s) =>
   ({
@@ -15,7 +17,9 @@ const statusLabel = (s) =>
     SENDING: "Sending",
     RECEIVED: "Received",
   })[s] || s;
-export default function CustomerDirectory() {
+export default function CustomerDirectory({ onOpenChat }) {
+  const [params] = useSearchParams();
+  const [documentKind, setDocumentKind] = useState(null);
   const historyRef = useRef(null);
   const { user } = useAuth(),
     navigate = useNavigate();
@@ -23,7 +27,7 @@ export default function CustomerDirectory() {
     [search, setSearch] = useState(""),
     [shared, setShared] = useState(false),
     [adding, setAdding] = useState(false),
-    [selected, setSelected] = useState(null),
+    [selected, setSelected] = useState(params.get('customerId')),
     [history, setHistory] = useState(null),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true);
@@ -176,6 +180,17 @@ export default function CustomerDirectory() {
             ) : (
               <>
                 <h2>{history.customer.companyName}</h2>
+                <div className="manual-actions">
+                  {['ADMIN', 'SALES'].includes(user.role) && <>
+                    <button className="btn btn-primary" onClick={() => setDocumentKind('quotations')}>Create quotation</button>
+                    <button className="btn" onClick={() => setDocumentKind('orders')}>Create order</button>
+                    <button className="btn" onClick={async () => { try {
+                      const {data} = await api.post('/whatsapp/conversations', {phoneNumber: history.customer.whatsapp || history.customer.mobile});
+                      onOpenChat?.(data);
+                    } catch (e) { setError(e.response?.data?.error || 'Could not open chat.'); } }}>Open WhatsApp chat</button>
+                  </>}
+                </div>
+                <MoneySummary invoice={history.documents.invoices.reduce((s, i) => ({total: s.total + Number(i.total || 0), amountPaid: s.amountPaid + Number(i.amountPaid || 0), balanceDue: s.balanceDue + Number(i.balanceDue || 0)}), {total: 0, amountPaid: 0, balanceDue: 0})} />
                 <p>
                   Saved documents are listed below. WhatsApp delivery is shown
                   separately in message history.
@@ -212,6 +227,7 @@ export default function CustomerDirectory() {
                             {d.status} · INR{" "}
                             {Number(d.total || 0).toLocaleString("en-IN")}
                           </span>
+                          {kind === 'invoices' && d.balanceDue > 0 && <button className="btn" onClick={() => navigate('/invoices/' + d.id + '?payment=1')}>Record payment</button>}
                         </div>
                       ))
                     ) : (
@@ -257,6 +273,7 @@ export default function CustomerDirectory() {
           }}
         />
       )}
+      {documentKind && history && <ManualDocument kind={documentKind} initialCustomerId={history.customer.id} onClose={() => setDocumentKind(null)} onSuccess={r => navigate('/' + documentKind + '/' + (r.quotation || r.order).id)} />}
     </section>
   );
 }

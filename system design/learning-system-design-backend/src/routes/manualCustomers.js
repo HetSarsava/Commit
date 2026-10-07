@@ -189,6 +189,48 @@ async function directory(user) {
       };
     });
 }
+// Saving a chat contact is repeatable: a failed response must not create a second customer.
+router.post('/chats/:id/customer', requireRole(['ADMIN', 'SALES']), wrap(async (req, res) => {
+  const result = await mutation(async () => {
+    const { store } = require('../services/whatsapp');
+    const chat = await store.getConversation(req.params.id);
+    if (!chat) throw Object.assign(new Error('Chat not found'), { status: 404 });
+    const lead = chat.leadId ? await prisma.lead.findUnique({ where: { id: chat.leadId } }) : null;
+    if (lead && !own(lead, req.user)) throw denied();
+    const customers = await prisma.customer.findMany({});
+    let customer = customers.find(c => c.id === chat.customerId || (lead && c.leadId === lead.id) ||
+      [c.mobile, c.whatsapp].some(v => phone(v) === phone(chat.phoneNumber)));
+    if (customer && !own(customer, req.user)) throw denied();
+    if (lead && customer?.leadId && customer.leadId !== lead.id) throw Object.assign(new Error('This number belongs to a customer linked to another lead.'), {status: 409});
+    if (lead && customer && !customer.leadId) customer = await prisma.customer.update({ where: {id: customer.id}, data: {leadId: lead.id} });
+    if (!customer) {
+      // The current chat's number is authoritative; editing the form cannot link an unrelated number.
+      customer = await saveCustomer({ ...lead, ...req.body, mobile: chat.phoneNumber, whatsapp: chat.phoneNumber }, req.user, lead);
+    }
+    if (lead) await prisma.lead.update({ where: { id: lead.id }, data: { status: 'COMPLETED', convertedAt: lead.convertedAt || new Date() } });
+    await store.transaction(s => s.updateConversation(chat.id, { customerId: customer.id, leadId: lead?.id || customer.leadId || null, customerName: customer.companyName }));
+    return { customer };
+  });
+  res.json(result);
+}));
+router.get('/workflow/:kind/:id', requireRole(['ADMIN', 'SALES', 'ACCOUNTANT']), wrap(async (req, res) => {
+  const { kind, id } = req.params;
+  const model = { quotations: 'quotation', orders: 'order', invoices: 'invoice' }[kind];
+  if (!model) throw bad('Unknown document');
+  const record = await prisma[model].findUnique({ where: { id } });
+  if (!record) throw Object.assign(new Error('Document not found'), { status: 404 });
+  if (req.user.role === 'SALES' && record.salesPersonId !== req.user.id) throw denied();
+  const orders = await prisma.order.findMany({});
+  const order = kind === 'orders' ? record : kind === 'invoices' ? orders.find(o => o.id === record.orderId) : orders.find(o => o.quotationId === id);
+  const invoice = kind === 'invoices' ? record : order ? (await prisma.invoice.findMany({})).find(i => i.orderId === order.id) : null;
+  const quotationId = kind === 'quotations' ? id : order?.quotationId;
+  const quotation = quotationId ? await prisma.quotation.findUnique({ where: { id: quotationId } }) : null;
+  const customers = await prisma.customer.findMany({});
+  const customer = customers.find(c => c.id === record.customerId || c.leadId === record.customerId);
+  const summary = (r, number) => r ? { id: r.id, number: r[number], status: r.status } : null;
+  res.json({ customer: customer ? { id: customer.id, name: customer.companyName } : null,
+    quotation: summary(quotation, 'quotationNumber'), order: summary(order, 'orderNumber'), invoice: invoice ? { ...summary(invoice, 'invoiceNumber'), total: invoice.total, amountPaid: invoice.amountPaid, balanceDue: invoice.balanceDue } : null });
+}));
 router.get(
   "/customer-directory",
   requireRole(["ADMIN", "SALES", "MARKETING", "ACCOUNTANT"]),
@@ -224,6 +266,7 @@ router.get(
         address: c.address,
         leadId: c.leadId,
       },
+      chats: c.chats.map(chat => ({ id: chat.id })),
       documents: Object.fromEntries(
         Object.entries(c.documents).map(([k, rows]) => [
           k,
@@ -232,6 +275,8 @@ router.get(
             number: r.quotationNumber || r.orderNumber || r.invoiceNumber,
             status: r.status,
             total: r.total,
+            balanceDue: r.balanceDue,
+            amountPaid: r.amountPaid,
             createdAt: r.createdAt,
           })),
         ]),
@@ -249,4 +294,31 @@ router.get(
     });
   }),
 );
+router.post('/invoices/:id/payment', requireRole(['ADMIN', 'SALES', 'ACCOUNTANT']), wrap(async (req, res) => {
+  const result = await prisma.$demoTransaction(async db => {
+    const invoice = await db.invoice.findUnique({ where: { id: req.params.id } });
+    if (!invoice) throw Object.assign(new Error('Invoice not found'), { status: 404 });
+    if (req.user.role === 'SALES' && invoice.salesPersonId !== req.user.id) throw denied();
+    const amount = Number(req.body.amount), method = req.body.method;
+    const referenceNumber = clean(req.body.referenceNumber, 100);
+    const date = new Date(req.body.paymentDate);
+    if (!Number.isFinite(amount) || amount <= 0 || Math.abs(amount * 100 - Math.round(amount * 100)) > 0.00001 ||
+      !['CASH', 'UPI', 'BANK_TRANSFER', 'CHEQUE', 'CARD'].includes(method) || !Number.isFinite(date.getTime()) || typeof req.body.paymentDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(req.body.paymentDate) || date.toISOString().slice(0,10) !== req.body.paymentDate || !/^PAY-[a-zA-Z0-9-]{10,80}$/.test(referenceNumber)) throw bad('Enter a valid amount, payment method and date.');
+    const previous = (await db.payment.findMany({})).find(p => p.referenceNumber === referenceNumber);
+    if (previous) {
+      if (previous.invoiceId !== invoice.id || Number(previous.amount) !== amount || previous.method !== method ||
+        new Date(previous.paymentDate).getTime() !== date.getTime()) throw Object.assign(new Error('Payment reference already used. Refresh and review payment history.'), { status: 409 });
+      return { payment: previous, alreadyRecorded: true };
+    }
+    if (amount > Number(invoice.balanceDue)) throw bad('Amount cannot exceed the amount still due.');
+    const payment = await db.payment.create({ data: { invoiceId: invoice.id, customerId: invoice.customerId, amount, method, referenceNumber,
+      transactionId: clean(req.body.transactionId, 250) || null, notes: clean(req.body.notes, 2000) || null, paymentDate: date, receivedBy: req.user.id } });
+    const amountPaid = Math.round((Number(invoice.amountPaid || 0) + amount) * 100) / 100;
+    const balanceDue = Math.round((Number(invoice.total) - amountPaid) * 100) / 100;
+    await db.invoice.update({ where: { id: invoice.id }, data: { amountPaid, balanceDue, status: balanceDue <= 0 ? 'PAID' : 'PARTIALLY_PAID' } });
+    return { payment };
+  });
+  res.status(result.alreadyRecorded ? 200 : 201).json(result);
+}));
+
 module.exports = router;

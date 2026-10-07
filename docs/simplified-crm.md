@@ -23,7 +23,7 @@ Order/quotation writes: Admin and Sales, with Sales ownership restrictions. Disp
 
 ## Storage and running both variants
 
-The manual pilot requires `USE_MOCK_DB=true`. Its existing demo workflow store persists orders, quotations, items, dispatches, invoices and campaigns in the local SQLite file identified by `WHATSAPP_DB_PATH`. Despite the historic mock-mode name, these entries persist across backend restarts. Initial example records are seeded. Customers and leads now persist in the same local store. Other retained features keep their existing storage limitations. Back up the local SQLite file before replacing a demo environment.
+The manual pilot requires `USE_MOCK_DB=true`. Its existing demo workflow store persists orders, quotations, items, dispatches, invoices, payment history and campaigns in the local SQLite file identified by `WHATSAPP_DB_PATH`. Despite the historic mock-mode name, these entries persist across backend restarts. Initial example records are seeded. Customers and leads now persist in the same local store. Other retained features keep their existing storage limitations. Back up the local SQLite file before replacing a demo environment.
 
 The existing PostgreSQL schema requires product relationships and has not been migrated to accept manual items. Manual routes return 503 when `USE_MOCK_DB=false`, rather than pretending PostgreSQL support works. Production use needs a reviewed schema migration, transactional document/dispatch updates, deployment and access-policy review.
 
@@ -56,3 +56,27 @@ In Leads, select a lead and choose **Turn into customer**. Review the prefilled 
 WhatsApp > Customers lists customers with document counts, search, a filter for recorded document sends, and a per-customer panel for quotations/orders/invoices and WhatsApp history. Document buttons open their existing screens. Saving a document is separate from submitting or delivering a message. The filter checks up to 1,000 recent CRM messages; history loads up to 500 messages per linked chat. Downloads, copied summaries, external WhatsApp sends and manual PDF sharing are not automatically tracked. Current preview relay isolation still applies.
 
 Customer writes and lead conversion use the authenticated manual API and the existing local workflow snapshot. Customer/lead data survive backend restart. New tests cover validation, permissions, duplicate conversion, source-document preservation, honest send-history flags, sanitized message responses and restart recovery. Browser checks created Demo Uniform Buyer, saved its draft quotation and converted Demo Converted Buyer, without sending messages.
+
+
+## Connected, simple business flow
+
+The reduced variant uses the same customer and document records throughout. It adds short, manual hand-offs rather than new automation:
+
+1. In WhatsApp, **Save as customer** opens a form with the current chat phone number already filled. Only company and contact names need typing. Optional details are collapsed. The current chat number is authoritative; repeated saves reuse the linked/matching customer. Sales ownership is checked before saving or reusing records. Linked leads are preserved and marked converted.
+2. **Create quotation** from chat or customer history opens the existing manual quotation form with the customer already selected. No products module is required. Notes and terms are optional expandable sections. Saving opens the quotation.
+3. **Create order** copies the quotation items and amounts into the linked order. Returning to the quotation shows **Open order**. Repeated conversion requests return the existing order; no second order is created. Rejected/expired quotations cannot become orders.
+4. **Confirm order** enables the existing invoice workflow. Orders show **View invoice** after generation. Existing invoice synchronization remains available for unpaid changes; paid-source edits remain protected.
+5. Every quotation/order/invoice shows links to its actual saved customer and related records. Invoices and their source orders show total, received and still due. A missing record is labelled Not created rather than displayed as completed.
+6. **Record payment** uses a short form: amount, payment method and date. Reference/notes are optional. Half/full balance buttons are conveniences. This records money already received; it does not charge anyone or initiate a transfer. The server validates amounts, methods, dates, invoice ownership and reused request references. Repeated requests from the same open form do not record another payment. Payment and invoice balance are saved as one serialized SQLite snapshot, with rollback on failure. Payment history survives restart.
+7. **Dispatch / delivery** keeps the current order selected. The focused delivery view shows that order's shipment and offers Back to order and All deliveries. Updating delivery remains manual; it does not book a courier.
+8. Customer history provides Create quotation, Create order, Open WhatsApp chat and Record payment shortcuts. The money summary totals the customer's saved invoices; order/quotation values are not counted again as money owed. No documents are sent automatically.
+
+Document screens prioritize the overview and next actions; **View quotation / View invoice** expands the full document. Print styles still include the full document even when its on-screen preview is hidden. WhatsApp send feedback says submitted until actual delivery status is available in chat. Invoice sharing still means saving a PDF or copying a summary; the app's private page URL is not a public customer link.
+
+The design uses focused dialogs and optional details, inspired by [Cashew's customizable entry flow](https://cashewapp.web.app/faq.html) and [Material dialog guidance](https://material-web.dev/components/dialog/). No new UI framework or external automation service was introduced.
+
+### Validation for these hand-offs
+
+`connected-workflow.test.js` exercises chat-to-customer-to-quotation-to-order-to-invoice-to-payment with isolated demo storage. It covers repeat/concurrent saves, role/ownership denial, authoritative chat phone, repeated order conversion, malformed/over-balance payments, payment retry idempotency, concurrent payments, rollback after a simulated invoice write failure, linked history and restart persistence. It does not send Meta messages.
+
+Browser checks used a newly created **Demo Connected Uniforms** customer and example quotation/order/invoice/part payment/dispatch. No real funds moved, no WhatsApp send was made and no shipment was booked. These example records are local, ignored demo data. Production gaps described above still apply; the retained tax document uses the existing intra-state demo calculation and is not a complete statutory billing system.

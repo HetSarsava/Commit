@@ -1,16 +1,17 @@
 import { useState } from "react";
 import api from "../api/client";
 import "./ManualCRM.css";
-export default function CustomerForm({ lead = null, onClose, onSuccess }) {
+export default function CustomerForm({ lead = null, contact = null, conversationId = null, onClose, onSuccess }) {
+  const initial = lead || contact;
   const [form, setForm] = useState({
-    companyName: lead?.companyName || "",
-    contactPerson: lead?.contactPerson || "",
-    mobile: lead?.mobile || "",
-    whatsapp: lead?.whatsapp || "",
-    email: lead?.email || "",
-    address: lead?.address || "",
-    city: lead?.city || "",
-    state: lead?.state || "",
+    companyName: initial?.companyName || "",
+    contactPerson: initial?.contactPerson || "",
+    mobile: initial?.mobile || "",
+    whatsapp: initial?.whatsapp || "",
+    email: initial?.email || "",
+    address: initial?.address || "",
+    city: initial?.city || "",
+    state: initial?.state || "",
   });
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -21,7 +22,7 @@ export default function CustomerForm({ lead = null, onClose, onSuccess }) {
     setError("");
     try {
       const { data } = await api.post(
-        lead ? "/manual/leads/" + lead.id + "/customer" : "/manual/customers",
+        conversationId ? '/manual/chats/' + conversationId + '/customer' : lead ? "/manual/leads/" + lead.id + "/customer" : "/manual/customers",
         form,
       );
       onSuccess(data.customer);
@@ -70,11 +71,6 @@ export default function CustomerForm({ lead = null, onClose, onSuccess }) {
                   ["companyName", "Company name"],
                   ["contactPerson", "Contact name"],
                   ["mobile", "Phone number"],
-                  ["whatsapp", "WhatsApp number (optional)"],
-                  ["email", "Email (optional)"],
-                  ["address", "Address (optional)"],
-                  ["city", "City (optional)"],
-                  ["state", "State (optional)"],
                 ].map(([key, label]) => (
                   <label key={key}>
                     {label}
@@ -92,6 +88,7 @@ export default function CustomerForm({ lead = null, onClose, onSuccess }) {
                             : "text"
                       }
                       value={form[key]}
+                      readOnly={Boolean(conversationId && key === 'mobile')}
                       maxLength={key === "address" ? 2000 : 254}
                       onChange={(e) =>
                         setForm((s) => ({ ...s, [key]: e.target.value }))
@@ -100,6 +97,12 @@ export default function CustomerForm({ lead = null, onClose, onSuccess }) {
                   </label>
                 ))}
               </div>
+              <details className="workflow-details">
+                <summary>More contact details (optional)</summary>
+                <div className="manual-grid">
+                  {['whatsapp', 'email', 'address', 'city', 'state'].filter(key => !conversationId || key !== 'whatsapp').map(key => <label key={key}>{key === 'whatsapp' ? 'WhatsApp number' : key.charAt(0).toUpperCase() + key.slice(1)}<input type={key === 'email' ? 'email' : 'text'} value={form[key]} maxLength={key === 'address' ? 2000 : 254} onChange={e => setForm(s => ({...s, [key]: e.target.value}))} /></label>)}
+                </div>
+              </details>
             </fieldset>
           </div>
           <footer>
