@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import CustomerForm from "./CustomerForm";
 import api from "../api/client";
+import { calculateDocument, formatINR } from "../utils/documentCalculation";
 import "./ManualCRM.css";
 export default function ManualDocument({
   kind = "orders",
@@ -10,6 +11,7 @@ export default function ManualDocument({
   onClose,
   onSuccess,
 }) {
+  const calculationRef = useRef(null);
   const [addingCustomer, setAddingCustomer] = useState(false);
   const [chooseCustomer, setChooseCustomer] = useState(!initialCustomerId);
   const [customers, setCustomers] = useState([]),
@@ -29,7 +31,7 @@ export default function ManualDocument({
     termsConditions: record?.termsConditions || "",
     taxPercent:
       record?.taxPercent ??
-      (record?.subtotal
+      (Number(record?.subtotal) - Number(record?.discountAmount || 0) > 0
         ? Math.round(
             (Number(record.taxAmount) * 100) /
               (Number(record.subtotal) - Number(record.discountAmount || 0)),
@@ -67,30 +69,17 @@ export default function ManualDocument({
         i === index ? { ...item, [key]: value } : item,
       ),
     }));
-  const total =
-    Math.max(
-      0,
-      form.items.reduce(
-        (sum, i) =>
-          sum +
-          Math.max(
-            0,
-            Number(i.quantity || 0) * Number(i.unitPrice || 0) -
-              Number(i.discount || 0),
-          ),
-        0,
-      ) - Number(form.discountAmount || 0),
-    ) *
-    (1 + Number(form.taxPercent || 0) / 100);
+  const calculation = calculateDocument(form);
+  const summaryAmount = value => calculation.errors.length ? '—' : formatINR(value);
   async function save(e) {
     e.preventDefault();
-    if (saving) return;
+    if (saving || calculation.errors.length) return;
     setSaving(true);
     setError("");
     try {
       const r = await api[record ? "put" : "post"](
         "/manual/" + kind + (record ? "/" + record.id : ""),
-        form,
+        { ...form, items: form.items.map(item => ({ ...item, discount: item.discount ?? 0 })) },
       );
       onSuccess(r.data);
     } catch (e) {
@@ -103,7 +92,7 @@ export default function ManualDocument({
     <>
       <div className="manual-overlay">
         <section
-          className="manual-dialog"
+          className="manual-dialog document-dialog"
           role="dialog"
           aria-modal="true"
           aria-label={
@@ -127,6 +116,7 @@ export default function ManualDocument({
                   {error}
                 </p>
               )}
+              <div className="document-editor">
               <fieldset disabled={saving || readOnly}>
                 <div className="manual-grid">
 {chooseCustomer ? <>                  <label>
@@ -284,12 +274,15 @@ export default function ManualDocument({
                       />
                     </label>
                     <label>
-                      Item discount (INR)
+                      Line discount (INR)
                       <input
                         type="number"
                         min="0"
+                        max={calculation.items[index].gross}
+                        required
                         step="0.01"
-                        value={i.discount || 0}
+                        aria-describedby={"line-discount-help-" + index}
+                        value={i.discount ?? 0}
                         onChange={(e) =>
                           itemChange(index, "discount", e.target.value)
                         }
@@ -308,6 +301,14 @@ export default function ManualDocument({
                     >
                       Remove item {index + 1}
                     </button>
+                    <div className="line-calculation manual-full">
+                      <small id={"line-discount-help-" + index} className="calculation-hint">Discount applies once to the whole line.</small>
+                      {calculation.items[index].valid ? <>
+                      <span>{i.quantity || 0} × {formatINR(calculation.items[index].unitPrice)} = {formatINR(calculation.items[index].gross)}</span>
+                      <span>− {formatINR(calculation.items[index].discount)} line discount</span>
+                      <strong>Line total: {formatINR(calculation.items[index].total)}</strong>
+                      </> : <strong>Check this item's quantity, price and discount.</strong>}
+                    </div>
 <details className="workflow-details manual-full"><summary>Item note (optional)</summary>                    <label className="manual-full">
                       Item notes
                       <input
@@ -339,10 +340,12 @@ export default function ManualDocument({
                 </button>
                 <div className="manual-grid manual-section">
                   <label>
-                    Discount (INR)
+                    Overall discount (INR)
                     <input
                       type="number"
                       min="0"
+                      max={calculation.subtotal}
+                      required
                       step="0.01"
                       value={form.discountAmount}
                       onChange={(e) => change("discountAmount", e.target.value)}
@@ -354,6 +357,7 @@ export default function ManualDocument({
                       type="number"
                       min="0"
                       max="100"
+                      required
                       step="0.01"
                       value={form.taxPercent}
                       onChange={(e) => change("taxPercent", e.target.value)}
@@ -377,16 +381,41 @@ export default function ManualDocument({
                   </label>
 </div></details>
               </fieldset>
+              </div>
+              <aside className="document-calculation" ref={calculationRef} aria-label="Live calculation">
+                <h3>Live calculation</h3>
+                <p className="calculation-hint">Updates as you type. Discounts are applied before GST.</p>
+                <div className="calculation-lines">
+                  {calculation.items.map((item, index) => (
+                    <div className="calculation-line" key={index}>
+                      <strong>{item.description}</strong>
+                      {item.valid ? <>
+                      <span>{item.quantity} × {formatINR(item.unitPrice)} = {formatINR(item.gross)}</span>
+                      <span>− {formatINR(item.discount)} line discount</span>
+                      <b>{formatINR(item.total)}</b>
+                      </> : <span>Check this item's quantity, price and discount.</span>}
+                    </div>
+                  ))}
+                </div>
+                <dl className="calculation-totals">
+                  <div><dt>Items after line discounts</dt><dd>{summaryAmount(calculation.subtotal)}</dd></div>
+                  <div><dt>Overall discount</dt><dd>− {summaryAmount(calculation.discountAmount)}</dd></div>
+                  <div><dt>Amount before GST</dt><dd>{summaryAmount(calculation.taxableAmount)}</dd></div>
+                  <div><dt>GST ({form.taxPercent || 0}%)</dt><dd>+ {summaryAmount(calculation.taxAmount)}</dd></div>
+                  <div className="calculation-grand-total"><dt>Total</dt><dd>{calculation.errors.length ? 'Check amounts' : formatINR(calculation.total)}</dd></div>
+                </dl>
+                {calculation.errors.length > 0 && <div className="manual-error" role="alert">{calculation.errors.map(message => <p key={message}>{message}</p>)}</div>}
+              </aside>
             </div>
             <footer>
-              <strong>
-                Total: INR{" "}
-                {total.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
-              </strong>
+              <div className="document-footer-total">
+                <strong aria-live="polite" aria-atomic="true">Total: {calculation.errors.length ? 'Check amounts' : formatINR(calculation.total)}</strong>
+                <button className="calculation-jump" type="button" onClick={() => calculationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>View calculation</button>
+              </div>
               {!readOnly && (
                 <button
                   className="btn btn-primary"
-                  disabled={saving}
+                  disabled={saving || calculation.errors.length > 0}
                   type="submit"
                 >
                   {saving

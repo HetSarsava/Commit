@@ -86,3 +86,9 @@ Browser checks used a newly created **Demo Connected Uniforms** customer and exa
 The lead screen shows **All, New, In discussion, Quotation and Closed**, without a separate analytics view. Search is always visible; source/priority filters are under More filters. Counts include historical stages. Contacted, requirement, catalogue, negotiation and sample records appear under In discussion; order, production, dispatch, completed and lost records appear under Closed. Closed cards distinguish Won from Not proceeding.
 
 Editing offers New, In discussion, Quotation, Won and Not proceeding. Editing other details preserves a record's historical status; choosing another stage changes it intentionally. New leads start as New. This is a presentation change, not a data migration or automatic customer conversion. Existing customer conversion and document links remain available.
+
+## Live document calculation
+
+Quotation and order editors show a live arithmetic preview beside the fields on wide screens. Smaller screens show the same preview below the editor, reachable with View calculation in the footer. Each item also shows its quantity × unit price, line discount and line total directly beside its fields. Line discounts apply once to the whole line; the overall discount applies to the sum of discounted lines. GST applies after both discounts.
+
+Example: 10 × INR 600 = INR 6,000; line discount INR 600 leaves INR 5,400; 18% GST is INR 972; total INR 6,372. One item priced INR 600 with a line discount of INR 600 has a zero total. The preview rounds each line, the summed subtotal, GST and the final total to two decimals, matching the server. Invalid quantities/discounts/GST show a correction message and prevent saving rather than displaying a valid final total. `document-calculation.test.js` compares preview amounts with saved quotation/order amounts using isolated demo storage.

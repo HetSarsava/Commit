@@ -223,6 +223,46 @@
 .payment-dialog .money-summary { margin:0 0 20px; }
 .manual-body > p { margin:16px 0 24px; }
 .manual-body fieldset > h3 { margin:24px 0 8px; }
+
+/* Keep the arithmetic beside the editor on wide screens, with a direct jump
+   to the same live preview on small screens. */
+.document-dialog { width:min(1200px,100%); }
+.document-dialog .manual-body { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:24px; align-items:start; }
+.document-dialog .manual-body > .manual-error { grid-column:1/-1; }
+.document-editor { min-width:0; }
+.document-editor .manual-item { grid-template-columns:repeat(3,minmax(0,1fr)); align-items:end; }
+.document-editor .manual-item > label:first-child { grid-column:1/-1; }
+.document-editor .manual-item > button { grid-column:1/-1; justify-self:start; }
+.line-calculation { display:flex; flex-wrap:wrap; gap:8px 16px; padding:12px; border-radius:8px; background:var(--canvas); font-size:13px; }
+.line-calculation small { flex-basis:100%; }
+.line-calculation strong { margin-left:auto; }
+.calculation-hint { color:var(--ink-soft); font-size:12px; line-height:1.5; }
+.document-calculation { position:sticky; top:0; padding:20px; background:var(--canvas); border:1px solid var(--line); border-radius:12px; }
+.document-calculation h3 { margin:0 0 8px; font-size:17px; }
+.calculation-lines { max-height:180px; overflow:auto; margin:16px 0; }
+.calculation-line { display:flex; flex-direction:column; gap:4px; padding:12px 0; border-bottom:1px solid var(--line); font-size:12px; overflow-wrap:anywhere; }
+.calculation-line:first-child { padding-top:0; }
+.calculation-line strong { font-size:14px; }
+.calculation-line span { color:var(--ink-soft); }
+.calculation-totals { margin:0; font-size:13px; }
+.calculation-totals > div { display:flex; justify-content:space-between; align-items:baseline; gap:16px; padding:8px 0; }
+.calculation-totals dt { flex:1; }
+.calculation-totals dd { margin:0; font-variant-numeric:tabular-nums; text-align:right; overflow-wrap:anywhere; }
+.calculation-totals .calculation-grand-total { margin-top:8px; padding-top:16px; border-top:1px solid var(--line); font-size:18px; font-weight:700; }
+.document-footer-total { display:flex; flex-direction:column; gap:6px; }
+.calculation-jump { display:none; background:none; padding:0; border:0; text-align:left; text-decoration:underline; color:var(--ink-soft); cursor:pointer; font:inherit; font-size:12px; }
+.document-calculation .manual-error p { margin:8px 0; }
+@media (max-width:900px) {
+  .document-dialog .manual-body { grid-template-columns:minmax(0,1fr); }
+  .document-calculation { position:static; }
+  .calculation-jump { display:block; }
+}
+@media (max-width:500px) {
+  .document-editor .manual-item { grid-template-columns:minmax(0,1fr); }
+  .line-calculation { flex-direction:column; }
+  .line-calculation strong { margin-left:0; }
+  .document-calculation { padding:16px; }
+}
 .manual-body fieldset > p { margin:0 0 16px; }
 .document-value { margin:12px 0 0; font-size:18px; font-weight:600; }
 .payment-history-summary { margin:0 24px 24px; padding:20px; border:1px solid var(--line,#ddd); border-radius:16px; background:#fff; }
