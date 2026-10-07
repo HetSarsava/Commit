@@ -115,14 +115,14 @@ exports.createFromQuotation = async (req, res, next) => {
         issueDate: new Date(),
         validUntil: quotation.validUntil,
         subtotal: quotation.subtotal,
-        discount: quotation.discount,
+        discount: quotation.discountPercent ?? quotation.discount,
         discountAmount: quotation.discountAmount,
-        taxableAmount: quotation.taxableAmount,
-        cgst: quotation.cgst,
-        sgst: quotation.sgst,
-        igst: quotation.igst,
+        taxableAmount: quotation.taxableAmount ?? Number(quotation.subtotal) - Number(quotation.discountAmount || 0),
+        cgst: quotation.cgst ?? Number(quotation.taxAmount || 0) / 2,
+        sgst: quotation.sgst ?? Number(quotation.taxAmount || 0) / 2,
+        igst: quotation.igst || 0,
         total: quotation.total,
-        terms: quotation.terms || 'Payment terms as agreed',
+        terms: quotation.termsConditions || quotation.terms || 'Payment terms as agreed',
         notes: quotation.notes,
         status: 'PENDING',
         createdBy: req.user.id,
@@ -137,8 +137,9 @@ exports.createFromQuotation = async (req, res, next) => {
           productId: item.productId,
           description: item.description,
           quantity: item.quantity,
-          rate: item.rate,
-          amount: item.amount,
+          rate: item.unitPrice ?? item.rate,
+          amount: item.total ?? item.amount,
+          customization: item.customization || null,
         },
       });
     }
@@ -340,6 +341,10 @@ exports.convertToOrder = async (req, res, next) => {
         quotationId: proforma.quotationId,
         orderDate: new Date(),
         expectedDeliveryDate: proforma.validUntil,
+        deliveryDate: proforma.validUntil,
+        salesPersonId: req.user.id,
+        taxAmount: Number(proforma.cgst || 0) + Number(proforma.sgst || 0) + Number(proforma.igst || 0),
+        discountPercent: proforma.discount || 0,
         subtotal: proforma.subtotal,
         discount: proforma.discount,
         discountAmount: proforma.discountAmount,
@@ -351,22 +356,9 @@ exports.convertToOrder = async (req, res, next) => {
         status: 'PENDING',
         paymentStatus: 'UNPAID',
         createdBy: req.user.id,
+        items: { create: proforma.items.map(item => ({ productId:item.productId, description:item.description, quantity:item.quantity, unitPrice:item.rate, total:item.amount, discount:Math.max(0, Number(item.quantity)*Number(item.rate)-Number(item.amount)), customization:item.customization || null })) },
       },
     });
-
-    // Create order items
-    for (const item of proforma.items) {
-      await prisma.orderItem.create({
-        data: {
-          orderId: order.id,
-          productId: item.productId,
-          description: item.description,
-          quantity: item.quantity,
-          rate: item.rate,
-          amount: item.amount,
-        },
-      });
-    }
 
     // Update proforma status
     await prisma.proformaInvoice.update({

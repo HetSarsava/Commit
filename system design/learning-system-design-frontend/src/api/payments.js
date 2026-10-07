@@ -17,7 +17,7 @@ export const paymentsAPI = {
   },
 
   recordPayment: async (data) => {
-    const response = await apiClient.post('/payments', data);
+    const response = await apiClient.post('/manual/invoices/' + data.invoiceId + '/payment', data);
     return response.data;
   },
 

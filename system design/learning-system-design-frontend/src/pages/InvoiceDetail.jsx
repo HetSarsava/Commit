@@ -1,29 +1,36 @@
 import { useCompany } from '../context/CompanyData';
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { invoicesAPI } from '../api/invoices';
 import { paymentsAPI } from '../api/payments';
 import { whatsappAPI } from '../api/whatsapp';
 import PaymentModal from '../components/PaymentModal';
+import BusinessFlow from '../components/BusinessFlow';
+import { useAuth } from '../context/AuthContext';
 import './InvoiceDetail.css';
 
 const InvoiceDetail = () => {
   const company = useCompany();
+  const { user } = useAuth();
+  const [params] = useSearchParams();
+  const [notice, setNotice] = useState(''), [sending, setSending] = useState(false);
   const { id } = useParams();
-  const navigate = useNavigate();
-  const [showShare, setShowShare] = useState(false);
+  const [showShare, setShowShare] = useState(false), [showDocument, setShowDocument] = useState(false);
   const [invoice, setInvoice] = useState(null);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(params.get('payment') === '1');
 
-  useEffect(() => {
-    if (id) {
-      fetchInvoice();
+  const fetchPayments = useCallback(async () => {
+    try {
+      const data = await paymentsAPI.getInvoicePayments(id);
+      setPayments(data.payments);
+    } catch (error) {
+      console.error('Failed to fetch payments:', error);
     }
   }, [id]);
 
-  const fetchInvoice = async () => {
+  const fetchInvoice = useCallback(async () => {
     try {
       setLoading(true);
       const data = await invoicesAPI.getInvoice(id);
@@ -34,24 +41,18 @@ const InvoiceDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, fetchPayments]);
 
-  const fetchPayments = async () => {
-    try {
-      const data = await paymentsAPI.getInvoicePayments(id);
-      setPayments(data.payments);
-    } catch (error) {
-      console.error('Failed to fetch payments:', error);
-    }
-  };
+  useEffect(() => { let active = true; Promise.resolve().then(() => { if (active) void fetchInvoice(); }); return () => { active = false; }; }, [fetchInvoice]);
 
   const handlePaymentRecorded = () => {
     setShowPaymentModal(false);
     fetchInvoice(); // Refresh invoice and payments
-    alert('Payment recorded successfully!');
+    setNotice('Payment saved. The balance and payment history have been updated.');
   };
 
   const handleSendPaymentReminder = async () => {
+    if (sending) return;
     if (!invoice.customer?.whatsapp) {
       alert('Customer WhatsApp number not available');
       return;
@@ -63,14 +64,15 @@ const InvoiceDetail = () => {
     }
 
     if (!window.confirm(`Send payment reminder to ${invoice.customer.companyName} via WhatsApp?`)) return;
+    setSending(true);
 
     try {
       await whatsappAPI.sendPaymentReminder(id);
-      alert('Payment reminder sent via WhatsApp successfully!');
+      setNotice('Reminder submitted. Open WhatsApp to check delivery.');
     } catch (error) {
       console.error('Failed to send WhatsApp:', error);
-      alert(error.response?.data?.error || 'Failed to send WhatsApp message');
-    }
+      setNotice(error.response?.data?.error || 'Reminder was not sent.');
+    } finally { setSending(false); }
   };
 
   const handleDownloadPDF = () => {
@@ -150,30 +152,28 @@ const InvoiceDetail = () => {
           </h1>
         </div>
         <div className="topbar-actions">
-          <button className="btn" onClick={() => navigate('/invoices')}>Back to Invoices</button>
-          {invoice.balanceDue > 0 && (
+          {invoice.balanceDue > 0 && ['ADMIN', 'SALES', 'ACCOUNTANT'].includes(user.role) && (
             <button className="btn btn-primary" onClick={() => setShowPaymentModal(true)}>
               Record Payment
             </button>
           )}
           {invoice.customer?.whatsapp && invoice.balanceDue > 0 && (
-            <button className="btn btn-whatsapp" onClick={handleSendPaymentReminder}>
+            <button className="btn btn-whatsapp" disabled={sending} onClick={handleSendPaymentReminder}>
                Send Reminder
             </button>
           )}
           <button className="btn" onClick={()=>setShowShare(true)}>Share Invoice</button>
           <button className="btn" onClick={handleDownloadPDF}>Download PDF</button>
-          {invoice.order && (
-            <button className="btn" onClick={() => navigate(`/orders/${invoice.order.id}`)}>
-              View Order
-            </button>
-          )}
+          <button className="btn" onClick={() => setShowDocument(s => !s)}>{showDocument ? 'Hide invoice' : 'View invoice'}</button>
         </div>
       </div>
 
       {showShare && <section className="card invoice-share-panel"><h2>Share this invoice</h2><p>Save the invoice as a PDF, then attach it in WhatsApp or email. The CRM page address requires login and is not a public customer link.</p><button className="btn" onClick={handleDownloadPDF}>Save PDF to share</button><button className="btn" onClick={async()=>{try{await navigator.clipboard.writeText('Invoice '+invoice.invoiceNumber+' from '+company.name+' — total ₹'+Number(invoice.total).toLocaleString('en-IN')+', balance ₹'+Number(invoice.balanceDue).toLocaleString('en-IN'));alert('Invoice summary copied');}catch{alert('Could not copy. Please use Save PDF.');}}}>Copy invoice summary</button><button className="btn" onClick={()=>setShowShare(false)}>Close</button></section>}
       {/* Invoice Document */}
-      <div className="invoice-document">
+      {notice && <p role="status" className="workflow-notice no-print">{notice}</p>}
+      <BusinessFlow kind="invoices" id={id} revision={invoice.updatedAt} />
+      <section className="payment-history-summary no-print"><h2>Payment history</h2><p>Due by {formatDate(invoice.dueDate)}</p>{payments.length ? payments.map(p => <div className="customer-document" key={p.id}><strong>INR {Number(p.amount).toLocaleString('en-IN')}</strong><span>{p.method.replaceAll('_', ' ').toLowerCase()} · {formatDate(p.paymentDate)}</span></div>) : <p>No payments recorded yet.</p>}</section>
+      <div className="invoice-document" style={{display: showDocument ? "flex" : "none"}}>
         <div className="invoice-paper">
           {/* Header */}
           <div className="invoice-header">
@@ -217,18 +217,18 @@ const InvoiceDetail = () => {
               <p>
                 <strong>{invoice.customer?.companyName}</strong><br />
                 {invoice.customer?.contactPerson}<br />
-                {invoice.customer?.address || 'Address on file'}<br />
-                {invoice.customer?.city}, {invoice.customer?.state || 'Gujarat'}<br />
-                Phone: {invoice.customer?.phone}<br />
-                Email: {invoice.customer?.email}
+                {invoice.customer?.address || 'Address not added'}<br />
+                {[invoice.customer?.city, invoice.customer?.state].filter(Boolean).join(', ')}<br />
+                Phone: {invoice.customer?.mobile || invoice.customer?.phone || 'Not added'}<br />
+                Email: {invoice.customer?.email || 'Not added'}
               </p>
             </div>
             <div className="party-box">
               <h3>Ship To:</h3>
               <p>
                 <strong>{invoice.customer?.companyName}</strong><br />
-                {invoice.customer?.address || 'Address on file'}<br />
-                {invoice.customer?.city}, {invoice.customer?.state || 'Gujarat'}
+                {invoice.customer?.address || 'Address not added'}<br />
+                {[invoice.customer?.city, invoice.customer?.state].filter(Boolean).join(', ')}
               </p>
             </div>
           </div>
@@ -258,7 +258,7 @@ const InvoiceDetail = () => {
                       <><br /><span className="item-note">Fabric: {item.product.fabric}</span></>
                     )}
                   </td>
-                  <td className="num">6217</td>
+                  <td className="num">{item.product?.hsnCode || "—"}</td>
                   <td className="num">{item.quantity}</td>
                   <td className="num">₹{item.unitPrice.toLocaleString('en-IN')}</td>
                   <td className="num">₹{item.total.toLocaleString('en-IN')}</td>
@@ -393,7 +393,7 @@ const InvoiceDetail = () => {
       </div>
 
       {/* Payment Modal */}
-      {showPaymentModal && (
+      {showPaymentModal && invoice.balanceDue > 0 && ['ADMIN', 'SALES', 'ACCOUNTANT'].includes(user.role) && (
         <PaymentModal
           invoice={invoice}
           onClose={() => setShowPaymentModal(false)}

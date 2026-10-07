@@ -148,7 +148,7 @@ const mockPrisma = {
       let leads = [...mockData.leads];
 
       // Apply filters
-      if (where.status) leads = leads.filter(l => l.status === where.status);
+      if (where.status) leads = leads.filter(l => Array.isArray(where.status.in) ? where.status.in.includes(l.status) : l.status === where.status);
       if (where.priority) leads = leads.filter(l => l.priority === where.priority);
       if (where.source) leads = leads.filter(l => l.source === where.source);
       if (where.salesPersonId) leads = leads.filter(l => l.salesPersonId === where.salesPersonId);
@@ -278,19 +278,8 @@ const mockPrisma = {
     },
 
     count: async ({ where = {} }) => {
-      let leads = [...mockData.leads];
-
-      if (where.status) leads = leads.filter(l => l.status === where.status);
-      if (where.priority) leads = leads.filter(l => l.priority === where.priority);
-      if (where.salesPersonId) leads = leads.filter(l => l.salesPersonId === where.salesPersonId);
-      if (where.campaignId) {
-        if (typeof where.campaignId === 'object' && where.campaignId.not !== undefined) {
-          leads = leads.filter(l => l.campaignId !== where.campaignId.not);
-        } else {
-          leads = leads.filter(l => l.campaignId === where.campaignId);
-        }
-      }
-
+      // Use the same stage, search and ownership filters as the paginated list.
+      const leads = await mockPrisma.lead.findMany({ where, take: Number.MAX_SAFE_INTEGER });
       return leads.length;
     },
 
@@ -451,6 +440,12 @@ const mockPrisma = {
              null;
     },
 
+    update: async ({where,data}) => {
+      const current=mockData.customers.find(c=>c.id===where.id);
+      if(!current)throw new Error('Customer not found');
+      if(data.leadId && mockData.customers.some(c=>c.id!==where.id&&c.leadId===data.leadId))throw Object.assign(new Error('Lead already linked'),{code:'P2002'});
+      Object.assign(current,data,{updatedAt:new Date()});return {...current};
+    },
     create: async ({ data }) => {
       if (data.leadId && mockData.customers.some(row=>row.leadId === data.leadId)) throw Object.assign(new Error('This source already has a linked customer'),{code:'P2002'});
       const newCustomer = {
@@ -509,7 +504,7 @@ const mockPrisma = {
             result.items = mockData.quotationItems.filter(qi => qi.quotationId === q.id).map(qi => {
               const item = { ...qi };
               if (include.items.include?.product) {
-                item.product = mockData.products.find(p => p.id === qi.productId);
+                item.product = mockData.products.find(p => p.id === qi.productId) || (qi.description ? {name:qi.description, id:null} : null);
               }
               return item;
             });
@@ -539,7 +534,7 @@ const mockPrisma = {
           result.items = mockData.quotationItems.filter(qi => qi.quotationId === quotation.id).map(qi => {
             const item = { ...qi };
             if (include.items.include?.product) {
-              item.product = mockData.products.find(p => p.id === qi.productId);
+              item.product = mockData.products.find(p => p.id === qi.productId) || (qi.description ? {name:qi.description, id:null} : null);
             }
             return item;
           });
@@ -581,6 +576,9 @@ const mockPrisma = {
       const index = mockData.quotations.findIndex(q => q.id === where.id);
       if (index === -1) throw new Error('Quotation not found');
 
+      if(data.items?.deleteMany)mockData.quotationItems=mockData.quotationItems.filter(i=>i.quotationId!==where.id);
+      if(data.items?.create)for(const item of data.items.create)mockData.quotationItems.push({id:generateId('qitem'),quotationId:where.id,...item});
+      data={...data};delete data.items;
       mockData.quotations[index] = {
         ...mockData.quotations[index],
         ...data,
@@ -694,7 +692,7 @@ const mockPrisma = {
             result.items = mockData.orderItems.filter(oi => oi.orderId === o.id).map(oi => {
               const item = { ...oi };
               if (include.items.include?.product) {
-                item.product = mockData.products.find(p => p.id === oi.productId);
+                item.product = mockData.products.find(p => p.id === oi.productId) || (oi.description ? {name:oi.description, id:null} : null);
               }
               if (include.items.include?.productionTracking) {
                 item.productionTracking = mockData.productionTracking.find(pt => pt.orderItemId === oi.id);
@@ -730,7 +728,7 @@ const mockPrisma = {
           result.items = mockData.orderItems.filter(oi => oi.orderId === order.id).map(oi => {
             const item = { ...oi };
             if (include.items.include?.product) {
-              item.product = mockData.products.find(p => p.id === oi.productId);
+              item.product = mockData.products.find(p => p.id === oi.productId) || (oi.description ? {name:oi.description, id:null} : null);
             }
             if (include.items.include?.productionTracking) {
               item.productionTracking = mockData.productionTracking.find(pt => pt.orderItemId === oi.id);
@@ -786,6 +784,9 @@ const mockPrisma = {
       const index = mockData.orders.findIndex(o => o.id === where.id);
       if (index === -1) throw new Error('Order not found');
 
+      if(data.items?.deleteMany) mockData.orderItems=mockData.orderItems.filter(i=>i.orderId!==where.id);
+      if(data.items?.create)for(const item of data.items.create)mockData.orderItems.push({id:generateId('oitem'),orderId:where.id,...item});
+      data={...data}; delete data.items;
       mockData.orders[index] = {
         ...mockData.orders[index],
         ...data,
@@ -846,7 +847,7 @@ const mockPrisma = {
           const result = { ...oi };
 
           if (include.product) {
-            result.product = mockData.products.find(p => p.id === oi.productId);
+            result.product = mockData.products.find(p => p.id === oi.productId) || (oi.description ? {name:oi.description, id:null} : null);
           }
 
           if (include.order) {
@@ -872,7 +873,7 @@ const mockPrisma = {
 
       if (include) {
         if (include.product) {
-          result.product = mockData.products.find(p => p.id === orderItem.productId);
+          result.product = mockData.products.find(p => p.id === orderItem.productId) || (orderItem.description ? {name:orderItem.description, id:null} : null);
         }
 
         if (include.order) {
@@ -947,7 +948,7 @@ const mockPrisma = {
                 if (include.items.include?.product) {
                   return {
                     ...item,
-                    product: mockData.products.find(p => p.id === item.productId),
+                    product: mockData.products.find(p => p.id === item.productId) || (item.description ? {name:item.description, id:null} : null),
                   };
                 }
                 return item;
@@ -992,7 +993,7 @@ const mockPrisma = {
               if (include.items.include?.product) {
                 return {
                   ...item,
-                  product: mockData.products.find(p => p.id === item.productId),
+                  product: mockData.products.find(p => p.id === item.productId) || (item.description ? {name:item.description, id:null} : null),
                 };
               }
               return item;
@@ -1119,7 +1120,7 @@ const mockPrisma = {
 
               if (include.orderItem.include) {
                 if (include.orderItem.include.product) {
-                  result.orderItem.product = mockData.products.find(p => p.id === orderItem.productId);
+                  result.orderItem.product = mockData.products.find(p => p.id === orderItem.productId) || (orderItem.description ? {name:orderItem.description, id:null} : null);
                 }
                 if (include.orderItem.include.order) {
                   const order = mockData.orders.find(o => o.id === orderItem.orderId);
@@ -2051,7 +2052,7 @@ const mockPrisma = {
               .filter(item => item.catalogueId === cat.id)
               .map(item => {
                 if (include.items.include?.product) {
-                  const product = mockData.products.find(p => p.id === item.productId);
+                  const product = mockData.products.find(p => p.id === item.productId) || (item.description ? {name:item.description, id:null} : null);
                   return {
                     ...item,
                     product: include.items.include.product.select
@@ -2104,7 +2105,7 @@ const mockPrisma = {
             .filter(item => item.catalogueId === catalogue.id)
             .map(item => {
               if (include.items.include?.product) {
-                const product = mockData.products.find(p => p.id === item.productId);
+                const product = mockData.products.find(p => p.id === item.productId) || (item.description ? {name:item.description, id:null} : null);
                 return { ...item, product };
               }
               return item;
@@ -2175,7 +2176,7 @@ const mockPrisma = {
       if (include?.product) {
         items = items.map(item => ({
           ...item,
-          product: mockData.products.find(p => p.id === item.productId),
+          product: mockData.products.find(p => p.id === item.productId) || (item.description ? {name:item.description, id:null} : null),
         }));
       }
 
@@ -2275,7 +2276,7 @@ const mockPrisma = {
               .filter(item => item.proformaInvoiceId === pi.id)
               .map(item => {
                 if (include.items.include?.product) {
-                  const product = mockData.products.find(p => p.id === item.productId);
+                  const product = mockData.products.find(p => p.id === item.productId) || (item.description ? {name:item.description, id:null} : null);
                   return {
                     ...item,
                     product: include.items.include.product.select
@@ -2315,7 +2316,7 @@ const mockPrisma = {
             .filter(item => item.proformaInvoiceId === proforma.id)
             .map(item => {
               if (include.items.include?.product) {
-                const product = mockData.products.find(p => p.id === item.productId);
+                const product = mockData.products.find(p => p.id === item.productId) || (item.description ? {name:item.description, id:null} : null);
                 return { ...item, product };
               }
               return item;
@@ -2380,7 +2381,7 @@ const mockPrisma = {
       if (include?.product) {
         items = items.map(item => ({
           ...item,
-          product: mockData.products.find(p => p.id === item.productId),
+          product: mockData.products.find(p => p.id === item.productId) || (item.description ? {name:item.description, id:null} : null),
         }));
       }
 
@@ -2586,7 +2587,7 @@ const mockPrisma = {
     },
 
     create: async ({ data }) => {
-      if (mockData.dispatches.some(d=>d.productionId===data.productionId)) throw Object.assign(new Error('Dispatch already exists for this ready order'),{code:'P2002'});
+      if (mockData.dispatches.some(d=>(data.productionId && d.productionId===data.productionId) || (data.orderId && d.orderId===data.orderId))) throw Object.assign(new Error('Dispatch already exists for this ready order'),{code:'P2002'});
       const newDispatch = {
         id: generateId('dispatch'),
         ...data,

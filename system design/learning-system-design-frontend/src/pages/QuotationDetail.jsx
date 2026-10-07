@@ -1,27 +1,25 @@
 import { useCompany } from '../context/CompanyData';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { quotationsAPI } from '../api/quotations';
 import { ordersAPI } from '../api/orders';
 import { whatsappAPI } from '../api/whatsapp';
 import QuotationBuilder from '../components/QuotationBuilder';
+import BusinessFlow from '../components/BusinessFlow';
+import { useAuth } from '../context/AuthContext';
 import './QuotationDetail.css';
 
 const QuotationDetail = () => {
   const company = useCompany();
+  const { user } = useAuth();
+  const [flow, setFlow] = useState(null), [busy, setBusy] = useState(false), [notice, setNotice] = useState('');
   const { id } = useParams();
   const navigate = useNavigate();
   const [quotation, setQuotation] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(false), [showDocument, setShowDocument] = useState(false);
 
-  useEffect(() => {
-    if (id) {
-      fetchQuotation();
-    }
-  }, [id]);
-
-  const fetchQuotation = async () => {
+  const fetchQuotation = useCallback(async () => {
     try {
       setLoading(true);
       const data = await quotationsAPI.getQuotation(id);
@@ -31,7 +29,9 @@ const QuotationDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => { let active = true; Promise.resolve().then(() => { if (active) void fetchQuotation(); }); return () => { active = false; }; }, [fetchQuotation]);
 
   const handleEdit = () => {
     setIsEditorOpen(true);
@@ -59,33 +59,36 @@ const QuotationDetail = () => {
   };
 
   const handleConvertToOrder = async () => {
-    if (!window.confirm('Convert this quotation to a sales order?')) return;
+    if (busy || !flow) return;
+    if (flow.order) { navigate('/orders/' + flow.order.id); return; }
+    setBusy(true); setNotice('');
 
     try {
       const response = await ordersAPI.createOrderFromQuotation(id);
-      alert(`Order ${response.order.orderNumber} created successfully!`);
       navigate(`/orders/${response.order.id}`);
     } catch (error) {
       console.error('Failed to convert:', error);
-      alert(error.response?.data?.error || 'Failed to convert to order');
-    }
+      setNotice(error.response?.data?.error || 'Could not create order.');
+    } finally { setBusy(false); }
   };
 
   const handleSendWhatsApp = async () => {
+    if (busy) return;
     if (!quotation.customer?.whatsapp) {
       alert('Customer WhatsApp number not available');
       return;
     }
 
     if (!window.confirm(`Send quotation to ${quotation.customer.companyName} via WhatsApp?`)) return;
+    setBusy(true);
 
     try {
       await whatsappAPI.sendQuotation(id);
-      alert('Quotation sent via WhatsApp successfully!');
+      setNotice('Message submitted. Open WhatsApp to check delivery.');
     } catch (error) {
       console.error('Failed to send WhatsApp:', error);
-      alert(error.response?.data?.error || 'Failed to send WhatsApp message');
-    }
+      setNotice(error.response?.data?.error || 'Message was not sent.');
+    } finally { setBusy(false); }
   };
 
   const formatDate = (dateString) => {
@@ -125,48 +128,29 @@ const QuotationDetail = () => {
           <h1>
             Quotation
             <span className="status-pill">{quotation.status}</span>
-          </h1>
+          </h1><p className="document-value">Total INR {Number(quotation.total).toLocaleString('en-IN')}</p>
         </div>
         <div className="topbar-actions">
+          <button className="btn" onClick={() => setShowDocument(s => !s)}>{showDocument ? 'Hide quotation' : 'View quotation'}</button>
           <button className="btn btn-ghost" onClick={handleDownloadPdf}>Print / Save PDF</button>
-          <button className="btn" onClick={handleEdit}>Edit</button>
+          {['ADMIN', 'SALES'].includes(user.role) && quotation.status === 'DRAFT' && <button className="btn" onClick={handleEdit}>Edit</button>}
           {quotation.customer?.whatsapp && (
-            <button className="btn btn-whatsapp" onClick={handleSendWhatsApp}>
+            <button className="btn btn-whatsapp" disabled={busy} onClick={handleSendWhatsApp}>
                Send via WhatsApp
             </button>
           )}
-          <button className="btn btn-convert" onClick={handleConvertToOrder}>
-            Convert → Sales Order
-          </button>
+          {['ADMIN', 'SALES'].includes(user.role) && <button className="btn btn-primary" disabled={busy || !flow || (!flow.order && ['REJECTED', 'EXPIRED'].includes(quotation.status))} onClick={handleConvertToOrder}>
+            {flow?.order ? 'Open order' : busy ? 'Working…' : 'Create order'}
+          </button>}
         </div>
       </div>
 
       {/* Workflow Stepper */}
-      <div className="stepper">
-        <div className={`step ${quotation.status !== 'DRAFT' ? 'done' : 'current'}`}>
-          <div className="step-num">{quotation.status !== 'DRAFT' ? '✓' : '1'}</div>
-          Quotation sent
-        </div>
-        <div className="step">
-          <div className="step-num">2</div>
-          Proforma Invoice
-        </div>
-        <div className="step">
-          <div className="step-num">3</div>
-          Sales Order
-        </div>
-        <div className="step">
-          <div className="step-num">4</div>
-          Production
-        </div>
-        <div className="step">
-          <div className="step-num">5</div>
-          Tax Invoice
-        </div>
-      </div>
+      {notice && <p role="status" className="workflow-notice">{notice}</p>}
+      <BusinessFlow kind="quotations" id={id} revision={quotation.updatedAt} onLoaded={setFlow} />
 
       {/* Content: Two Column Layout */}
-      <div className="content-layout">
+      <div className="content-layout" style={{display: showDocument ? "flex" : "none"}}>
         {/* Document Column */}
         <div className="doc-col">
           <div className="card">
@@ -209,9 +193,9 @@ const QuotationDetail = () => {
                 {quotation.items?.map((item) => (
                   <tr key={item.id}>
                     <td>
-                      <div className="item-name">{item.product?.name}</div>
+                      <div className="item-name">{item.description || item.product?.name}</div>
                       <div className="item-sub">
-                        SKU: {item.product?.sku}
+                        {item.product?.sku && `SKU: ${item.product.sku}`}
                         {item.customization && ` · ${item.customization}`}
                       </div>
                     </td>
@@ -280,7 +264,7 @@ const QuotationDetail = () => {
         <div className="side-col">
           {/* Linked Lead */}
           <div className="card side-card">
-            <h3>Linked lead</h3>
+            <h3>Customer details</h3>
             <div className="side-row">
               <span className="k">Contact</span>
               <span className="v">{quotation.customer?.contactPerson}</span>
@@ -299,27 +283,14 @@ const QuotationDetail = () => {
             </div>
           </div>
 
-          {/* Payment Status */}
-          <div className="card side-card">
-            <h3>Payment status</h3>
-            <div className="payment-bar">
-              <div className="fill" style={{ width: '0%' }}></div>
-            </div>
-            <div className="payment-note">₹0 received of ₹{quotation.total.toLocaleString('en-IN')} due</div>
-            <div className="side-row" style={{ marginTop: '8px' }}>
-              <span className="k">Due date</span>
-              <span className="v">On dispatch</span>
-            </div>
-          </div>
-
           {/* Actions */}
           <div className="card side-card">
             <h3>Actions</h3>
             <div className="action-list">
-              <button type="button" className="action-btn wa" onClick={handleSendWhatsApp}> Send on WhatsApp</button>
-              <button type="button" className="action-btn" disabled title="Email delivery is not configured"> Email PDF</button>
-              <button type="button" className="action-btn" disabled title="Follow-up reminders are not configured"> Set follow-up reminder</button>
-              <button type="button" className="action-btn" onClick={handleEdit}> Edit quotation</button>
+              <button type="button" className="action-btn wa" disabled={busy} onClick={handleSendWhatsApp}> Send on WhatsApp</button>
+
+
+              <button type="button" className="action-btn" disabled={quotation.status !== "DRAFT" || !["ADMIN", "SALES"].includes(user.role)} onClick={handleEdit}> Edit quotation</button>
               <button type="button" className="action-btn danger" onClick={handleDelete}> Delete quotation</button>
             </div>
           </div>

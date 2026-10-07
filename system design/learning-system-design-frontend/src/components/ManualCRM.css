@@ -1,0 +1,282 @@
+.manual-page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: auto;
+  color: var(--ink, #182235);
+}
+.manual-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.manual-top h1 {
+  margin: 0 0 8px;
+}
+.manual-top p {
+  margin: 0;
+  color: var(--slate, #64748b);
+}
+.manual-toolbar {
+  display: flex;
+  gap: 12px;
+  margin: 0 0 24px;
+  flex-wrap: wrap;
+}
+.manual-toolbar input {
+  flex: 1;
+  min-width: 200px;
+}
+.manual-list {
+  display: grid;
+  gap: 16px;
+}
+.manual-card {
+  background: var(--paper, #fff);
+  border: 1px solid var(--line, #dedad1);
+  border-radius: 12px;
+  padding: 20px;
+}
+.manual-card h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+.manual-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.manual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.manual-page input,
+.manual-page select,
+.manual-page textarea,
+.manual-dialog input,
+.manual-dialog select,
+.manual-dialog textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line, #dedad1);
+  border-radius: 8px;
+  background: var(--paper, #fff);
+  color: inherit;
+  font: inherit;
+}
+.manual-dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.manual-overlay {
+  position: fixed;
+  inset: 0;
+  background: #10182780;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.manual-dialog {
+  width: min(900px, 100%);
+  max-height: 92dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper, #fff);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.manual-dialog header,
+.manual-dialog footer {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--line, #ddd);
+  flex-shrink: 0;
+}
+.manual-dialog header h2 {
+  margin: 0;
+}
+.manual-dialog footer {
+  border-bottom: 0;
+  border-top: 1px solid var(--line, #ddd);
+}
+.manual-dialog form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.manual-body {
+  padding: 20px;
+  overflow: auto;
+  min-height: 0;
+}
+.manual-dialog fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.manual-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line, #ddd);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  align-items: end;
+}
+.manual-full {
+  grid-column: 1/-1;
+}
+.manual-section {
+  margin-top: 24px;
+}
+.manual-error {
+  padding: 12px;
+  background: #fff1f0;
+  color: #9a2525;
+  border-radius: 8px;
+}
+.manual-status {
+  font-size: 13px;
+  color: #64748b;
+}
+.manual-empty {
+  padding: 40px;
+  text-align: center;
+  border: 1px dashed #ccc;
+  border-radius: 12px;
+}
+.manual-page .btn,
+.manual-dialog .btn {
+  padding: 10px 16px;
+  min-height: 40px;
+  cursor: pointer;
+}
+.manual-dialog .btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+@media (max-width: 700px) {
+  .manual-page {
+    padding: 16px;
+  }
+  .manual-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .manual-grid,
+  .manual-item {
+    grid-template-columns: 1fr;
+  }
+  .manual-dialog header,
+  .manual-dialog footer {
+    padding: 16px;
+  }
+  .manual-body {
+    padding: 16px;
+  }
+}
+.manual-card p { margin: 12px 0; line-height: 1.5; }
+.manual-page .btn-primary, .manual-dialog .btn-primary { background: var(--gold, #b78538); color: #fff; border-color: var(--gold, #b78538); }
+@media print { .manual-page button, .manual-toolbar { display:none !important; } .manual-card { break-inside: avoid; } }
+.customer-directory { width:100%; box-sizing:border-box; overflow:auto; }
+.customer-columns { display:grid; grid-template-columns:minmax(260px,1fr) minmax(300px,1.5fr); gap:24px; align-items:start; }
+.customer-document { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:12px 0; }
+.customer-message { padding:16px; margin:12px 0; border:1px solid var(--line,#ddd); border-radius:8px; }
+.customer-message p { white-space:pre-wrap; overflow-wrap:anywhere; }
+@media (max-width:800px) { .customer-columns { grid-template-columns:1fr; } }
+.customer-columns:not(.has-history) { grid-template-columns:1fr; }
+.customer-columns:not(.has-history) .manual-list { grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); }
+.business-flow { margin:24px; padding:20px; background:#fff; border:1px solid var(--line,#ded9cc); border-radius:16px; }
+.manual-page .business-flow { margin:0 0 24px; }
+.flow-links { display:flex; align-items:stretch; gap:12px; flex-wrap:wrap; }
+.flow-links { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.flow-links > .btn { grid-column:1/-1; text-align:left; }
+.flow-step { flex:1; min-width:130px; display:flex; flex-direction:column; gap:8px; padding:14px 18px; text-align:left; border:1px solid var(--line,#ded9cc); border-radius:12px; background:#faf9f6; color:var(--ink,#1c2333); cursor:pointer; }
+.flow-step small { overflow-wrap:anywhere; color:#64748b; }
+.flow-step.current { background:#f5ecd9; border-color:#b78538; }
+.flow-step:disabled { cursor:default; opacity:.65; }
+.money-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:20px; }
+.money-summary > div { padding:18px; border-radius:12px; background:#f7f6f2; display:flex; flex-direction:column; gap:8px; }
+.money-summary small { color:#64748b; }
+.money-summary strong { font-size:clamp(18px,2vw,26px); overflow-wrap:anywhere; color:#1c2333; }
+.money-summary > div:last-child { background:#f5ecd9; }
+.workflow-notice { padding:16px 24px; margin:16px 24px; border-radius:12px; background:#edf5ef; }
+.workflow-details { margin-top:20px; border:1px solid var(--line,#ded9cc); border-radius:12px; padding:14px 16px; }
+.workflow-details summary { cursor:pointer; font-weight:600; }
+.workflow-details[open] summary { margin-bottom:20px; }
+.payment-dialog { max-width:640px; }
+.selected-customer { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px; border-radius:12px; background:#f5ecd9; margin-bottom:16px; }
+.payment-dialog header p { margin:6px 0 0; color:#64748b; }
+.payment-dialog .money-summary { margin:0 0 20px; }
+.manual-body > p { margin:16px 0 24px; }
+.manual-body fieldset > h3 { margin:24px 0 8px; }
+
+/* Keep the arithmetic beside the editor on wide screens, with a direct jump
+   to the same live preview on small screens. */
+.document-dialog { width:min(1200px,100%); }
+.document-dialog .manual-body { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:24px; align-items:start; }
+.document-dialog .manual-body > .manual-error { grid-column:1/-1; }
+.document-editor { min-width:0; }
+.document-editor .manual-item { grid-template-columns:repeat(3,minmax(0,1fr)); align-items:end; }
+.document-editor .manual-item > label:first-child { grid-column:1/-1; }
+.document-editor .manual-item > button { grid-column:1/-1; justify-self:start; }
+.line-calculation { display:flex; flex-wrap:wrap; gap:8px 16px; padding:12px; border-radius:8px; background:var(--canvas); font-size:13px; }
+.line-calculation small { flex-basis:100%; }
+.line-calculation strong { margin-left:auto; }
+.calculation-hint { color:var(--ink-soft); font-size:12px; line-height:1.5; }
+.document-calculation { position:sticky; top:0; padding:20px; background:var(--canvas); border:1px solid var(--line); border-radius:12px; }
+.document-calculation h3 { margin:0 0 8px; font-size:17px; }
+.calculation-lines { max-height:180px; overflow:auto; margin:16px 0; }
+.calculation-line { display:flex; flex-direction:column; gap:4px; padding:12px 0; border-bottom:1px solid var(--line); font-size:12px; overflow-wrap:anywhere; }
+.calculation-line:first-child { padding-top:0; }
+.calculation-line strong { font-size:14px; }
+.calculation-line span { color:var(--ink-soft); }
+.calculation-totals { margin:0; font-size:13px; }
+.calculation-totals > div { display:flex; justify-content:space-between; align-items:baseline; gap:16px; padding:8px 0; }
+.calculation-totals dt { flex:1; }
+.calculation-totals dd { margin:0; font-variant-numeric:tabular-nums; text-align:right; overflow-wrap:anywhere; }
+.calculation-totals .calculation-grand-total { margin-top:8px; padding-top:16px; border-top:1px solid var(--line); font-size:18px; font-weight:700; }
+.document-footer-total { display:flex; flex-direction:column; gap:6px; }
+.calculation-jump { display:none; background:none; padding:0; border:0; text-align:left; text-decoration:underline; color:var(--ink-soft); cursor:pointer; font:inherit; font-size:12px; }
+.document-calculation .manual-error p { margin:8px 0; }
+@media (max-width:900px) {
+  .document-dialog .manual-body { grid-template-columns:minmax(0,1fr); }
+  .document-calculation { position:static; }
+  .calculation-jump { display:block; }
+}
+@media (max-width:500px) {
+  .document-editor .manual-item { grid-template-columns:minmax(0,1fr); }
+  .line-calculation { flex-direction:column; }
+  .line-calculation strong { margin-left:0; }
+  .document-calculation { padding:16px; }
+}
+.manual-body fieldset > p { margin:0 0 16px; }
+.document-value { margin:12px 0 0; font-size:18px; font-weight:600; }
+.payment-history-summary { margin:0 24px 24px; padding:20px; border:1px solid var(--line,#ddd); border-radius:16px; background:#fff; }
+.payment-history-summary p { margin:12px 0; }
+.flow-links .btn { white-space:normal; }
+@media(max-width:650px) {
+  .business-flow { margin:16px; padding:16px; }
+  .flow-step { min-width:0; padding:12px; }
+  .money-summary { gap:8px; }
+  .money-summary > div { padding:12px 8px; }
+  .quotation-detail .topbar .topbar-actions, .invoice-detail .topbar .topbar-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; gap:12px; }
+  .quotation-detail .topbar-actions .btn, .invoice-detail .topbar-actions .btn { min-height:42px; padding:10px; white-space:normal; }
+}
+.manual-dialog header .btn { width:auto; flex:none; }
+.invoice-detail .manual-dialog header .btn { width:auto; flex:none; }
+@media print { .business-flow, .workflow-notice { display:none!important; } }
+@media print { .invoice-detail .invoice-document {display:flex!important;} .quotation-detail .content-layout {display:flex!important;} .payment-history-summary, .document-value {display:none!important;} }

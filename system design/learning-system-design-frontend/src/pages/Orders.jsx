@@ -1,181 +1,133 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ordersAPI } from '../api/orders';
-import './Orders.css';
-
-const Orders = () => {
-  const navigate = useNavigate();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState('ALL');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    fetchOrders();
-  }, [filterStatus, searchQuery]);
-
-  const fetchOrders = async () => {
+import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { ordersAPI } from "../api/orders";
+import ManualDocument from "../components/ManualDocument";
+import { useAuth } from "../context/AuthContext";
+import "../components/ManualCRM.css";
+export default function Orders() {
+  const [orders, setOrders] = useState([]),
+    [error, setError] = useState(""),
+    [loading, setLoading] = useState(true),
+    [search, setSearch] = useState(""),
+    [status, setStatus] = useState(""),
+    [creating, setCreating] = useState(false);
+  const navigate = useNavigate(),
+    { user } = useAuth();
+  const load = useCallback(async () => {
     try {
-      setLoading(true);
-      const data = await ordersAPI.getOrders({
-        status: filterStatus === 'ALL' ? undefined : filterStatus,
-        search: searchQuery || undefined,
-        limit: 100,
-      });
-      setOrders(data.orders);
-    } catch (error) {
-      console.error('Failed to fetch orders:', error);
+      setError("");
+      const r = await ordersAPI.getOrders({ limit: 100 });
+      setOrders(r.orders);
+    } catch {
+      setError("Could not load orders. Please retry.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleView = (order) => {
-    navigate(`/orders/${order.id}`);
-  };
-
-  const handleCardKeyDown = (event, order) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      handleView(order);
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'PENDING':
-        return 'status-pending';
-      case 'CONFIRMED':
-        return 'status-confirmed';
-      case 'IN_PRODUCTION':
-        return 'status-production';
-      case 'COMPLETED':
-        return 'status-completed';
-      case 'CANCELLED':
-        return 'status-cancelled';
-      default:
-        return '';
-    }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-  };
-
+  }, []);
+  useEffect(() => {
+    load();
+  }, [load]);
   return (
-    <div className="orders-page">
-      {/* Top Bar */}
-      <div className="topbar">
+    <main className="manual-page">
+      <div className="manual-top">
         <div>
-          <h1>Sales Orders</h1>
-          <div className="sub">{orders.length} orders</div>
+          <h1>Orders</h1>
+          <p>Enter customer orders and update their progress manually.</p>
         </div>
-        <div className="topbar-actions">
-          <button className="btn" disabled title="Order export is not configured">Export</button>
-          <button className="btn btn-primary" onClick={() => navigate('/quotations')}>
-            + New Order (from Quotation)
+        {["ADMIN", "SALES"].includes(user.role) && (
+          <button className="btn btn-primary" onClick={() => setCreating(true)}>
+            New order
           </button>
-        </div>
-      </div>
-
-      {/* Toolbar */}
-      <div className="toolbar">
-        <div className="search">
-          <input
-            placeholder="Search by order number, PO number…"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            aria-label="Search orders by order number or PO number"
-          />
-        </div>
-        <button
-          type="button"
-          className={`chip ${filterStatus !== 'ALL' ? 'on' : ''}`}
-          aria-pressed={filterStatus !== 'ALL'}
-          onClick={() => setFilterStatus(filterStatus === 'ALL' ? 'CONFIRMED' : 'ALL')}
-        >
-          Status: {filterStatus === 'ALL' ? 'All' : filterStatus}
-        </button>
-      </div>
-
-      {/* Orders List */}
-      <div className="content-area">
-        {loading ? (
-          <div className="loading-state">Loading...</div>
-        ) : orders.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">▤</div>
-            <h3>No orders yet</h3>
-            <p>Convert quotations to orders to get started</p>
-            <button className="btn btn-primary" onClick={() => navigate('/quotations')}>
-              View Quotations
-            </button>
-          </div>
-        ) : (
-          <div className="orders-list">
-            {orders.map((order) => (
-              <div
-                key={order.id}
-                className="order-card"
-                role="button"
-                tabIndex={0}
-                aria-label={`View order ${order.orderNumber}`}
-                onClick={() => handleView(order)}
-                onKeyDown={(event) => handleCardKeyDown(event, order)}
-              >
-                <div className="order-header">
-                  <div className="order-number">{order.orderNumber}</div>
-                  <div className={`status-badge ${getStatusColor(order.status)}`}>
-                    {order.status.replace('_', ' ')}
-                  </div>
-                </div>
-
-                <div className="order-body">
-                  <div className="order-customer">
-                    <strong>{order.customer?.companyName}</strong>
-                    <div className="order-contact">{order.customer?.contactPerson}</div>
-                  </div>
-
-                  <div className="order-details">
-                    {order.poNumber && (
-                      <div className="order-meta">
-                        <span className="label">PO:</span>
-                        <span className="value">{order.poNumber}</span>
-                      </div>
-                    )}
-                    <div className="order-meta">
-                      <span className="label">Delivery:</span>
-                      <span className="value">{formatDate(order.deliveryDate)}</span>
-                    </div>
-                    <div className="order-meta">
-                      <span className="label">Items:</span>
-                      <span className="value">{order.items?.length || 0} items</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="order-footer">
-                  <div className="order-amount">
-                    <span className="label">Total:</span>
-                    <span className="amount">₹{Number(order.total).toLocaleString('en-IN')}</span>
-                  </div>
-                  {order.advanceAmount > 0 && (
-                    <div className="payment-status">
-                      <span className="advance-paid">
-                        ₹{Number(order.advanceAmount).toLocaleString('en-IN')} paid
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
         )}
       </div>
-    </div>
+      <div className="manual-toolbar">
+        <input
+          aria-label="Search orders"
+          placeholder="Search customer or order number"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <select
+          aria-label="Order status filter"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="">All statuses</option>
+          {[
+            "PENDING",
+            "CONFIRMED",
+            "IN_PRODUCTION",
+            "READY",
+            "DISPATCHED",
+            "COMPLETED",
+            "CANCELLED",
+          ].map((s) => (
+            <option key={s} value={s}>
+              {s === "IN_PRODUCTION" ? "In progress" : s.replaceAll("_", " ")}
+            </option>
+          ))}
+        </select>
+      </div>
+      {error && (
+        <p role="alert">
+          {error}
+          <button className="btn" onClick={load}>
+            Retry
+          </button>
+        </p>
+      )}
+      {loading ? (
+        <p>Loading orders…</p>
+      ) : (
+        <div className="manual-list">
+          {orders
+            .filter(
+              (o) =>
+                (!status || (o.status === "DELIVERED" ? "COMPLETED" : o.status) === status) &&
+                (o.orderNumber + " " + o.customer?.companyName)
+                  .toLowerCase()
+                  .includes(search.toLowerCase()),
+            )
+            .map((o) => (
+              <article className="manual-card" key={o.id}>
+                <h2>{o.orderNumber}</h2>
+                <p>{o.customer?.companyName}</p>
+                <p className="manual-status">
+                  {o.status === "IN_PRODUCTION"
+                    ? "In progress"
+                    : (o.status === "DELIVERED" ? "Completed" : o.status.replaceAll("_", " "))}{" "}
+                  · Delivery:{" "}
+                  {o.deliveryDate
+                    ? new Date(o.deliveryDate).toLocaleDateString("en-IN")
+                    : "Not set"}
+                </p>
+                <strong>INR {Number(o.total).toLocaleString("en-IN")}</strong>
+                <div className="manual-actions">
+                  <button
+                    className="btn"
+                    onClick={() => navigate("/orders/" + o.id)}
+                  >
+                    Open order
+                  </button>
+                </div>
+              </article>
+            ))}
+          {!orders.length && (
+            <p className="manual-empty">
+              No orders yet. Add your first customer order.
+            </p>
+          )}
+        </div>
+      )}
+      {creating && (
+        <ManualDocument
+          onClose={() => setCreating(false)}
+          onSuccess={() => {
+            setCreating(false);
+            load();
+          }}
+        />
+      )}
+    </main>
   );
-};
-
-export default Orders;
+}

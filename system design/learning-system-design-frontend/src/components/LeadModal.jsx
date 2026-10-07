@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { leadsAPI } from '../api/leads';
 import { useAuth } from '../context/AuthContext';
+import { getLeadStatusOptions } from '../utils/leadStages';
 import './LeadModal.css';
 
 const LeadModal = ({ mode, lead, onClose, onSuccess }) => {
@@ -335,26 +336,18 @@ const LeadModal = ({ mode, lead, onClose, onSuccess }) => {
                 </div>
 
                 <div className="form-field">
-                  <label>Status *</label>
+                  <label>Stage *</label>
                   <select
                     name="status"
+                    aria-label="Lead stage"
                     value={formData.status}
                     onChange={handleChange}
-                    disabled={isViewMode}
+                    disabled={isViewMode || mode === 'create'}
                     required
                   >
-                    <option value="NEW">New</option>
-                    <option value="CONTACTED">Contacted</option>
-                    <option value="REQUIREMENT">Requirement</option>
-                    <option value="CATALOGUE">Catalogue</option>
-                    <option value="QUOTATION">Quotation</option>
-                    <option value="NEGOTIATION">Negotiation</option>
-                    <option value="SAMPLE">Sample</option>
-                    <option value="ORDER">Order</option>
-                    <option value="PRODUCTION">Production</option>
-                    <option value="DISPATCH">Dispatch</option>
-                    <option value="COMPLETED">Completed</option>
-                    <option value="LOST">Lost</option>
+                    {getLeadStatusOptions(formData.status).map(option => (
+                      <option key={option.key} value={option.value}>{option.label}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -362,11 +355,15 @@ const LeadModal = ({ mode, lead, onClose, onSuccess }) => {
                   <label>Priority *</label>
                   <select
                     name="priority"
+                    aria-label="Lead priority"
                     value={formData.priority}
                     onChange={handleChange}
                     disabled={isViewMode}
                     required
                   >
+                    {!['LOW', 'MEDIUM', 'HIGH', 'HOT'].includes(formData.priority) && (
+                      <option value={formData.priority}>{formData.priority.charAt(0) + formData.priority.slice(1).toLowerCase()}</option>
+                    )}
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">Medium</option>
                     <option value="HIGH">High</option>

@@ -1,210 +1,41 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { paymentsAPI } from '../api/payments';
-import './PaymentModal.css';
-
-const PaymentModal = ({ invoice, onClose, onPaymentRecorded }) => {
-  const [formData, setFormData] = useState({
-    amount: '',
-    method: 'BANK_TRANSFER',
-    transactionId: '',
-    notes: '',
-    paymentDate: new Date().toISOString().split('T')[0],
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
+import { MoneySummary } from './BusinessFlow';
+import './ManualCRM.css';
+export default function PaymentModal({ invoice, onClose, onPaymentRecorded }) {
+  const [form, setForm] = useState({ amount: '', method: 'UPI', paymentDate: new Date().toLocaleDateString('en-CA'), transactionId: '', notes: '' });
+  const [busy, setBusy] = useState(false), [error, setError] = useState('');
+  const request = useRef(null), lock = useRef(false);
+  const change = (key, value) => setForm(s => ({ ...s, [key]: value }));
+  async function save(e) {
     e.preventDefault();
-    setError('');
-
-    if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      setError('Please enter a valid amount');
-      return;
-    }
-
-    if (parseFloat(formData.amount) > invoice.balanceDue) {
-      setError(`Amount cannot exceed balance due: ₹${invoice.balanceDue.toLocaleString('en-IN')}`);
-      return;
-    }
-
+    if (lock.current) return;
+    const amount = Number(form.amount);
+    if (!Number.isFinite(amount) || amount <= 0 || amount > invoice.balanceDue) { setError('Enter an amount between INR 0.01 and the amount still due.'); return; }
+    lock.current = true; setBusy(true); setError('');
+    const payload = { ...form, invoiceId: invoice.id, amount };
+    const fingerprint = JSON.stringify(payload);
+    if (request.current?.fingerprint !== fingerprint) request.current = {fingerprint, referenceNumber: 'PAY-' + crypto.randomUUID()};
     try {
-      setLoading(true);
-      await paymentsAPI.recordPayment({
-        invoiceId: invoice.id,
-        amount: parseFloat(formData.amount),
-        method: formData.method,
-        transactionId: formData.transactionId || null,
-        notes: formData.notes || null,
-        paymentDate: formData.paymentDate,
-      });
-
-      if (onPaymentRecorded) {
-        onPaymentRecorded();
-      }
-    } catch (err) {
-      console.error('Failed to record payment:', err);
-      setError(err.response?.data?.error || 'Failed to record payment');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const setQuickAmount = (percentage) => {
-    const amount = (invoice.balanceDue * percentage) / 100;
-    setFormData((prev) => ({
-      ...prev,
-      amount: amount.toFixed(2),
-    }));
-  };
-
-  return (
-    <div className="payment-modal" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Record Payment</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
-        </div>
-
-        <div className="modal-body">
-          <div className="invoice-summary">
-            <div className="summary-row">
-              <span>Invoice:</span>
-              <strong>{invoice.invoiceNumber}</strong>
-            </div>
-            <div className="summary-row">
-              <span>Total Amount:</span>
-              <strong>₹{invoice.total.toLocaleString('en-IN')}</strong>
-            </div>
-            <div className="summary-row">
-              <span>Already Paid:</span>
-              <strong>₹{invoice.amountPaid.toLocaleString('en-IN')}</strong>
-            </div>
-            <div className="summary-row balance">
-              <span>Balance Due:</span>
-              <strong>₹{invoice.balanceDue.toLocaleString('en-IN')}</strong>
-            </div>
-          </div>
-
-          {error && <div className="error-message">{error}</div>}
-
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Payment Amount *</label>
-              <input
-                type="number"
-                name="amount"
-                value={formData.amount}
-                onChange={handleChange}
-                placeholder="Enter amount"
-                step="0.01"
-                min="0.01"
-                max={invoice.balanceDue}
-                required
-              />
-              <div className="quick-amounts">
-                <button
-                  type="button"
-                  className="quick-btn"
-                  onClick={() => setQuickAmount(25)}
-                >
-                  25%
-                </button>
-                <button
-                  type="button"
-                  className="quick-btn"
-                  onClick={() => setQuickAmount(50)}
-                >
-                  50%
-                </button>
-                <button
-                  type="button"
-                  className="quick-btn"
-                  onClick={() => setQuickAmount(100)}
-                >
-                  Full Amount
-                </button>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Payment Method *</label>
-              <select
-                name="method"
-                value={formData.method}
-                onChange={handleChange}
-                required
-              >
-                <option value="BANK_TRANSFER">Bank Transfer</option>
-                <option value="CASH">Cash</option>
-                <option value="CHEQUE">Cheque</option>
-                <option value="UPI">UPI</option>
-                <option value="CARD">Card</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Transaction ID / Reference</label>
-              <input
-                type="text"
-                name="transactionId"
-                value={formData.transactionId}
-                onChange={handleChange}
-                placeholder="Enter transaction ID or reference number"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Payment Date *</label>
-              <input
-                type="date"
-                name="paymentDate"
-                value={formData.paymentDate}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Notes</label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                placeholder="Add any notes about this payment"
-                rows="3"
-              />
-            </div>
-
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={onClose}
-                disabled={loading}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={loading}
-              >
-                {loading ? 'Recording...' : 'Record Payment'}
-              </button>
-            </div>
-          </form>
-        </div>
+      await paymentsAPI.recordPayment({ ...payload, referenceNumber: request.current.referenceNumber });
+      onPaymentRecorded?.();
+    } catch (e) { setError(e.response?.data?.error || 'Could not confirm saving. Keep this form open and retry with the same details.'); }
+    finally { lock.current = false; setBusy(false); }
+  }
+  return <div className="manual-overlay"><section className="manual-dialog payment-dialog" role="dialog" aria-modal="true" aria-label="Record payment">
+    <header><div><h2>Record payment</h2><p>{invoice.invoiceNumber}</p></div><button className="btn" onClick={onClose} disabled={busy}>Close</button></header>
+    <form onSubmit={save}><div className="manual-body">
+      <MoneySummary invoice={invoice} />
+      <p>Record money you have already received. This does not charge the customer.</p>
+      {error && <p className="manual-error" role="alert">{error}</p>}
+      <fieldset disabled={busy}><div className="manual-grid">
+        <label>Amount received (INR)<input autoFocus required type="number" min="0.01" max={invoice.balanceDue} step="0.01" value={form.amount} onChange={e => change('amount', e.target.value)} /></label>
+        <label>Paid by<select value={form.method} onChange={e => change('method', e.target.value)}>{[['UPI','UPI'], ['BANK_TRANSFER','Bank transfer'], ['CASH','Cash'], ['CHEQUE','Cheque'], ['CARD','Card']].map(([v,label]) => <option key={v} value={v}>{label}</option>)}</select></label>
+        <label>Received on<input required type="date" value={form.paymentDate} onChange={e => change('paymentDate',e.target.value)} /></label>
       </div>
-    </div>
-  );
-};
-
-export default PaymentModal;
+      <div className="manual-actions"><button className="btn" type="button" onClick={() => change('amount', (invoice.balanceDue / 2).toFixed(2))}>Half the balance</button><button className="btn" type="button" onClick={() => change('amount', Number(invoice.balanceDue).toFixed(2))}>Full balance</button></div>
+      <details className="workflow-details"><summary>Reference or note (optional)</summary><div className="manual-grid"><label>Payment reference<input maxLength={250} value={form.transactionId} onChange={e => change('transactionId',e.target.value)} /></label><label>Note<input maxLength={2000} value={form.notes} onChange={e => change('notes',e.target.value)} /></label></div></details>
+      </fieldset>
+    </div><footer><span>The invoice balance updates when you save.</span><button type="submit" className="btn btn-primary" disabled={busy}>{busy ? 'Saving...' : 'Save payment'}</button></footer></form>
+  </section></div>;
+}

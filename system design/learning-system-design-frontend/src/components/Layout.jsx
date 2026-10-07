@@ -54,20 +54,13 @@ const Layout = ({ children }) => {
   const navItems = [
     { path: '/dashboard', icon: '◈', label: 'Dashboard' },
     { path: '/leads', icon: '☰', label: 'Leads' },
-    { path: '/products', icon: '▤', label: 'Products' },
-    { path: '/catalogues', icon: '◪', label: 'Catalogues', roles: ['ADMIN', 'SALES'] },
     { path: '/quotations', icon: '◫', label: 'Quotations' },
     { path: '/proformas', icon: '◬', label: 'Proforma', roles: ['ADMIN', 'SALES', 'ACCOUNTANT'] },
     { path: '/orders', icon: '⊞', label: 'Orders' },
     { path: '/invoices', icon: '▣', label: 'Invoices' },
-    { path: '/production', icon: '◧', label: 'Production' },
     { path: '/dispatch', icon: '◭', label: 'Dispatch', roles: ['ADMIN', 'PRODUCTION', 'SALES'] },
-    { path: '/inventory', icon: '▦', label: 'Inventory', roles: ['ADMIN', 'PURCHASE', 'PRODUCTION'] },
-    { path: '/purchase', icon: '▨', label: 'Purchase', roles: ['ADMIN', 'PURCHASE'] },
     { path: '/marketing', icon: '◮', label: 'Marketing', roles: ['ADMIN', 'MARKETING', 'SALES'] },
-    { path: '/reports', icon: '◩', label: 'Reports' },
     { path: '/users', icon: '◉', label: 'Users', adminOnly: true },
-    { path: '/activity-logs', icon: '◎', label: 'Activity Logs', roles: ['ADMIN', 'ACCOUNTANT'] },
     { path: '/whatsapp', icon: '◐', label: 'WhatsApp', roles: ['ADMIN', 'SALES', 'MARKETING'] },
   ];
 

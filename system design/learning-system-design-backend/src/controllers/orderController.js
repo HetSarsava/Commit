@@ -120,6 +120,7 @@ exports.getOrder = async (req, res, next) => {
 // Create order from quotation
 exports.createOrderFromQuotation = async (req, res, next) => {
   try {
+    if (!['ADMIN', 'SALES'].includes(req.user.role)) return res.status(403).json({error: 'Access denied'});
     const { quotationId } = req.body;
 
     // Get quotation with items
@@ -140,13 +141,15 @@ exports.createOrderFromQuotation = async (req, res, next) => {
     }
 
     // Check if order already exists for this quotation
+    if (req.user.role === 'SALES' && quotation.salesPersonId !== req.user.id) return res.status(403).json({error: 'Access denied'});
     const existingOrder = await prisma.order.findFirst({
       where: { quotationId },
     });
 
     if (existingOrder) {
-      return res.status(400).json({ error: 'Order already exists for this quotation' });
+      return res.json({order: existingOrder, alreadyCreated: true});
     }
+    if (['REJECTED', 'EXPIRED'].includes(quotation.status)) return res.status(400).json({error: 'This quotation cannot become an order.'});
 
     // Generate order number
     const orderNumber = generateOrderNumber();
@@ -169,6 +172,7 @@ exports.createOrderFromQuotation = async (req, res, next) => {
         items: {
           create: quotation.items.map(item => ({
             productId: item.productId,
+            description: item.description,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             discount: item.discount,
@@ -257,6 +261,7 @@ exports.createOrder = async (req, res, next) => {
         items: {
           create: items.map(item => ({
             productId: item.productId,
+            description: item.description,
             quantity: parseInt(item.quantity),
             unitPrice: parseFloat(item.unitPrice),
             discount: item.discount ? parseFloat(item.discount) : null,

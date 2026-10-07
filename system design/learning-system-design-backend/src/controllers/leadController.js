@@ -81,6 +81,7 @@ exports.getLeads = async (req, res, next) => {
   try {
     const {
       status,
+      statuses,
       priority,
       source,
       salesPersonId,
@@ -92,7 +93,13 @@ exports.getLeads = async (req, res, next) => {
     // Build filters
     const where = {};
 
-    if (status) where.status = status;
+    if (statuses !== undefined) {
+      const allowed = new Set(['NEW', 'CONTACTED', 'REQUIREMENT', 'CATALOGUE', 'QUOTATION', 'NEGOTIATION', 'SAMPLE', 'ORDER', 'PRODUCTION', 'DISPATCH', 'COMPLETED', 'LOST']);
+      if (typeof statuses !== 'string' || !statuses || statuses.split(',').some(value => !allowed.has(value))) {
+        return res.status(400).json({ error: 'Invalid lead stages' });
+      }
+      where.status = { in: [...new Set(statuses.split(','))] };
+    } else if (status) where.status = status;
     if (priority) where.priority = priority;
     if (source) where.source = source;
     if (salesPersonId) where.salesPersonId = salesPersonId;
