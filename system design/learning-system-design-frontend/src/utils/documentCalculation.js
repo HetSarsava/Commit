@@ -1,5 +1,7 @@
 const round = value => Math.round((value + Number.EPSILON) * 100) / 100;
 export const formatINR = value => '₹' + value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// Keep empty and fractional drafts editable; remove only extra integer zeros.
+export const normalizeNumberInput = value => typeof value === 'string' ? value.replace(/^0+(?=\d)/, '') : value;
 
 // Follow the server's calculation order: round each discounted line, sum,
 // subtract the document discount, then round GST and the final amount.

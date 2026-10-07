@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import CustomerForm from "./CustomerForm";
 import api from "../api/client";
-import { calculateDocument, formatINR } from "../utils/documentCalculation";
+import { calculateDocument, formatINR, normalizeNumberInput } from "../utils/documentCalculation";
 import "./ManualCRM.css";
 export default function ManualDocument({
   kind = "orders",
@@ -61,12 +61,17 @@ export default function ManualDocument({
       active = false;
     };
   }, []);
-  const change = (key, value) => setForm((s) => ({ ...s, [key]: value }));
+  const selectStartingZero = e => {
+    if (e.currentTarget.value === '0') e.currentTarget.select();
+  };
+  const change = (key, value) => setForm((s) => ({ ...s, [key]:
+    ['discountAmount', 'taxPercent', 'advanceAmount'].includes(key) ? normalizeNumberInput(value) : value,
+  }));
   const itemChange = (index, key, value) =>
     setForm((s) => ({
       ...s,
       items: s.items.map((item, i) =>
-        i === index ? { ...item, [key]: value } : item,
+        i === index ? { ...item, [key]: ['quantity', 'unitPrice', 'discount'].includes(key) ? normalizeNumberInput(value) : value } : item,
       ),
     }));
   const calculation = calculateDocument(form);
@@ -200,6 +205,7 @@ export default function ManualDocument({
                         Advance received (INR)
                         <input
                           type="number"
+                          onFocus={selectStartingZero}
                           min="0"
                           step="0.01"
                           value={form.advanceAmount}
@@ -252,6 +258,7 @@ export default function ManualDocument({
                       <input
                         required
                         type="number"
+                        onFocus={selectStartingZero}
                         min="0.01"
                         step="0.01"
                         value={i.quantity}
@@ -265,6 +272,7 @@ export default function ManualDocument({
                       <input
                         required
                         type="number"
+                        onFocus={selectStartingZero}
                         min="0"
                         step="0.01"
                         value={i.unitPrice}
@@ -277,6 +285,7 @@ export default function ManualDocument({
                       Line discount (INR)
                       <input
                         type="number"
+                        onFocus={selectStartingZero}
                         min="0"
                         max={calculation.items[index].gross}
                         required
@@ -343,6 +352,7 @@ export default function ManualDocument({
                     Overall discount (INR)
                     <input
                       type="number"
+                      onFocus={selectStartingZero}
                       min="0"
                       max={calculation.subtotal}
                       required
@@ -355,6 +365,7 @@ export default function ManualDocument({
                     GST (%)
                     <input
                       type="number"
+                      onFocus={selectStartingZero}
                       min="0"
                       max="100"
                       required
