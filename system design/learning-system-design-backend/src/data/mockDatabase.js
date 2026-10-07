@@ -148,7 +148,7 @@ const mockPrisma = {
       let leads = [...mockData.leads];
 
       // Apply filters
-      if (where.status) leads = leads.filter(l => l.status === where.status);
+      if (where.status) leads = leads.filter(l => Array.isArray(where.status.in) ? where.status.in.includes(l.status) : l.status === where.status);
       if (where.priority) leads = leads.filter(l => l.priority === where.priority);
       if (where.source) leads = leads.filter(l => l.source === where.source);
       if (where.salesPersonId) leads = leads.filter(l => l.salesPersonId === where.salesPersonId);
@@ -278,19 +278,8 @@ const mockPrisma = {
     },
 
     count: async ({ where = {} }) => {
-      let leads = [...mockData.leads];
-
-      if (where.status) leads = leads.filter(l => l.status === where.status);
-      if (where.priority) leads = leads.filter(l => l.priority === where.priority);
-      if (where.salesPersonId) leads = leads.filter(l => l.salesPersonId === where.salesPersonId);
-      if (where.campaignId) {
-        if (typeof where.campaignId === 'object' && where.campaignId.not !== undefined) {
-          leads = leads.filter(l => l.campaignId !== where.campaignId.not);
-        } else {
-          leads = leads.filter(l => l.campaignId === where.campaignId);
-        }
-      }
-
+      // Use the same stage, search and ownership filters as the paginated list.
+      const leads = await mockPrisma.lead.findMany({ where, take: Number.MAX_SAFE_INTEGER });
       return leads.length;
     },
 

@@ -80,3 +80,9 @@ The design uses focused dialogs and optional details, inspired by [Cashew's cust
 `connected-workflow.test.js` exercises chat-to-customer-to-quotation-to-order-to-invoice-to-payment with isolated demo storage. It covers repeat/concurrent saves, role/ownership denial, authoritative chat phone, repeated order conversion, malformed/over-balance payments, payment retry idempotency, concurrent payments, rollback after a simulated invoice write failure, linked history and restart persistence. It does not send Meta messages.
 
 Browser checks used a newly created **Demo Connected Uniforms** customer and example quotation/order/invoice/part payment/dispatch. No real funds moved, no WhatsApp send was made and no shipment was booked. These example records are local, ignored demo data. Production gaps described above still apply; the retained tax document uses the existing intra-state demo calculation and is not a complete statutory billing system.
+
+## Simple lead stages
+
+The lead screen shows **All, New, In discussion, Quotation and Closed**, without a separate analytics view. Search is always visible; source/priority filters are under More filters. Counts include historical stages. Contacted, requirement, catalogue, negotiation and sample records appear under In discussion; order, production, dispatch, completed and lost records appear under Closed. Closed cards distinguish Won from Not proceeding.
+
+Editing offers New, In discussion, Quotation, Won and Not proceeding. Editing other details preserves a record's historical status; choosing another stage changes it intentionally. New leads start as New. This is a presentation change, not a data migration or automatic customer conversion. Existing customer conversion and document links remain available.
